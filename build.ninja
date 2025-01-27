@@ -7,7 +7,7 @@ rule linux-cxx
   command = c++ -O0 -g -MMD -MF $out.d -Iinclude -c -o $out $in
 
 rule linux-ld
-  command = c++ -o $out $in -lX11 -lGL
+  command = c++ -o $out $in -lX11 -lGL -lpthread
 
 build fcsim: linux-ld $
 obj/linux/arena.o $
