@@ -12,6 +12,7 @@
 #include "graph.h"
 #include "text.h"
 #include "arena.h"
+#include "graph.h"
 
 #define TAU 6.28318530718
 
@@ -61,16 +62,6 @@ const char *joint_fragment_shader_src =
 
 GLuint joint_program;
 GLuint joint_program_coord_attrib;
-
-struct color {
-	float r;
-	float g;
-	float b;
-};
-
-static struct color build_color = { 0.737f, 0.859f, 0.976f };
-static struct color goal_color  = { 0.945f, 0.569f, 0.569f };
-static struct color sky_color   = { 0.529f, 0.741f, 0.945f };
 
 void pixel_to_world(struct view *view, int x, int y, float *x_world, float *y_world)
 {
@@ -208,18 +199,17 @@ static void block_graphics_add_block(struct block_graphics *graphics,
 		shell.angle = block->body->m_rotation;
 	}
 
+	get_color_by_block(block, 1, &color);
+
 	if (block->overlap) {
 		color.r = 1.0f;
 		color.g = 0.0f;
 		color.b = 0.0f;
 	} else if (block->visited) {
-		color.r = block->r + (1.0f - block->r) * 0.25f;
-		color.g = block->g + (1.0f - block->g) * 0.25f;
-		color.b = block->b + (1.0f - block->b) * 0.25f;
+		color.r = color.r + (1.0f - color.r) * 0.25f;
+		color.g = color.g + (1.0f - color.g) * 0.25f;
+		color.b = color.b + (1.0f - color.b) * 0.25f;
 	} else {
-		color.r = block->r;
-		color.g = block->g;
-		color.b = block->b;
 	}
 
 	if (shell.type == SHELL_CIRC)
@@ -282,6 +272,10 @@ void block_graphics_reset(struct block_graphics *graphics, struct design *design
 	graphics->vertex_cnt = 0;
 	graphics->triangle_cnt = 0;
 
+	struct color build_color;
+	struct color goal_color;
+	get_color_by_type(FCSIM_BUILD_AREA, 1, &build_color);
+	get_color_by_type(FCSIM_GOAL_AREA, 1, &goal_color);
 	block_graphics_add_area(graphics, &design->build_area, &build_color);
 	block_graphics_add_area(graphics, &design->goal_area, &goal_color);
 
@@ -507,6 +501,8 @@ static void draw_tick_counter(struct arena *arena)
 
 void arena_draw(struct arena *arena)
 {
+	struct color sky_color;
+	get_color_by_type(FCSIM_SKY, 1, &sky_color);
 	glClearColor(sky_color.r, sky_color.g, sky_color.b, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -1623,19 +1619,10 @@ void mouse_down_rod(struct arena *arena, float x, float y)
 	adjust_new_rod(&block->shape.rod);
 
 	block->material = solid ? &solid_rod_material : &water_rod_material;
+	block->type_id = solid ? FCSIM_SOLID_ROD : FCSIM_ROD;
 	block->goal = false;
 	block->overlap = false;
 	block->visited = false;
-
-	if (solid) {
-		block->r = solid_rod_r;
-		block->g = solid_rod_g;
-		block->b = solid_rod_b;
-	} else {
-		block->r = water_rod_r;
-		block->g = water_rod_g;
-		block->b = water_rod_b;
-	}
 
 	arena->new_block = block;
 
@@ -1710,19 +1697,13 @@ void mouse_down_wheel(struct arena *arena, float x, float y)
 
 	switch (arena->tool) {
 	case TOOL_WHEEL:
-		block->r = wheel_r;
-		block->g = wheel_g;
-		block->b = wheel_b;
+		block->type_id = FCSIM_WHEEL;
 		break;
 	case TOOL_CW_WHEEL:
-		block->r = cw_wheel_r;
-		block->g = cw_wheel_g;
-		block->b = cw_wheel_b;
+		block->type_id = FCSIM_CW_WHEEL;
 		break;
 	case TOOL_CCW_WHEEL:
-		block->r = ccw_wheel_r;
-		block->g = ccw_wheel_g;
-		block->b = ccw_wheel_b;
+		block->type_id = FCSIM_CCW_WHEEL;
 		break;
 	}
 
