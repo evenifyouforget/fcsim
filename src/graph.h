@@ -131,26 +131,6 @@ extern struct material solid_material;
 extern struct material solid_rod_material;
 extern struct material water_rod_material;
 
-extern const float wheel_r;
-extern const float wheel_g;
-extern const float wheel_b;
-
-extern const float cw_wheel_r;
-extern const float cw_wheel_g;
-extern const float cw_wheel_b;
-
-extern const float ccw_wheel_r;
-extern const float ccw_wheel_g;
-extern const float ccw_wheel_b;
-
-extern const float solid_rod_r;
-extern const float solid_rod_g;
-extern const float solid_rod_b;
-
-extern const float water_rod_r;
-extern const float water_rod_g;
-extern const float water_rod_b;
-
 // mostly redundant
 #define FCSIM_STAT_RECT   0
 #define FCSIM_STAT_CIRCLE 1

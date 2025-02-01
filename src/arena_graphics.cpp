@@ -130,6 +130,84 @@ void block_graphics::clear() {
     layers.clear();
 }
 
+shell get_shell(block* block) {
+    shell shell;
+    get_shell(&shell, &block->shape);
+	if (block->body) {
+		shell.x = block->body->m_position.x;
+		shell.y = block->body->m_position.y;
+		shell.angle = block->body->m_rotation;
+	}
+    return shell;
+}
+
+joint joint_from_xy(float x, float y) {
+    joint result;
+    result.x = x;
+    result.y = y;
+    return result;
+}
+
+std::vector<joint> generate_joints(block* block) {
+    // TODO: correct joint order
+    const int type_id = block->type_id;
+    shell shell = get_shell(block);
+    std::vector<joint> result;
+    float sina_half = sinf(shell.angle) / 2;
+    float cosa_half = cosf(shell.angle) / 2;
+    float w = shell.type == SHELL_CIRC ? shell.circ.radius * 2 : shell.rect.w;
+    float h = shell.type == SHELL_RECT ? shell.circ.radius * 2 : shell.rect.h;
+    float wc = w * cosa_half;
+    float ws = w * sina_half;
+    float hc = h * cosa_half;
+    float hs = h * sina_half;
+    switch(type_id) {
+        case FCSIM_ROD:
+        case FCSIM_SOLID_ROD:
+        {
+            // pattern: rod (up to 2)
+            result.push_back(joint_from_xy(shell.x - wc, shell.y - ws));
+            result.push_back(joint_from_xy(shell.x + wc, shell.y + ws));
+        }
+        break;
+        case FCSIM_GOAL_RECT:
+        {
+            // pattern: jointed rect (up to 5)
+            result.push_back(joint_from_xy(shell.x, shell.y));
+            result.push_back(joint_from_xy(shell.x + wc - hs, shell.y + ws + hc));
+            result.push_back(joint_from_xy(shell.x - wc - hs, shell.y - ws + hc));
+            result.push_back(joint_from_xy(shell.x - wc + hs, shell.y - ws - hc));
+            result.push_back(joint_from_xy(shell.x + wc + hs, shell.y + ws - hc));
+        }
+        break;
+        case FCSIM_GOAL_CIRCLE:
+        case FCSIM_CW_GOAL_CIRCLE:
+        case FCSIM_CCW_GOAL_CIRCLE:
+        case FCSIM_WHEEL:
+        case FCSIM_CW_WHEEL:
+        case FCSIM_CCW_WHEEL:
+        {
+            // pattern: wheel (up to 9)
+            result.push_back(joint_from_xy(shell.x, shell.y));
+            result.push_back(joint_from_xy(shell.x + wc, shell.y + ws));
+            result.push_back(joint_from_xy(shell.x - ws, shell.y + wc));
+            result.push_back(joint_from_xy(shell.x - wc, shell.y - ws));
+            result.push_back(joint_from_xy(shell.x + ws, shell.y - wc));
+            if(w > 40) {
+                // extra inner joints
+                float wc2 = 40 * cosa_half;
+                float ws2 = 40 * sina_half;
+                result.push_back(joint_from_xy(shell.x + wc2, shell.y + ws2));
+                result.push_back(joint_from_xy(shell.x - ws2, shell.y + wc2));
+                result.push_back(joint_from_xy(shell.x - wc2, shell.y - ws2));
+                result.push_back(joint_from_xy(shell.x + ws2, shell.y - wc2));
+            }
+        }
+        break;
+    }
+    return result;
+}
+
 static void block_graphics_add_rect_single(struct block_graphics *graphics,
 				    struct shell shell, color col, int z_offset)
 {
@@ -232,17 +310,41 @@ static void block_graphics_add_circ(struct block_graphics *graphics,
     block_graphics_add_circ_single(graphics, shell, alpha_over(get_color_by_type(type_id, 1), overlay), z_offset + 1);
 }
 
+#define JOINT_INNER_RADIUS 2
+#define JOINT_OUTER_RADIUS 4
+
+void block_graphics_add_joint(block_graphics* graphics, joint joint, color overlay) {
+    const int z_offset = 4;
+    color col = alpha_over(get_color_by_type(FCSIM_JOINT, 1), overlay);
+
+    const int circle_segments = 24;
+    uint16_t v_last;
+
+	float a;
+	int i;
+
+	for (int i = 0; i < circle_segments; i++) {
+		a = TAU * i / circle_segments;
+		float x = joint.x + cosf(a) * JOINT_INNER_RADIUS;
+		float y = joint.y + sinf(a) * JOINT_INNER_RADIUS;
+        graphics->push_vertex(x, y, col, z_offset);
+		x = joint.x + cosf(a) * JOINT_OUTER_RADIUS;
+		y = joint.y + sinf(a) * JOINT_OUTER_RADIUS;
+        v_last = graphics->push_vertex(x, y, col, z_offset);
+	}
+
+	for (i = 0; i < circle_segments - 1; i++) {
+        graphics->push_triangle(v_last - i * 2, v_last - i * 2 - 1, v_last - i * 2 - 2, z_offset);
+        graphics->push_triangle(v_last - i * 2 - 3, v_last - i * 2 - 1, v_last - i * 2 - 2, z_offset);
+	}
+    graphics->push_triangle(v_last - i * 2, v_last - i * 2 - 1, v_last, z_offset);
+    graphics->push_triangle(v_last - 1, v_last - i * 2 - 1, v_last, z_offset);
+}
+
 static void block_graphics_add_block(struct block_graphics *graphics,
 				     struct block *block)
 {
-	struct shell shell;
-
-	get_shell(&shell, &block->shape);
-	if (block->body) {
-		shell.x = block->body->m_position.x;
-		shell.y = block->body->m_position.y;
-		shell.angle = block->body->m_rotation;
-	}
+	struct shell shell = get_shell(block);
 
     color overlay;
 
@@ -258,10 +360,17 @@ static void block_graphics_add_block(struct block_graphics *graphics,
 		block_graphics_add_circ(graphics, shell, block->type_id, overlay);
 	else
 		block_graphics_add_rect(graphics, shell, block->type_id, 2, overlay);
+
+    std::vector<joint> joints_generated = generate_joints(block);
+    for(auto it = joints_generated.begin(); it != joints_generated.end(); ++it) {
+        block_graphics_add_joint(graphics, *it, color{0,0,0,0});
+    }
 }
 
-void block_graphics_reset(struct block_graphics *graphics, struct design *design)
+void block_graphics_reset(arena* arena, struct design *design)
 {
+    block_graphics* graphics = (block_graphics*)arena->block_graphics_v2;
+
     // clear old data
     graphics->clear();
 
@@ -333,23 +442,7 @@ void arena_draw(struct arena *arena)
 	glClearColor(sky_color.r, sky_color.g, sky_color.b, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	block_graphics_reset((block_graphics*)arena->block_graphics_v2, &arena->design);
-    /*
-	if (arena->hover_joint) {
-
-		fill_joint_coords(arena, arena->hover_joint);
-
-		glUseProgram(joint_program);
-
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, arena->joint_coord_buffer);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, 48 * sizeof(float), arena->joint_coords);
-		glDrawArrays(GL_TRIANGLES, 0, 24);
-		glDisableVertexAttribArray(0);
-	}
-    */
-
+	block_graphics_reset(arena, &arena->design);
 	block_graphics_draw((block_graphics*)arena->block_graphics_v2, &arena->view);
 
 	draw_tick_counter(arena);
