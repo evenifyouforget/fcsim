@@ -11,6 +11,7 @@ rule linux-ld
 
 build fcsim: linux-ld $
 obj/linux/arena.o $
+obj/linux/arena_graphics.o $
 obj/linux/button.o $
 obj/linux/export.o $
 obj/linux/core.o $
@@ -44,12 +45,13 @@ obj/linux/fpmath/sincos.o $
 obj/linux/fpmath/strtod.o
 
 build obj/linux/arena.o: linux-cc src/arena.c
+build obj/linux/arena_graphics.o: linux-cxx src/arena_graphics.cpp
 build obj/linux/button.o: linux-cc src/button.c
 build obj/linux/export.o: linux-cc src/export.c
 build obj/linux/core.o: linux-cc src/core.c
 build obj/linux/gen.o: linux-cc src/gen.c
 build obj/linux/graph.o: linux-cc src/graph.c
-build obj/linux/main.o: linux-cc src/main.c
+build obj/linux/main.o: linux-cxx src/main.cpp
 build obj/linux/str.o: linux-cc src/str.c
 build obj/linux/text.o: linux-cc src/text.c
 build obj/linux/xml.o: linux-cc src/xml.c
