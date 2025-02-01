@@ -1,3 +1,6 @@
+#ifndef ARENA_H
+#define ARENA_H
+
 struct view {
 	float x;
 	float y;
@@ -105,3 +108,6 @@ void arena_scroll_event(struct arena *arena, int delta);
 void arena_mouse_button_up_event(struct arena *arena, int button);
 void arena_mouse_button_down_event(struct arena *arena, int button);
 void arena_size_event(struct arena *arena, float w, float h);
+
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef TEXT_H
+#define TEXT_H
+
 struct text {
 	GLuint vertex_buf;
 	size_t vertex_cnt;
@@ -17,3 +20,6 @@ void text_render(struct text *text, int w, int h, int x, int y);
 void text_stream_create(struct text_stream *text, size_t len);
 void text_stream_update(struct text_stream *text, char *str);
 void text_stream_render(struct text_stream *text, int w, int h, int x, int y);
+
+
+#endif
