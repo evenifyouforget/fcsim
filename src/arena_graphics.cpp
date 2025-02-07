@@ -219,8 +219,8 @@ static void block_graphics_add_rect_single(struct block_graphics *graphics,
 {
 	float sina_half = sinf(shell.angle) / 2;
 	float cosa_half = cosf(shell.angle) / 2;
-	float w = fmaxf(fabsf(shell.rect.w), 4.0);
-	float h = fmaxf(fabsf(shell.rect.h), 4.0);
+	float w = std::max(std::abs(shell.rect.w), 4.0);
+	float h = std::max(std::abs(shell.rect.h), 4.0);
 	float wc = w * cosa_half;
 	float ws = w * sina_half;
 	float hc = h * cosa_half;
@@ -274,6 +274,7 @@ static void block_graphics_add_area(struct block_graphics *graphics,
     area_shell.rect.h = area.h;
     area_shell.x = area.x;
     area_shell.y = area.y;
+    area_shell.angle = 0;
     block_graphics_add_rect(graphics, area_shell, type_id, 0, color{0,0,0,0});
 }
 

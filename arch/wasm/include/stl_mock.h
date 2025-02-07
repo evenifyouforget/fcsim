@@ -16,7 +16,7 @@ namespace std {
 // <algorithm>
 
 template <class T>
-const T& abs(const T& a){
+T abs(const T& a){
     return (a < 0) ? -a : a;
 }
 
