@@ -41,3 +41,24 @@ ninja fcsim
 ```sh
 ninja html/fcsim.wasm
 ```
+
+# Development
+
+## Web STL
+
+The web build does not support STL, so we need a mock STL.
+The mock STL comes with basic tests.
+
+You can build the mock STL tests with:
+
+```sh
+ninja stl test
+```
+
+Which will produce the executable `stl_test`.
+
+To see that the data structures are working correctly, you can use `valgrind` to check for memory leaks and other memory issues:
+
+```sh
+valgrind ./stl_test
+```
