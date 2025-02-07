@@ -106,6 +106,43 @@ static void init_attach_list(struct attach_list *list)
 	list->tail = NULL;
 }
 
+uint32_t piece_color_table[FCSIM_NUM_TYPES][2] = {
+	{0xff007f09, 0xff01be02},
+	{0xff007f09, 0xff01be02},
+	{0xffc5550e, 0xfff8dc2f},
+	{0xffbd591b, 0xfff98931},
+	{0xffb86461, 0xfffe6766},
+	{0xffb86461, 0xfffe6766},
+	{0xffb86461, 0xfffe6766},
+	{0xffb86461, 0xfffe6766},
+	{0xff0b6afc, 0xff8cfce4},
+	{0xfffd8003, 0xffffed00},
+	{0xffce49a3, 0xffffcfce},
+	{0xfffeffff, 0xff0001fe},
+	{0xff6a3502, 0xffb55a04},
+	{0x00ffffff, 0xff808080},
+	{0xff7878ee, 0xffbedcf8},
+	{0xffbc6667, 0xfff29291},
+	{0x00000000, 0xff87bdf1},
+};
+
+void get_color_by_type(int type_id, int slot, struct color * c) {
+	uint32_t argb = piece_color_table[type_id][slot];
+	uint32_t b = argb & 0xff;
+	uint32_t g = (argb >> 8) & 0xff;
+	uint32_t r = (argb >> 16) & 0xff;
+	uint32_t a = (argb >> 24) & 0xff;
+	const float one_over_255 = 0.00392156862745098;
+	c->a = a * one_over_255;
+	c->r = r * one_over_255;
+	c->g = g * one_over_255;
+	c->b = b * one_over_255;
+}
+
+void get_color_by_block(struct block * bl, int slot, struct color * c) {
+	get_color_by_type(bl->type_id, slot, c);
+}
+
 void append_block(struct block_list *list, struct block *block)
 {
 	if (list->tail) {
@@ -505,30 +542,22 @@ static void add_level_block(struct design *design, struct xml_block *xml_block)
 	case XML_STATIC_RECTANGLE:
 		init_rect(&block->shape, xml_block);
 		block->material = &static_env_material;
-		block->r = static_r;
-		block->g = static_g;
-		block->b = static_b;
+		block->type_id = FCSIM_STAT_RECT;
 		break;
 	case XML_DYNAMIC_RECTANGLE:
 		init_rect(&block->shape, xml_block);
 		block->material = &dynamic_env_material;
-		block->r = dynamic_r;
-		block->g = dynamic_g;
-		block->b = dynamic_b;
+		block->type_id = FCSIM_DYN_RECT;
 		break;
 	case XML_STATIC_CIRCLE:
 		init_circ(&block->shape, xml_block);
 		block->material = &static_env_material;
-		block->r = static_r;
-		block->g = static_g;
-		block->b = static_b;
+		block->type_id = FCSIM_STAT_CIRCLE;
 		break;
 	case XML_DYNAMIC_CIRCLE:
 		init_circ(&block->shape, xml_block);
 		block->material = &dynamic_env_material;
-		block->r = dynamic_r;
-		block->g = dynamic_g;
-		block->b = dynamic_b;
+		block->type_id = FCSIM_DYN_CIRCLE;
 		break;
 	}
 
@@ -553,25 +582,19 @@ static void add_player_block(struct design *design, struct xml_block *xml_block)
 		add_box(design, block, xml_block);
 		block->material = &solid_material;
 		block->goal = true;
-		block->r = goal_r;
-		block->g = goal_g;
-		block->b = goal_b;
+		block->type_id = FCSIM_GOAL_RECT;
 		break;
 	case XML_SOLID_ROD:
 		add_rod(design, block, xml_block);
 		block->material = &solid_rod_material;
 		block->goal = false;
-		block->r = solid_rod_r;
-		block->g = solid_rod_g;
-		block->b = solid_rod_b;
+		block->type_id = FCSIM_SOLID_ROD;
 		break;
 	case XML_HOLLOW_ROD:
 		add_rod(design, block, xml_block);
 		block->material = &water_rod_material;
 		block->goal = false;
-		block->r = water_rod_r;
-		block->g = water_rod_g;
-		block->b = water_rod_b;
+		block->type_id = FCSIM_ROD;
 		break;
 	case XML_NO_SPIN_WHEEL:
 	case XML_CLOCKWISE_WHEEL:
@@ -579,23 +602,8 @@ static void add_player_block(struct design *design, struct xml_block *xml_block)
 		add_wheel(design, block, xml_block);
 		block->material = &solid_material;
 		block->goal = xml_block->goal_block;
-		if (block->goal) {
-			block->r = goal_r;
-			block->g = goal_g;
-			block->b = goal_b;
-		} else if (xml_block->type == XML_NO_SPIN_WHEEL) {
-			block->r = wheel_r;
-			block->g = wheel_g;
-			block->b = wheel_b;
-		} else if (xml_block->type == XML_CLOCKWISE_WHEEL) {
-			block->r = cw_wheel_r;
-			block->g = cw_wheel_g;
-			block->b = cw_wheel_b;
-		} else {
-			block->r = ccw_wheel_r;
-			block->g = ccw_wheel_g;
-			block->b = ccw_wheel_b;
-		}
+		// this covers 6 cases
+		block->type_id = FCSIM_WHEEL - 3 * (block->goal) + (xml_block->type == XML_CLOCKWISE_WHEEL) + 2 * (xml_block->type == XML_COUNTER_CLOCKWISE_WHEEL);
 		break;
 	}
 

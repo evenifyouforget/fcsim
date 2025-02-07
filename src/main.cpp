@@ -1,3 +1,5 @@
+extern "C" {
+
 #include <stdlib.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -136,6 +138,8 @@ void clear_interval(int i)
 	slots[i].func = NULL;
 }
 
+} // extern "C"
+
 int main(void)
 {
 	Display *dpy;
@@ -189,7 +193,7 @@ int main(void)
 
 	while (1) {
 		pthread_mutex_lock(&mutex);
-		draw(); 
+		draw();
 		pthread_mutex_unlock(&mutex);
 
 		glFinish();

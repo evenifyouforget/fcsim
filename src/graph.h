@@ -1,8 +1,19 @@
+#ifndef GRAPH_H
+#define GRAPH_H
+
+#include <stdint.h>
+
 typedef struct b2Body b2Body;
 struct b2Body;
 
 typedef struct b2World b2World;
 struct b2World;
+struct color {
+	float a;
+	float r;
+	float g;
+	float b;
+};
 
 struct attach_node {
 	struct attach_node *prev;
@@ -120,25 +131,27 @@ extern struct material solid_material;
 extern struct material solid_rod_material;
 extern struct material water_rod_material;
 
-extern const float wheel_r;
-extern const float wheel_g;
-extern const float wheel_b;
+// mostly redundant
+#define FCSIM_STAT_RECT   0
+#define FCSIM_STAT_CIRCLE 1
+#define FCSIM_DYN_RECT    2
+#define FCSIM_DYN_CIRCLE  3
+#define FCSIM_GOAL_RECT   4
+#define FCSIM_GOAL_CIRCLE 5
+#define FCSIM_CW_GOAL_CIRCLE 6
+#define FCSIM_CCW_GOAL_CIRCLE 7
+#define FCSIM_WHEEL       8
+#define FCSIM_CW_WHEEL    9
+#define FCSIM_CCW_WHEEL   10
+#define FCSIM_ROD         11
+#define FCSIM_SOLID_ROD   12
+#define FCSIM_JOINT   13
+#define FCSIM_BUILD_AREA   14
+#define FCSIM_GOAL_AREA   15
+#define FCSIM_SKY 16
+#define FCSIM_NUM_TYPES 17
 
-extern const float cw_wheel_r;
-extern const float cw_wheel_g;
-extern const float cw_wheel_b;
-
-extern const float ccw_wheel_r;
-extern const float ccw_wheel_g;
-extern const float ccw_wheel_b;
-
-extern const float solid_rod_r;
-extern const float solid_rod_g;
-extern const float solid_rod_b;
-
-extern const float water_rod_r;
-extern const float water_rod_g;
-extern const float water_rod_b;
+extern uint32_t piece_color_table[FCSIM_NUM_TYPES][2];
 
 struct block {
 	struct block *prev;
@@ -149,11 +162,12 @@ struct block {
 	bool overlap;
 	bool visited;
 	int id;
-	float r;
-	float g;
-	float b;
+	uint8_t type_id;
 	b2Body *body;
 };
+
+void get_color_by_type(int, int, struct color *);
+void get_color_by_block(struct block *, int, struct color *);
 
 struct block_list {
 	struct block *head;
@@ -211,3 +225,6 @@ void free_world(b2World *world, struct design *design);
 void step(struct b2World *world);
 void get_shell(struct shell *shell, struct shape *shape);
 int get_block_joints(struct block *block, struct joint **res);
+
+
+#endif

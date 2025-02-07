@@ -1,0 +1,130 @@
+#include "stl_mock.h"
+#include <cassert>
+
+int main() {
+    // test vector construct destruct
+    {
+        std::vector<int> vec;
+    }
+    // test vector size
+    {
+        std::vector<int> vec;
+        assert(vec.size() == 0);
+    }
+    // test vector push_back
+    for(int i = 0; i < 100; ++i) {
+        std::vector<int> vec;
+        for(int j = 0; j < i; ++j) {
+            vec.push_back(j);
+        }
+        assert(vec.size() == i);
+    }
+    // test vector index
+    for(int i = 0; i < 100; ++i) {
+        std::vector<int> vec;
+        for(int j = 0; j < i; ++j) {
+            vec.push_back(j);
+            assert(vec[j] == j);
+        }
+        assert(vec.size() == i);
+    }
+    // test vector clear
+    for(int i = 0; i < 100; ++i) {
+        std::vector<int> vec;
+        for(int j = 0; j < i; ++j) {
+            vec.push_back(j);
+            assert(vec[j] == j);
+        }
+        assert(vec.size() == i);
+        vec.clear();
+        for(int j = 0; j < i; ++j) {
+            vec.push_back(2 * j);
+            assert(vec[j] == 2 * j);
+        }
+        assert(vec.size() == i);
+    }
+    // test string construct destruct
+    {
+        std::string str;
+    }
+    // test string to_string
+    {
+        std::string str = std::to_string(12345);
+    }
+    // test string to_string data
+    {
+        std::string str = std::to_string(12345);
+        for(int i = 0; i < 5; ++i) {
+            assert(str._data[i] == '0' + i + 1);
+        }
+        assert(str._length == 5);
+    }
+    // test string to_string negative
+    {
+        std::string str = std::to_string(-12345);
+        assert(str._data[0] == '-');
+        for(int i = 0; i < 5; ++i) {
+            assert(str._data[i+1] == '0' + i + 1);
+        }
+        assert(str._length == 6);
+    }
+    // test string to_string large value
+    {
+        std::to_string(9223372036854000000);
+        std::to_string(-9223372036854000000);
+    }
+    // test 2d memory
+    for(int i = 0; i < 100; ++i) {
+        std::vector<std::string> vec;
+        for(int j = 0; j < i; ++j) {
+            vec.push_back(std::to_string(j));
+        }
+        vec.clear();
+        for(int j = 0; j < i; ++j) {
+            vec.push_back(std::to_string(2 * j));
+        }
+    }
+    // test 2d memory overwrite
+    for(int i = 0; i < 100; ++i) {
+        std::vector<std::string> vec;
+        for(int j = 0; j < i; ++j) {
+            vec.push_back(std::to_string(j));
+        }
+        for(int j = 0; j < i; ++j) {
+            vec[j] = std::to_string(2 * j);
+        }
+    }
+    // test vector copy
+    for(int i = 0; i < 100; ++i) {
+        std::vector<std::vector<int>> vec;
+        vec.push_back(std::vector<int>());
+        for(int j = 0; j < 100; ++j) {
+            vec[0].push_back(j);
+        }
+        for(int j = 0; j < i; ++j) {
+            vec.push_back(vec[j]);
+            vec[j][0] = 2 * j;
+        }
+        for(int j = 0; j < i; ++j) {
+            assert(vec[j][0] == 2 * j);
+        }
+        assert(vec[i][0] == 0);
+    }
+    // test vector explicit copy
+    for(int i = 0; i < 100; ++i) {
+        std::vector<std::vector<int>> vec;
+        vec.push_back(std::vector<int>());
+        for(int j = 0; j < 100; ++j) {
+            vec[0].push_back(j);
+        }
+        for(int j = 0; j < i; ++j) {
+            vec.push_back(std::vector<int>());
+            vec[j+1] = vec[j];
+            vec[j][0] = 2 * j;
+        }
+        for(int j = 0; j < i; ++j) {
+            assert(vec[j][0] == 2 * j);
+        }
+        assert(vec[i][0] == 0);
+    }
+}

@@ -400,7 +400,7 @@ function save_design(event)
 
 	let xml_str = make_cstring(xml);
 
-	let request_promise = fetch("/fc/saveDesign.php", {
+	let request_promise = fetch("http://fantasticcontraption.com/saveDesign.php", {
 		method: "POST",
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded'
@@ -443,7 +443,7 @@ let module_promise = WebAssembly.instantiateStreaming(
 let design_id = params.get('designId');
 let level_id = params.get('levelId');
 
-let response_promise = fetch("/fc/retrieveLevel.php", {
+let response_promise = fetch("http://fantasticcontraption.com/retrieveLevel.php", {
 	method: "POST",
 	headers: {
 		'Content-Type': 'application/x-www-form-urlencoded'

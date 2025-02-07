@@ -12,8 +12,7 @@
 #include "graph.h"
 #include "text.h"
 #include "arena.h"
-
-#define TAU 6.28318530718
+#include "graph.h"
 
 void b2PolyShape_ctor(b2PolyShape *polyShape,
 			     const b2ShapeDef* def, b2Body* body,
@@ -62,16 +61,6 @@ const char *joint_fragment_shader_src =
 GLuint joint_program;
 GLuint joint_program_coord_attrib;
 
-struct color {
-	float r;
-	float g;
-	float b;
-};
-
-static struct color build_color = { 0.737f, 0.859f, 0.976f };
-static struct color goal_color  = { 0.945f, 0.569f, 0.569f };
-static struct color sky_color   = { 0.529f, 0.741f, 0.945f };
-
 void pixel_to_world(struct view *view, int x, int y, float *x_world, float *y_world)
 {
 	*x_world = view->x + view->scale * (2 * x - view->width);
@@ -82,224 +71,6 @@ void world_to_view(struct view *view, float x, float y, float *x_view, float *y_
 {
 	*x_view = (x - view->x) / (view->width * view->scale);
 	*y_view = (view->y - y) / (view->height * view->scale);
-}
-
-static void block_graphics_add_area(struct block_graphics *graphics,
-				    struct area *area, struct color *color)
-{
-	float w_half = area->w / 2;
-	float h_half = area->h / 2;
-	int i;
-
-	unsigned short *indices = graphics->indices + (graphics->triangle_cnt * 3);
-	float *coords = graphics->coords + (graphics->vertex_cnt * 2);
-	float *colors = graphics->colors + (graphics->vertex_cnt * 3);
-
-	for (i = 0; i < 2; i++) {
-		*indices++ = graphics->vertex_cnt;
-		*indices++ = graphics->vertex_cnt + i + 1;
-		*indices++ = graphics->vertex_cnt + i + 2;
-	}
-
-	*coords++ = area->x + w_half;
-	*coords++ = area->y + h_half;
-	*coords++ = area->x + w_half;
-	*coords++ = area->y - h_half;
-	*coords++ = area->x - w_half;
-	*coords++ = area->y - h_half;
-	*coords++ = area->x - w_half;
-	*coords++ = area->y + h_half;
-
-	for (i = 0; i < 4; i++) {
-		*colors++ = color->r;
-		*colors++ = color->g;
-		*colors++ = color->b;
-	}
-
-	graphics->triangle_cnt += 2;
-	graphics->vertex_cnt += 4;
-}
-
-static void block_graphics_add_rect(struct block_graphics *graphics,
-				    struct shell *shell, struct color *color)
-{
-	float sina_half = sinf(shell->angle) / 2;
-	float cosa_half = cosf(shell->angle) / 2;
-	float w = fmaxf(fabsf(shell->rect.w), 4.0);
-	float h = fmaxf(fabsf(shell->rect.h), 4.0);
-	float wc = w * cosa_half;
-	float ws = w * sina_half;
-	float hc = h * cosa_half;
-	float hs = h * sina_half;
-	int i;
-
-	unsigned short *indices = graphics->indices + (graphics->triangle_cnt * 3);
-	float *coords = graphics->coords + (graphics->vertex_cnt * 2);
-	float *colors = graphics->colors + (graphics->vertex_cnt * 3);
-
-	for (i = 0; i < 2; i++) {
-		*indices++ = graphics->vertex_cnt;
-		*indices++ = graphics->vertex_cnt + i + 1;
-		*indices++ = graphics->vertex_cnt + i + 2;
-	}
-
-	*coords++ = shell->x + wc - hs;
-	*coords++ = shell->y + ws + hc;
-	*coords++ = shell->x - wc - hs;
-	*coords++ = shell->y - ws + hc;
-	*coords++ = shell->x - wc + hs;
-	*coords++ = shell->y - ws - hc;
-	*coords++ = shell->x + wc + hs;
-	*coords++ = shell->y + ws - hc;
-
-	for (i = 0; i < 4; i++) {
-		*colors++ = color->r;
-		*colors++ = color->g;
-		*colors++ = color->b;
-	}
-
-	graphics->triangle_cnt += 2;
-	graphics->vertex_cnt += 4;
-}
-
-#define CIRCLE_SEGMENTS 24
-
-static void block_graphics_add_circ(struct block_graphics *graphics,
-				    struct shell *shell, struct color *color)
-{
-	unsigned short *indices = graphics->indices + (graphics->triangle_cnt * 3);
-	float *coords = graphics->coords + (graphics->vertex_cnt * 2);
-	float *colors = graphics->colors + (graphics->vertex_cnt * 3);
-	float a;
-	int i;
-
-	for (i = 0; i < CIRCLE_SEGMENTS - 2; i++) {
-		*indices++ = graphics->vertex_cnt;
-		*indices++ = graphics->vertex_cnt + i + 1;
-		*indices++ = graphics->vertex_cnt + i + 2;
-	}
-
-	for (int i = 0; i < CIRCLE_SEGMENTS; i++) {
-		a = shell->angle + TAU * i / CIRCLE_SEGMENTS;
-		*coords++ = shell->x + cosf(a) * shell->circ.radius;
-		*coords++ = shell->y + sinf(a) * shell->circ.radius;
-	}
-
-	for (i = 0; i < CIRCLE_SEGMENTS; i++) {
-		*colors++ = color->r;
-		*colors++ = color->g;
-		*colors++ = color->b;
-	}
-
-	graphics->triangle_cnt += CIRCLE_SEGMENTS - 2;
-	graphics->vertex_cnt += CIRCLE_SEGMENTS;
-}
-
-static void block_graphics_add_block(struct block_graphics *graphics,
-				     struct block *block)
-{
-	struct shell shell;
-	struct color color;
-
-	get_shell(&shell, &block->shape);
-	if (block->body) {
-		shell.x = block->body->m_position.x;
-		shell.y = block->body->m_position.y;
-		shell.angle = block->body->m_rotation;
-	}
-
-	if (block->overlap) {
-		color.r = 1.0f;
-		color.g = 0.0f;
-		color.b = 0.0f;
-	} else if (block->visited) {
-		color.r = block->r + (1.0f - block->r) * 0.25f;
-		color.g = block->g + (1.0f - block->g) * 0.25f;
-		color.b = block->b + (1.0f - block->b) * 0.25f;
-	} else {
-		color.r = block->r;
-		color.g = block->g;
-		color.b = block->b;
-	}
-
-	if (shell.type == SHELL_CIRC)
-		block_graphics_add_circ(graphics, &shell, &color);
-	else
-		block_graphics_add_rect(graphics, &shell, &color);
-}
-
-void add_block_mesh_cnts(struct block *block, int *vertex_cnt, int *triangle_cnt)
-{
-	enum shape_type type = block->shape.type;
-	int v;
-
-	if (type == SHAPE_CIRC || type == SHAPE_WHEEL)
-		v = CIRCLE_SEGMENTS;
-	else
-		v = 4;
-
-	*vertex_cnt += v;
-	*triangle_cnt += v - 2;
-}
-
-void get_mesh_cnts(struct design *design, int *vertex_cnt, int *triangle_cnt)
-{
-	struct block *block;
-
-	*vertex_cnt = 8;
-	*triangle_cnt = 4;
-
-	for (block = design->level_blocks.head; block; block = block->next)
-		add_block_mesh_cnts(block, vertex_cnt, triangle_cnt);
-
-	for (block = design->player_blocks.head; block; block = block->next)
-		add_block_mesh_cnts(block, vertex_cnt, triangle_cnt);
-}
-
-void block_graphics_reset(struct block_graphics *graphics, struct design *design)
-{
-	struct block *block;
-	int vertex_cnt;
-	int triangle_cnt;
-	int indices_size;
-	int coords_size;
-	int colors_size;
-
-	get_mesh_cnts(design, &vertex_cnt, &triangle_cnt);
-
-	indices_size = triangle_cnt * 3 * sizeof(unsigned short);
-	coords_size = vertex_cnt * 2 * sizeof(float);
-	colors_size = vertex_cnt * 3 * sizeof(float);
-
-	free(graphics->indices);
-	free(graphics->coords);
-	free(graphics->colors);
-
-	graphics->indices = malloc(indices_size);
-	graphics->coords = malloc(coords_size);
-	graphics->colors = malloc(colors_size);
-
-	graphics->vertex_cnt = 0;
-	graphics->triangle_cnt = 0;
-
-	block_graphics_add_area(graphics, &design->build_area, &build_color);
-	block_graphics_add_area(graphics, &design->goal_area, &goal_color);
-
-	for (block = design->level_blocks.head; block; block = block->next)
-		block_graphics_add_block(graphics, block);
-
-	for (block = design->player_blocks.head; block; block = block->next)
-		block_graphics_add_block(graphics, block);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, graphics->index_buffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_size, graphics->indices,
-		     GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, graphics->coord_buffer);
-	glBufferData(GL_ARRAY_BUFFER, coords_size, graphics->coords, GL_DYNAMIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, graphics->color_buffer);
-	glBufferData(GL_ARRAY_BUFFER, colors_size, graphics->colors, GL_STATIC_DRAW);
 }
 
 bool arena_compile_shaders(void)
@@ -368,20 +139,6 @@ bool arena_compile_shaders(void)
 	return true;
 }
 
-void block_graphics_init(struct block_graphics *graphics)
-{
-	graphics->indices = NULL;
-	graphics->coords = NULL;
-	graphics->colors = NULL;
-
-	glGenBuffers(1, &graphics->index_buffer);
-	glGenBuffers(1, &graphics->coord_buffer);
-	glGenBuffers(1, &graphics->color_buffer);
-
-	graphics->triangle_cnt = 0;
-	graphics->vertex_cnt = 0;
-}
-
 void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 {
 	struct xml_level level;
@@ -412,69 +169,19 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 
 	arena->world = gen_world(&arena->design);
 
-	block_graphics_init(&arena->block_graphics);
+	block_graphics_init(arena);
 
+	/*
 	glGenBuffers(1, &arena->joint_coord_buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, arena->joint_coord_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(arena->joint_coords),
 		     arena->joint_coords, GL_STREAM_DRAW);
+	*/
 
 	arena->tick_ms = 17;
 	arena->tick = 0;
 	text_stream_create(&arena->tick_counter, 20);
 	arena->has_won = false;
-}
-
-void fill_joint_coords(struct arena *arena, struct joint *joint)
-{
-	float x = joint->x;
-	float y = joint->y;
-	float a0, x0, y0;
-	float a1, x1, y1;
-	float r = 4.0f;
-	float *coords = arena->joint_coords;
-	int i;
-
-	for (i = 0; i < 8; i++) {
-		a0 = i * (TAU / 8);
-		a1 = (i + 1) * (TAU / 8);
-		x0 = x + cosf(a0) * r;
-		y0 = y + sinf(a0) * r;
-		x1 = x + cosf(a1) * r;
-		y1 = y + sinf(a1) * r;
-		world_to_view(&arena->view, x,  y,  coords + 2, coords + 3);
-		world_to_view(&arena->view, x0, y0, coords + 0, coords + 1);
-		world_to_view(&arena->view, x1, y1, coords + 4, coords + 5);
-		coords += 6;
-	}
-}
-
-void block_graphics_draw(struct block_graphics *graphics, struct view *view)
-{
-	glUseProgram(block_program);
-
-	glUniform2f(block_program_scale_uniform,
-		     1.0f / (view->width * view->scale),
-		    -1.0f / (view->height * view->scale));
-	glUniform2f(block_program_shift_uniform,
-		    -view->x / (view->width * view->scale),
-		     view->y / (view->height * view->scale));
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, graphics->index_buffer);
-
-	glBindBuffer(GL_ARRAY_BUFFER, graphics->coord_buffer);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, graphics->color_buffer);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glDrawElements(GL_TRIANGLES, graphics->triangle_cnt * 3, GL_UNSIGNED_SHORT, 0);
-
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
 }
 
 /* TODO: dedupe */
@@ -493,41 +200,6 @@ static void u64tostr(char *buf, uint64_t val)
 		buf[i] = tmp[l - 1 - i];
 
 	buf[l] = 0;
-}
-
-static void draw_tick_counter(struct arena *arena)
-{
-	char buf[20];
-
-	u64tostr(buf, arena->tick);
-
-	text_stream_update(&arena->tick_counter, buf);
-	text_stream_render(&arena->tick_counter,
-			arena->view.width, arena->view.height, 10, 10);
-}
-
-void arena_draw(struct arena *arena)
-{
-	glClearColor(sky_color.r, sky_color.g, sky_color.b, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	block_graphics_reset(&arena->block_graphics, &arena->design);
-	block_graphics_draw(&arena->block_graphics, &arena->view);
-
-	if (arena->hover_joint) {
-		fill_joint_coords(arena, arena->hover_joint);
-
-		glUseProgram(joint_program);
-
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, arena->joint_coord_buffer);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, 48 * sizeof(float), arena->joint_coords);
-		glDrawArrays(GL_TRIANGLES, 0, 24);
-		glDisableVertexAttribArray(0);
-	}
-
-	draw_tick_counter(arena);
 }
 
 void update_tool(struct arena *arena)
@@ -1646,19 +1318,10 @@ void mouse_down_rod(struct arena *arena, float x, float y)
 	adjust_new_rod(&block->shape.rod);
 
 	block->material = solid ? &solid_rod_material : &water_rod_material;
+	block->type_id = solid ? FCSIM_SOLID_ROD : FCSIM_ROD;
 	block->goal = false;
 	block->overlap = false;
 	block->visited = false;
-
-	if (solid) {
-		block->r = solid_rod_r;
-		block->g = solid_rod_g;
-		block->b = solid_rod_b;
-	} else {
-		block->r = water_rod_r;
-		block->g = water_rod_g;
-		block->b = water_rod_b;
-	}
 
 	arena->new_block = block;
 
@@ -1733,19 +1396,13 @@ void mouse_down_wheel(struct arena *arena, float x, float y)
 
 	switch (arena->tool) {
 	case TOOL_WHEEL:
-		block->r = wheel_r;
-		block->g = wheel_g;
-		block->b = wheel_b;
+		block->type_id = FCSIM_WHEEL;
 		break;
 	case TOOL_CW_WHEEL:
-		block->r = cw_wheel_r;
-		block->g = cw_wheel_g;
-		block->b = cw_wheel_b;
+		block->type_id = FCSIM_CW_WHEEL;
 		break;
 	case TOOL_CCW_WHEEL:
-		block->r = ccw_wheel_r;
-		block->g = ccw_wheel_g;
-		block->b = ccw_wheel_b;
+		block->type_id = FCSIM_CCW_WHEEL;
 		break;
 	}
 

@@ -1,3 +1,11 @@
+#ifndef ARENA_H
+#define ARENA_H
+
+#include "graph.h"
+#include "text.h"
+
+#define TAU 6.28318530718
+
 struct view {
 	float x;
 	float y;
@@ -40,19 +48,6 @@ struct joint_head {
 	double orig_y;
 };
 
-struct block_graphics {
-	unsigned short *indices;
-	float *coords;
-	float *colors;
-
-	GLuint index_buffer;
-	GLuint coord_buffer;
-	GLuint color_buffer;
-
-	int triangle_cnt;
-	int vertex_cnt;
-};
-
 struct arena {
 	struct design design;
 	b2World *world;
@@ -83,10 +78,7 @@ struct arena {
 
 	struct block *new_block;
 
-	struct block_graphics block_graphics;
-
-	float joint_coords[48];
-	GLuint joint_coord_buffer;
+	void* block_graphics_v2;
 
 	uint64_t tick;
 	struct text_stream tick_counter;
@@ -106,3 +98,16 @@ void arena_scroll_event(struct arena *arena, int delta);
 void arena_mouse_button_up_event(struct arena *arena, int button);
 void arena_mouse_button_down_event(struct arena *arena, int button);
 void arena_size_event(struct arena *arena, float w, float h);
+
+extern GLuint block_program;
+extern GLuint block_program_coord_attrib;
+extern GLuint block_program_color_attrib;
+extern GLuint block_program_scale_uniform;
+extern GLuint block_program_shift_uniform;
+extern GLuint joint_program;
+extern GLuint joint_program_coord_attrib;
+
+// c++ compat
+void block_graphics_init(struct arena *ar);
+
+#endif

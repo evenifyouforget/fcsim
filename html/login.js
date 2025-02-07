@@ -23,7 +23,7 @@ function on_submit(event) {
 
 	let data = new FormData(login);
 
-	let request_promise = fetch("/fc/logIn.php", {
+	let request_promise = fetch("http://fantasticcontraption.com/logIn.php", {
 		method: "POST",
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded'

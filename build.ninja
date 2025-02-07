@@ -6,11 +6,23 @@ rule linux-cxx
   depfile = $out.d
   command = c++ -O0 -g -MMD -MF $out.d -Iinclude -c -o $out $in
 
+rule linux-cxx-stl-test
+  depfile = $out.d
+  command = c++ -O0 -g -MMD -MF $out.d -Iinclude -Iarch/wasm/include -D__wasm__ -c -o $out $in
+
 rule linux-ld
-  command = c++ -o $out $in -lX11 -lGL
+  command = c++ -o $out $in -lX11 -lGL -lpthread
+
+build stl_test: linux-ld $
+obj/linux/stl_mock.o $
+obj/linux/test_main.o
+
+build obj/linux/stl_mock.o: linux-cxx-stl-test src/stl_mock.cpp
+build obj/linux/test_main.o: linux-cxx-stl-test test/stl_test_main.cpp
 
 build fcsim: linux-ld $
 obj/linux/arena.o $
+obj/linux/arena_graphics.o $
 obj/linux/button.o $
 obj/linux/export.o $
 obj/linux/core.o $
@@ -44,12 +56,13 @@ obj/linux/fpmath/sincos.o $
 obj/linux/fpmath/strtod.o
 
 build obj/linux/arena.o: linux-cc src/arena.c
+build obj/linux/arena_graphics.o: linux-cxx src/arena_graphics.cpp
 build obj/linux/button.o: linux-cc src/button.c
 build obj/linux/export.o: linux-cc src/export.c
 build obj/linux/core.o: linux-cc src/core.c
 build obj/linux/gen.o: linux-cc src/gen.c
 build obj/linux/graph.o: linux-cc src/graph.c
-build obj/linux/main.o: linux-cc src/main.c
+build obj/linux/main.o: linux-cxx src/main.cpp
 build obj/linux/str.o: linux-cc src/str.c
 build obj/linux/text.o: linux-cc src/text.c
 build obj/linux/xml.o: linux-cc src/xml.c
@@ -89,11 +102,13 @@ rule wasm-ld
 
 build html/fcsim.wasm: wasm-ld $
 obj/wasm/arena.o $
+obj/wasm/arena_graphics.o $
 obj/wasm/button.o $
 obj/wasm/export.o $
 obj/wasm/core.o $
 obj/wasm/gen.o $
 obj/wasm/graph.o $
+obj/wasm/stl_mock.o $
 obj/wasm/str.o $
 obj/wasm/text.o $
 obj/wasm/xml.o $
@@ -125,11 +140,13 @@ obj/wasm/fpmath/sincos.o $
 obj/wasm/fpmath/strtod.o
 
 build obj/wasm/arena.o: wasm-cc src/arena.c
+build obj/wasm/arena_graphics.o: wasm-cxx src/arena_graphics.cpp
 build obj/wasm/button.o: wasm-cc src/button.c
 build obj/wasm/export.o: wasm-cc src/export.c
 build obj/wasm/core.o: wasm-cc src/core.c
 build obj/wasm/gen.o: wasm-cc src/gen.c
 build obj/wasm/graph.o: wasm-cc src/graph.c
+build obj/wasm/stl_mock.o: wasm-cxx src/stl_mock.cpp
 build obj/wasm/str.o: wasm-cc src/str.c
 build obj/wasm/text.o: wasm-cc src/text.c
 build obj/wasm/xml.o: wasm-cc src/xml.c
