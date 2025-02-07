@@ -1,7 +1,13 @@
+#ifdef __wasm__
+#include "stdint.h"
+#include "stl_mock.h"
+#else
 #include <algorithm>
 #include <cstdint>
 #include <string>
 #include <vector>
+#endif
+#include "stl_compat.h"
 extern "C" {
 #include "arena.h"
 #include "gl.h"
@@ -238,15 +244,15 @@ static void block_graphics_add_rect(struct block_graphics *graphics,
     }
     float w = shell.rect.w;
     float h = shell.rect.h;
-    float iw = abs(w-8);
-    float ih = abs(h-8);
+    float iw = std::abs(w-8);
+    float ih = std::abs(h-8);
     float ow,oh;
     if(type_id == FCSIM_ROD || type_id == FCSIM_SOLID_ROD) {
         ow = w;
         oh = h;
         if(type_id == FCSIM_ROD && !graphics->wireframe)oh*=2;
-        iw = abs(ow-4);
-        ih = abs(oh-4);
+        iw = std::abs(ow-4);
+        ih = std::abs(oh-4);
     }else{
         ow = std::max(w, iw+2);
 		oh = std::max(h, ih+2);
@@ -450,7 +456,7 @@ void arena_draw(struct arena *arena)
 
 extern "C" void block_graphics_init(struct arena *ar)
 {
-    ar->block_graphics_v2 = new block_graphics();
+    ar->block_graphics_v2 = _new<block_graphics>();
     block_graphics* graphics = (block_graphics*)ar->block_graphics_v2;
 
 	glGenBuffers(1, &graphics->_index_buffer);
