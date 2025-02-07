@@ -1,0 +1,3 @@
+[submodule "TinySTL"]
+	path = TinySTL
+	url = git@github.com:zouxiaohang/TinySTL.git

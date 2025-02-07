@@ -1481,3 +1481,4 @@ void arena_size_event(struct arena *arena, float width, float height)
 	arena->view.width = width;
 	arena->view.height = height;
 }
+

@@ -1,6 +1,7 @@
 #ifndef ARENA_H
 #define ARENA_H
 
+#include "stddef.h"
 #include "graph.h"
 #include "text.h"
 

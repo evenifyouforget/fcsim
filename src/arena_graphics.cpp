@@ -1,7 +1,16 @@
+#ifdef __wasm__
+#include "stdint.h"
+#include "algorithm.h"
+#include "string.h"
+#include "vector.h"
+#define stl TinySTL
+#else
 #include <algorithm>
-#include <cstdint>
 #include <string>
 #include <vector>
+#include <cstdint>
+#define stl std
+#endif
 extern "C" {
 #include "arena.h"
 #include "gl.h"
@@ -10,16 +19,16 @@ extern "C" {
 }
 #include "math.h"
 
-template <typename T> void append_vector(std::vector<T>& a, std::vector<T>& b) {
+template <typename T> void append_vector(stl::vector<T>& a, stl::vector<T>& b) {
     for(auto it = b.begin(); it != b.end(); ++it) {
         a.push_back(*it);
     }
 }
 
 struct block_graphics_layer {
-    std::vector<uint16_t> indices;
-    std::vector<float> coords;
-    std::vector<float> colors;
+    stl::vector<uint16_t> indices;
+    stl::vector<float> coords;
+    stl::vector<float> colors;
     uint16_t push_vertex(float x, float y, float r, float g, float b);
     uint16_t push_vertex(float x, float y, color col);
     void push_triangle(uint16_t v1, uint16_t v2, uint16_t v3);
@@ -30,11 +39,11 @@ struct block_graphics {
     bool simple_graphics = false;
     bool wireframe = false;
     // working values
-    std::vector<block_graphics_layer> layers;
+    stl::vector<block_graphics_layer> layers;
     // final values
-    std::vector<uint16_t> _indices;
-    std::vector<float> _coords;
-    std::vector<float> _colors;
+    stl::vector<uint16_t> _indices;
+    stl::vector<float> _coords;
+    stl::vector<float> _colors;
 	GLuint _index_buffer;
 	GLuint _coord_buffer;
 	GLuint _color_buffer;
@@ -56,7 +65,7 @@ constexpr float lerp_exact(float a, float b, float t) {
   // Exact at t=0, monotonic except near t=1,
   // bounded, determinate, and consistent:
   const float x = a + t*(b-a);
-  return t>1 == b>a ? std::max(b,x) : std::min(b,x);  // monotonic near t=1
+  return t>1 == b>a ? stl::max(b,x) : stl::min(b,x);  // monotonic near t=1
 }
 
 color get_color_by_type(int type_id, int slot) {
@@ -148,11 +157,11 @@ joint joint_from_xy(float x, float y) {
     return result;
 }
 
-std::vector<joint> generate_joints(block* block) {
+stl::vector<joint> generate_joints(block* block) {
     // TODO: correct joint order
     const int type_id = block->type_id;
     shell shell = get_shell(block);
-    std::vector<joint> result;
+    stl::vector<joint> result;
     float sina_half = sinf(shell.angle) / 2;
     float cosa_half = cosf(shell.angle) / 2;
     float w = shell.type == SHELL_CIRC ? shell.circ.radius * 2 : shell.rect.w;
@@ -248,8 +257,8 @@ static void block_graphics_add_rect(struct block_graphics *graphics,
         iw = abs(ow-4);
         ih = abs(oh-4);
     }else{
-        ow = std::max(w, iw+2);
-		oh = std::max(h, ih+2);
+        ow = stl::max(w, iw+2);
+		oh = stl::max(h, ih+2);
     }
     shell.rect.w = ow;
     shell.rect.h = oh;
@@ -303,7 +312,7 @@ static void block_graphics_add_circ(struct block_graphics *graphics,
     }
     float r = shell.circ.radius;
     float ir = r - 4;
-    float _or = std::max(r, ir+1);
+    float _or = stl::max(r, ir+1);
     shell.circ.radius = _or;
     block_graphics_add_circ_single(graphics, shell, alpha_over(get_color_by_type(type_id, 0), overlay), z_offset);
     shell.circ.radius = ir;
@@ -361,7 +370,7 @@ static void block_graphics_add_block(struct block_graphics *graphics,
 	else
 		block_graphics_add_rect(graphics, shell, block->type_id, 2, overlay);
 
-    std::vector<joint> joints_generated = generate_joints(block);
+    stl::vector<joint> joints_generated = generate_joints(block);
     for(auto it = joints_generated.begin(); it != joints_generated.end(); ++it) {
         block_graphics_add_joint(graphics, *it, color{0,0,0,0});
     }
@@ -429,7 +438,7 @@ void block_graphics_draw(struct block_graphics *graphics, struct view *view)
 
 static void draw_tick_counter(struct arena *arena)
 {
-    std::string buf = std::to_string(arena->tick);
+    stl::string buf = stl::to_string(arena->tick);
 
 	text_stream_update(&arena->tick_counter, buf.c_str());
 	text_stream_render(&arena->tick_counter,
