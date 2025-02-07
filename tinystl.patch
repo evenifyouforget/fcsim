@@ -1,0 +1,90 @@
+diff --git a/alloc.h b/alloc.h
+index 3e03e5a..69ad2d4 100644
+--- a/alloc.h
++++ b/alloc.h
+@@ -2,8 +2,7 @@
+ #define MYSTL_ALLOC_H_
+ 
+ #include <stdlib.h>
+-#include <cstring>
+-#include <iostream>
++#include <string.h>
+ #include "construct.h"
+ 
+ /* 本头文件中实现了具有 SGI 特色的两级分配器，我的个人博客 https://choubin.site 有详细讲解*/
+diff --git a/construct.h b/construct.h
+index 27deeb0..d1b7525 100644
+--- a/construct.h
++++ b/construct.h
+@@ -1,7 +1,6 @@
+ #if !defined(MYSTL_CONSTRUCT_H)
+ #define MYSTL_CONSTRUCT_H
+ 
+-#include <new>  // placement new 在此头文件内
+ #include "type_traits.h"
+ #include "iterator.h"
+ namespace mystl {
+diff --git a/iterator.h b/iterator.h
+index 36633a4..a5ca53b 100644
+--- a/iterator.h
++++ b/iterator.h
+@@ -1,7 +1,7 @@
+ #if !defined(MYSTL_ITERATOR_H_)
+ #define MYSTL_ITERATOR_H_
+ 
+-#include <cstddef>
++#include <stddef.h>
+ 
+ namespace mystl{
+ // 分别表示5种迭代器 category 的 struct
+diff --git a/uninitialized.h b/uninitialized.h
+index eb03aad..68b7d54 100644
+--- a/uninitialized.h
++++ b/uninitialized.h
+@@ -1,7 +1,7 @@
+ #if !defined(MYSTL_UNINITIALIZED_H_)
+ #define MYSTL_UNINITIALIZED_H_
+ 
+-#include <memory>
++#include "memory.h"
+ #include "iterator.h"
+ #include "construct.h"
+ #include "type_traits.h"
+diff --git a/vector.h b/vector.h
+index a5e7fdc..7a8b615 100644
+--- a/vector.h
++++ b/vector.h
+@@ -3,7 +3,6 @@
+ 
+ // 该头文件用以实现 vector
+ 
+-#include <initializer_list>
+ #include "memory.h"
+ namespace mystl
+ {
+@@ -46,11 +45,7 @@ public:
+     vector(InputIterator first, InputIterator last) {
+         copy_init(first, last);
+     }
+-    vector(std::initializer_list<T> rhs) {
+-        copy_init(rhs.begin(), rhs.end());
+-    }
+     vector<T, Allocator>& operator=(const vector<T, Allocator>& vec);
+-    vector<T, Allocator>& operator=(std::initializer_list<T> rhs);
+     ~vector() {
+         destroy(start, finish);
+         deallocate();
+@@ -187,13 +182,6 @@ vector<T, Alloc>& vector<T, Alloc>::operator=(const vector<T, Alloc>& vec) {
+     return *this;
+ }
+ 
+-template <typename T, typename Alloc>
+-vector<T, Alloc>& vector<T, Alloc>::operator=(std::initializer_list<T> rhs) {
+-    vector<T, Alloc> tmp(rhs.begin(), rhs.end());
+-    swap(tmp);
+-    return *this;
+-}
+-
+ template <typename T, typename Alloc>
+ void vector<T, Alloc>::push_back(const T& value) {
+     if (finish != end_of_storage)

@@ -80,17 +80,18 @@ build obj/linux/fpmath/strtod.o: linux-cc src/fpmath/strtod.c
 
 rule wasm-cc
   depfile = $out.d
-  command = clang -O2 -MMD -MF $out.d -Iinclude -Iarch/wasm/include --target=wasm32 -nostdlib -c -o $out $in
+  command = clang -O2 -MMD -MF $out.d -Iinclude -Iarch/wasm/include -ITinySTL --target=wasm32 -nostdlib -c -o $out $in
 
 rule wasm-cxx
   depfile = $out.d
-  command = clang++ -O2 -MMD -MF $out.d -Iinclude -Iarch/wasm/include --target=wasm32 -nostdlib -fno-rtti -fno-exceptions -c -o $out $in
+  command = clang++ -O2 -MMD -MF $out.d -Iinclude -Iarch/wasm/include -ITinySTL --target=wasm32 -nostdlib -fno-rtti -fno-exceptions -c -o $out $in
 
 rule wasm-ld
   command = wasm-ld --no-entry --export-all --allow-undefined -o $out $in
 
 build html/fcsim.wasm: wasm-ld $
 obj/wasm/arena.o $
+obj/wasm/arena_graphics.o $
 obj/wasm/button.o $
 obj/wasm/export.o $
 obj/wasm/core.o $
@@ -127,6 +128,7 @@ obj/wasm/fpmath/sincos.o $
 obj/wasm/fpmath/strtod.o
 
 build obj/wasm/arena.o: wasm-cc src/arena.c
+build obj/wasm/arena_graphics.o: wasm-cxx src/arena_graphics.cpp
 build obj/wasm/button.o: wasm-cc src/button.c
 build obj/wasm/export.o: wasm-cc src/export.c
 build obj/wasm/core.o: wasm-cc src/core.c

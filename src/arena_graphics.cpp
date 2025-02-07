@@ -1,7 +1,14 @@
+#ifdef __wasm__
+#include "algorithm.h"
+#include "stdint.h"
+#include "string.h"
+#include "vector.h"
+#else
 #include <algorithm>
 #include <cstdint>
 #include <string>
 #include <vector>
+#endif
 extern "C" {
 #include "arena.h"
 #include "gl.h"
