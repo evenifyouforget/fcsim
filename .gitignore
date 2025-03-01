@@ -3,6 +3,7 @@
 *.xml
 fcsim
 html/fcsim.wasm
+stl_test
 tags
 .ninja_log
 .ninja_deps
