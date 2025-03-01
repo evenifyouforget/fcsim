@@ -83,8 +83,6 @@ struct b2World
 extern "C" {
 #endif
 
-bool b2_defaultFilter(b2Shape* shape1, b2Shape* shape2);
-
 void b2World_ctor(b2World *world, const b2AABB* worldAABB, b2Vec2 gravity, bool doSleep);
 
 void b2World_dtor(b2World *world);
@@ -105,19 +103,9 @@ void b2World_DestroyJoint(b2World *world, b2Joint* joint);
 
 void b2World_Step(b2World *world, float64 timeStep, int32 iterations);
 
-static inline b2Body* b2World_GetBodyList(b2World *world)
-{
-	return world->m_bodyList;
-}
-
 static inline b2Joint* b2World_GetJointList(b2World *world)
 {
 	return world->m_jointList;
-}
-
-static inline b2Contact* b2World_GetContactList(b2World *world)
-{
-	return world->m_contactList;
 }
 
 extern int32 b2World_s_enablePositionCorrection;
