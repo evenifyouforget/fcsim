@@ -132,4 +132,17 @@ int main() {
         std::string str;
         str = "Hello world";
     }
+    // test string construct by string literal
+    {
+        std::string str = "Hello world";
+    }
+    // test string size
+    {
+        std::string str;
+        assert(str.size() == 0);
+        for(int i = 1; i < 10; ++i) {
+            str.append('0' + i);
+            assert(str.size() == i);
+        }
+    }
 }
