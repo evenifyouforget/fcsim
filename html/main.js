@@ -316,6 +316,11 @@ function to_key(code)
 	if (code == "Digit2") return 11;
 	if (code == "Digit3") return 12;
 	if (code == "Digit4") return 13;
+	if (code == "Digit5") return 14;
+	if (code == "Digit6") return 15;
+	if (code == "Digit7") return 16;
+	if (code == "Digit8") return 17;
+	if (code == "Digit9") return 18;
 	if (code == "ShiftLeft") return 50;
 	if (code == "ControlLeft") return 37;
 	return 0;

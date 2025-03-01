@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <iostream>
 #endif
 #include "stl_compat.h"
 extern "C" {
@@ -188,7 +189,7 @@ std::vector<joint> generate_joints(block* block) {
     float sina_half = sinf(shell.angle) / 2;
     float cosa_half = cosf(shell.angle) / 2;
     float w = shell.type == SHELL_CIRC ? shell.circ.radius * 2 : shell.rect.w;
-    float h = shell.type == SHELL_RECT ? shell.circ.radius * 2 : shell.rect.h;
+    float h = shell.type == SHELL_CIRC ? shell.circ.radius * 2 : shell.rect.h;
     float wc = w * cosa_half;
     float ws = w * sina_half;
     float hc = h * cosa_half;

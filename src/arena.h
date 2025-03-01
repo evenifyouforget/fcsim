@@ -4,6 +4,13 @@
 #include "graph.h"
 #include "text.h"
 
+#define BASE_FPS 30
+#ifdef __wasm__
+#define MIN_MSPT 33
+#else
+#define MIN_MSPT 5
+#endif
+
 #define TAU 6.28318530718
 
 struct view {
@@ -54,6 +61,7 @@ struct arena {
 
 	int ival;
 	int tick_ms;
+	int tick_multiply;
 
 	struct view view;
 
