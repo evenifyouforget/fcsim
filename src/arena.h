@@ -88,6 +88,7 @@ struct arena {
 	// this text object has been repurposed for all text rendering
 	struct text_stream tick_counter;
 	bool has_won;
+	bool enable_tick;
 
 	// ui button templates
 	void* ui_buttons; // actual type: ui_button_collection*

@@ -509,6 +509,9 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
     if(button.id == ui_button_id{2, 0}) {
         start_stop(arena);
     }
+    if(button.id == ui_button_id{2, 1}) {
+        arena->enable_tick = !arena->enable_tick;
+    }
 }
 
 void regenerate_ui_buttons(arena* arena) {
@@ -585,9 +588,14 @@ void regenerate_ui_buttons(arena* arena) {
         all_buttons->buttons.push_back(button);
     }
     {
-        ui_button_single button{{2, 0}, 30, vh - 30, 50, 50};
+        ui_button_single button{{2, 0}, 30, vh - 30, 50, 50, 2};
         button.texts.push_back(ui_button_text{"Space", 1.5, 0, 8});
         button.texts.push_back(ui_button_text{is_running(arena)?"Stop":"Start", 1, 0, -8});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{2, 1}, 30, vh - 55 - 10 + 4, 50, 20};
+        button.texts.push_back(ui_button_text{arena->enable_tick?"Pause":"Resume", 1});
         all_buttons->buttons.push_back(button);
     }
 }
@@ -670,6 +678,7 @@ extern "C" void block_graphics_init(struct arena *ar)
     ar->ui_buttons = new ui_button_collection();
     regenerate_ui_buttons(ar);
     ar->ui_toolbar_opened = false;
+    ar->enable_tick = true;
 }
 
 extern "C" bool arena_mouse_click_button(struct arena *arena) {
