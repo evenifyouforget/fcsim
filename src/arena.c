@@ -177,6 +177,7 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 	*/
 
 	arena->tick_ms = 17;
+	arena->tick_multiply = 1;
 	arena->tick = 0;
 	text_stream_create(&arena->tick_counter, MAX_RENDER_TEXT_LENGTH);
 	arena->has_won = false;
@@ -247,11 +248,16 @@ void tick_func(void *arg)
 	struct arena *arena = arg;
 	if(!arena->enable_tick)return;
 
-	step(arena->world);
-	arena->tick++;
-	if (!arena->has_won && goal_blocks_inside_goal_area(&arena->design)) {
-		arena->has_won = true;
-		arena->tick_solve = arena->tick;
+	double time_start = time_precise_ms();
+	for(int i = 0; i < arena->tick_multiply; ++i) {
+		step(arena->world);
+		arena->tick++;
+		if (!arena->has_won && goal_blocks_inside_goal_area(&arena->design)) {
+			arena->has_won = true;
+			arena->tick_solve = arena->tick;
+		}
+		double time_end = time_precise_ms();
+		if(time_end - time_start >= arena->tick_ms)break;
 	}
 }
 
@@ -272,14 +278,23 @@ void stop(struct arena *arena)
 	clear_interval(arena->ival);
 }
 
-void change_speed(struct arena *arena, int ms)
+void change_speed(struct arena *arena, int ms, int multiply)
 {
 	arena->tick_ms = ms;
+	arena->tick_multiply = multiply;
 	if (arena->state == STATE_RUNNING ||
 	    arena->state == STATE_RUNNING_PAN) {
 		clear_interval(arena->ival);
 		arena->ival = set_interval(tick_func, ms, arena);
 	}
+}
+
+void change_speed_factor(struct arena *arena, double factor) {
+	if(factor < 1)factor = 1;
+	double mspt = 1000 / (BASE_FPS * factor);
+	long long int multiples = 1 + (long long int)(MIN_MSPT / mspt);
+	long long int mspt_int = (long long int)(1000 * multiples / (BASE_FPS * factor));
+	change_speed(arena, (int)mspt_int, (int)multiples);
 }
 
 void mouse_up_new_block(struct arena *arena);
@@ -355,16 +370,31 @@ void arena_key_down_event(struct arena *arena, int key)
 		arena->tool_hidden = TOOL_CCW_WHEEL;
 		break;
 	case 10: /* 1 */
-		change_speed(arena, 33);
+		change_speed_factor(arena, 1);
 		break;
 	case 11: /* 2 */
-		change_speed(arena, 17);
+		change_speed_factor(arena, 2);
 		break;
 	case 12: /* 3 */
-		change_speed(arena, 8);
+		change_speed_factor(arena, 4);
 		break;
 	case 13: /* 4 */
-		change_speed(arena, 4);
+		change_speed_factor(arena, 8);
+		break;
+	case 14: /* 5 */
+		change_speed_factor(arena, 100);
+		break;
+	case 15: /* 6 */
+		change_speed_factor(arena, 1e3);
+		break;
+	case 16: /* 7 */
+		change_speed_factor(arena, 1e4);
+		break;
+	case 17: /* 8 */
+		change_speed_factor(arena, 1e5);
+		break;
+	case 18: /* 9 */
+		change_speed_factor(arena, 1e9);
 		break;
 	case 50: /* shift */
 		arena->shift = true;
