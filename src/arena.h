@@ -81,6 +81,7 @@ struct arena {
 	void* block_graphics_v2;
 
 	uint64_t tick;
+	// this text object has been repurposed for all text rendering
 	struct text_stream tick_counter;
 	bool has_won;
 };

@@ -129,6 +129,7 @@ struct string {
     char* c_str();
     void append(char);
     string& operator=(const string& other);
+    string& operator=(const char* other);
 };
 
 string to_string(int64_t);

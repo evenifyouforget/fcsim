@@ -14,6 +14,8 @@
 #include "arena.h"
 #include "graph.h"
 
+#define MAX_RENDER_TEXT_LENGTH 1000
+
 const char *block_vertex_shader_src =
 	"attribute vec2 a_coords;"
 	"attribute vec3 a_color;"
@@ -176,7 +178,7 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 
 	arena->tick_ms = 17;
 	arena->tick = 0;
-	text_stream_create(&arena->tick_counter, 20);
+	text_stream_create(&arena->tick_counter, MAX_RENDER_TEXT_LENGTH);
 	arena->has_won = false;
 }
 
