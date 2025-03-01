@@ -145,4 +145,26 @@ int main() {
             assert(str.size() == i);
         }
     }
+    // test to_string 0
+    {
+        std::string str = std::to_string(0);
+        assert(str.size() == 1);
+        assert(str[0] == '0');
+    }
+    // test string size with to_string single digit
+    {
+        std::string str;
+        for(int i = 0; i < 10; ++i) {
+            str = std::to_string(i);
+            assert(str.size() == 1);
+        }
+    }
+    // test string size with to_string single digit negative
+    {
+        std::string str;
+        for(int i = -9; i < 0; ++i) {
+            str = std::to_string(i);
+            assert(str.size() == 2);
+        }
+    }
 }

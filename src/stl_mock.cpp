@@ -44,6 +44,7 @@ std::string& std::string::operator=(const char* other) {
 }
 
 std::string std::to_string(int64_t value) {
+    if(value == 0)return "0";
     bool neg = value < 0;
     if(neg)value = -value;
     char buffer[21] = {0};
@@ -70,4 +71,8 @@ char* std::string::c_str() {
 
 size_t std::string::size() const {
     return _length;
+}
+
+char& std::string::operator[](size_t pos) {
+    return _data[pos];
 }

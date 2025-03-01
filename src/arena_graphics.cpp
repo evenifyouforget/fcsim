@@ -54,6 +54,32 @@ struct block_graphics {
     void push_all_layers();
 };
 
+struct ui_button_id {
+    int group, index;
+    bool operator==(const ui_button_id& other) {
+        return group == other.group && index == other.index;
+    }
+};
+
+struct ui_button_text {
+    std::string text;
+    float scale = FONT_SCALE_DEFAULT;
+    float relative_x = 0, relative_y = 0, align_x = 0.5f, align_y = 0.5f;
+};
+
+struct ui_button_single {
+    ui_button_id id = {0, 0};
+    float x = 0, y = 0, w = 0, h = 0;
+    int z_offset = 0;
+    bool enabled = true, clickable = true, highlighted = false;
+    std::vector<ui_button_text> texts;
+};
+
+struct ui_button_collection {
+    std::vector<ui_button_single> buttons;
+    std::vector<area> buttons_buffer;
+};
+
 constexpr float lerp_exact(float a, float b, float t) {
   // Exact, monotonic, bounded, determinate, and (for a=b=0) consistent:
   if(a<=0 && b>=0 || a>=0 && b<=0) return t*b + (1-t)*a;
@@ -374,6 +400,21 @@ static void block_graphics_add_block(struct block_graphics *graphics,
     }
 }
 
+void block_graphics_push_and_bind(block_graphics* graphics) {
+    // layers are ready
+    graphics->push_all_layers();
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, graphics->_index_buffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, graphics->_indices.size() * sizeof(uint16_t), &(graphics->_indices[0]),
+		     GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, graphics->_coord_buffer);
+	glBufferData(GL_ARRAY_BUFFER, graphics->_coords.size() * sizeof(float), &(graphics->_coords[0]), GL_DYNAMIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, graphics->_color_buffer);
+	glBufferData(GL_ARRAY_BUFFER, graphics->_colors.size() * sizeof(float), &(graphics->_colors[0]), GL_STATIC_DRAW);
+}
+
 void block_graphics_reset(arena* arena, struct design *design)
 {
     block_graphics* graphics = (block_graphics*)arena->block_graphics_v2;
@@ -391,31 +432,27 @@ void block_graphics_reset(arena* arena, struct design *design)
 
 	for (block = design->player_blocks.head; block; block = block->next)
 		block_graphics_add_block(graphics, block);
-
-    // layers are ready
-    graphics->push_all_layers();
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, graphics->_index_buffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, graphics->_indices.size() * sizeof(uint16_t), &(graphics->_indices[0]),
-		     GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, graphics->_coord_buffer);
-	glBufferData(GL_ARRAY_BUFFER, graphics->_coords.size() * sizeof(float), &(graphics->_coords[0]), GL_DYNAMIC_DRAW);
-
-	glBindBuffer(GL_ARRAY_BUFFER, graphics->_color_buffer);
-	glBufferData(GL_ARRAY_BUFFER, graphics->_colors.size() * sizeof(float), &(graphics->_colors[0]), GL_STATIC_DRAW);
 }
 
-void block_graphics_draw(struct block_graphics *graphics, struct view *view)
+void block_graphics_draw(struct block_graphics *graphics, struct view *view, bool use_world_transform=true)
 {
+    block_graphics_push_and_bind(graphics);
+
 	glUseProgram(block_program);
 
-	glUniform2f(block_program_scale_uniform,
-		     1.0f / (view->width * view->scale),
-		    -1.0f / (view->height * view->scale));
-	glUniform2f(block_program_shift_uniform,
-		    -view->x / (view->width * view->scale),
-		     view->y / (view->height * view->scale));
+    if(use_world_transform) {
+        glUniform2f(block_program_scale_uniform,
+                1.0f / (view->width * view->scale),
+                -1.0f / (view->height * view->scale));
+        glUniform2f(block_program_shift_uniform,
+                -view->x / (view->width * view->scale),
+                view->y / (view->height * view->scale));
+    } else {
+        glUniform2f(block_program_scale_uniform,
+                2.0f / view->width,
+                2.0f / view->height);
+        glUniform2f(block_program_shift_uniform, -1, -1);
+    }
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -434,36 +471,227 @@ void block_graphics_draw(struct block_graphics *graphics, struct view *view)
 	glDisableVertexAttribArray(1);
 }
 
-void draw_text_default(arena* arena, std::string text, float x, float y, float scale=FONT_SCALE_DEFAULT) {
+void on_button_clicked(arena* arena, ui_button_single& button) {
+    if(button.id == ui_button_id{0, 0}) {
+        arena->ui_toolbar_opened = true;
+    }
+    if(button.id == ui_button_id{1, 1}) {
+        arena->ui_toolbar_opened = false;
+    }
+    if(button.id == ui_button_id{1, 2}) {
+        arena->tool_hidden = TOOL_CW_WHEEL;
+        update_tool(arena);
+    }
+    if(button.id == ui_button_id{1, 3}) {
+        arena->tool_hidden = TOOL_CCW_WHEEL;
+        update_tool(arena);
+    }
+    if(button.id == ui_button_id{1, 4}) {
+        arena->tool_hidden = TOOL_WHEEL;
+        update_tool(arena);
+    }
+    if(button.id == ui_button_id{1, 5}) {
+        arena->tool_hidden = TOOL_ROD;
+        update_tool(arena);
+    }
+    if(button.id == ui_button_id{1, 6}) {
+        arena->tool_hidden = TOOL_SOLID_ROD;
+        update_tool(arena);
+    }
+    if(button.id == ui_button_id{1, 7}) {
+        arena->tool_hidden = TOOL_MOVE;
+        update_tool(arena);
+    }
+    if(button.id == ui_button_id{1, 8}) {
+        arena->tool_hidden = TOOL_DELETE;
+        update_tool(arena);
+    }
+    if(button.id == ui_button_id{2, 0}) {
+        start_stop(arena);
+    }
+}
+
+void regenerate_ui_buttons(arena* arena) {
+    ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
+    all_buttons->buttons.clear();
+
+    float vw = arena->view.width;
+    float vh = arena->view.height;
+
+    {
+        ui_button_single button{{0, 0}, 75, vh, 30, 30};
+        button.enabled = !arena->ui_toolbar_opened;
+        button.texts.push_back(ui_button_text{"v", 2});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{1, 0}, 120 + 55 * 3, vh, 60 + 55 * 6 + 8, 128};
+        button.enabled = arena->ui_toolbar_opened;
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{1, 1}, 75, vh, 30, 128, 2};
+        button.enabled = arena->ui_toolbar_opened;
+        button.texts.push_back(ui_button_text{"^", 2, 0, -30});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{1, 2}, 120, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_toolbar_opened;
+        button.texts.push_back(ui_button_text{"W", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"CW Wheel", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{1, 3}, 120 + 55, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_toolbar_opened;
+        button.texts.push_back(ui_button_text{"C", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"CCW Wheel", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{1, 4}, 120 + 55 * 2, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_toolbar_opened;
+        button.texts.push_back(ui_button_text{"U", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"Wheel", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{1, 5}, 120 + 55 * 3, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_toolbar_opened;
+        button.texts.push_back(ui_button_text{"R", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"Water", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{1, 6}, 120 + 55 * 4, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_toolbar_opened;
+        button.texts.push_back(ui_button_text{"S", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"Wood", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{1, 7}, 120 + 55 * 5, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_toolbar_opened;
+        button.texts.push_back(ui_button_text{"M", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"Move", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{1, 8}, 120 + 55 * 6, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_toolbar_opened;
+        button.texts.push_back(ui_button_text{"D", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"Delete", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{2, 0}, 30, vh - 30, 50, 50};
+        button.texts.push_back(ui_button_text{"Space", 1.5, 0, 8});
+        button.texts.push_back(ui_button_text{is_running(arena)?"Stop":"Start", 1, 0, -8});
+        all_buttons->buttons.push_back(button);
+    }
+}
+
+// Draw text, and return the x where the text ends
+float draw_text_default(arena* arena, std::string text, float x, float y, float scale=FONT_SCALE_DEFAULT) {
     text_set_scale(scale);
     text_stream_update(&arena->tick_counter, text.c_str());
 	text_stream_render(&arena->tick_counter,
 			arena->view.width, arena->view.height, (int)x, (int)y);
+    return x + FONT_X_INCREMENT * scale * text.size();
 }
 
 void draw_tick_counter(struct arena *arena)
 {
-    draw_text_default(arena, std::to_string(arena->tick), 10, 10);
+    float x = 10;
+    x = draw_text_default(arena, std::to_string(arena->tick), x, 10);
+    x = draw_text_default(arena, "ticks", x, 10, 1);
+    if(arena->has_won) {
+        x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
+        x = draw_text_default(arena, std::to_string(arena->tick_solve), x, 10);
+        x = draw_text_default(arena, "at solve", x, 10, 1);
+    }
+}
+
+void draw_ui(arena* arena) {
+    block_graphics* graphics = (block_graphics*)arena->block_graphics_v2b;
+    ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
+    graphics->clear();
+
+    for(auto it = all_buttons->buttons.begin(); it != all_buttons->buttons.end(); ++it) {
+        if(!it->enabled)continue;
+        shell ishell{SHELL_RECT, {}, it->x, it->y, 0};
+        ishell.rect = {it->w, it->h};
+        block_graphics_add_rect(graphics, ishell, FCSIM_UI_BUTTON, it->z_offset, it->highlighted?color{0.25,1,1,1}:color{0,0,0,0});
+    }
+
+	block_graphics_draw(graphics, &arena->view, false);
+
+	draw_tick_counter(arena);
+
+    for(auto it = all_buttons->buttons.begin(); it != all_buttons->buttons.end(); ++it) {
+        if(!it->enabled)continue;
+        for(auto jt = it->texts.begin(); jt != it->texts.end(); ++jt) {
+            float predict_w = FONT_X_INCREMENT * jt->scale * jt->text.size();
+            float predict_h = FONT_Y_INCREMENT * jt->scale;
+            float x = it->x + jt->relative_x - jt->align_x * predict_w;
+            float y = it->y + jt->relative_y - jt->align_y * predict_h;
+            draw_text_default(arena, jt->text, x, y, jt->scale);
+        }
+    }
 }
 
 void arena_draw(struct arena *arena)
 {
 	color sky_color = get_color_by_type(FCSIM_SKY, 1);
-	glClearColor(sky_color.r, sky_color.g, sky_color.b, 1.0f);
+	glClearColor(sky_color.r, sky_color.g, sky_color.b, sky_color.a);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	block_graphics_reset(arena, &arena->design);
 	block_graphics_draw((block_graphics*)arena->block_graphics_v2, &arena->view);
 
-	draw_tick_counter(arena);
+    regenerate_ui_buttons(arena);
+    draw_ui(arena);
 }
 
-extern "C" void block_graphics_init(struct arena *ar)
-{
-    ar->block_graphics_v2 = _new<block_graphics>();
-    block_graphics* graphics = (block_graphics*)ar->block_graphics_v2;
+void block_graphics_init_single(void*& _graphics) {
+    block_graphics*& graphics = *(block_graphics**)&_graphics;
+    graphics = _new<block_graphics>();
 
 	glGenBuffers(1, &graphics->_index_buffer);
 	glGenBuffers(1, &graphics->_coord_buffer);
 	glGenBuffers(1, &graphics->_color_buffer);
+}
+
+extern "C" void block_graphics_init(struct arena *ar)
+{
+    block_graphics_init_single(ar->block_graphics_v2);
+    block_graphics_init_single(ar->block_graphics_v2b);
+    ar->ui_buttons = new ui_button_collection();
+    regenerate_ui_buttons(ar);
+    ar->ui_toolbar_opened = false;
+}
+
+extern "C" bool arena_mouse_click_button(struct arena *arena) {
+    // O(NK)
+    // odd z indices won't be used, but we check them anyway
+    ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
+    int max_z_offset = 0;
+    for(auto it = all_buttons->buttons.begin(); it != all_buttons->buttons.end(); ++it) {
+        max_z_offset = std::max(max_z_offset, it->z_offset);
+    }
+    for(int z_offset = max_z_offset; z_offset >= 0; --z_offset) {
+        for(auto it = all_buttons->buttons.begin(); it != all_buttons->buttons.end(); ++it) {
+            if(it->z_offset != z_offset)continue;
+            float cx = arena->cursor_x;
+            float cy = arena->view.height - arena->cursor_y;
+            if(it->enabled && it->clickable
+            && it->x - it->w * 0.5 <= cx && cx <= it->x + it->w * 0.5
+            && it->y - it->h * 0.5 <= cy && cy <= it->y + it->h * 0.5) {
+                on_button_clicked(arena, *it);
+                return true;
+            }
+        }
+    }
+    return false;
 }
