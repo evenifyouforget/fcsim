@@ -434,7 +434,8 @@ void block_graphics_draw(struct block_graphics *graphics, struct view *view)
 	glDisableVertexAttribArray(1);
 }
 
-void draw_text_default(arena* arena, std::string text, float x, float y) {
+void draw_text_default(arena* arena, std::string text, float x, float y, float scale=FONT_SCALE_DEFAULT) {
+    text_set_scale(scale);
     text_stream_update(&arena->tick_counter, text.c_str());
 	text_stream_render(&arena->tick_counter,
 			arena->view.width, arena->view.height, (int)x, (int)y);

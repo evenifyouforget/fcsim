@@ -122,19 +122,24 @@ bool text_compile_shaders(void)
 	return true;
 } 
 
+static float _text_scale = FONT_SCALE_DEFAULT;
+
+void text_set_scale(float scale) {
+	_text_scale = scale;
+}
+
 static void make_letter_verts(float *data, uint8_t c, int idx)
 {
 	static const int xi[6] = { 0, 1, 1, 0, 1, 0 };
 	static const int yi[6] = { 0, 0, 1, 0, 1, 1 };
-	static const float scale = 2.0f;
 	float x[2], y[2], s[2], t[2];
 	int i;
 
-	x[0] = scale * idx * 6.0f;
-	x[1] = x[0] + scale * 5.0f;
+	x[0] = _text_scale * idx * FONT_X_INCREMENT;
+	x[1] = x[0] + _text_scale * 5.0f;
 
 	y[0] = 0.0f;
-	y[1] = scale * 8.0f;
+	y[1] = _text_scale * 8.0f;
 
 	s[0] = (c & 0xf) * 0.0625f;
 	s[1] = s[0] + (5.0f / 128.0f);
