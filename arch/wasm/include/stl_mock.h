@@ -132,6 +132,7 @@ struct string {
     string& operator=(const string& other);
     string& operator=(const char* other);
     size_t size() const;
+    char& operator[](size_t pos);
 };
 
 string to_string(int64_t);

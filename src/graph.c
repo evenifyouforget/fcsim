@@ -124,6 +124,7 @@ uint32_t piece_color_table[FCSIM_NUM_TYPES][2] = {
 	{0xff7878ee, 0xffbedcf8},
 	{0xffbc6667, 0xfff29291},
 	{0x00000000, 0xff87bdf1},
+	{0xff404886, 0xff3a3b54},
 };
 
 void get_color_by_type(int type_id, int slot, struct color * c) {

@@ -247,10 +247,10 @@ void tick_func(void *arg)
 	struct arena *arena = arg;
 
 	step(arena->world);
-	if (!arena->has_won) {
-		arena->tick++;
-		if (goal_blocks_inside_goal_area(&arena->design))
-			arena->has_won = true;
+	arena->tick++;
+	if (!arena->has_won && goal_blocks_inside_goal_area(&arena->design)) {
+		arena->has_won = true;
+		arena->tick_solve = arena->tick;
 	}
 }
 
@@ -283,6 +283,15 @@ void change_speed(struct arena *arena, int ms)
 
 void mouse_up_new_block(struct arena *arena);
 void mouse_up_move(struct arena *arena);
+
+bool is_running(struct arena *arena) {
+	switch (arena->state) {
+	case STATE_RUNNING:
+	case STATE_RUNNING_PAN:
+	return true;
+	}
+	return false;
+}
 
 void start_stop(struct arena *arena)
 {
@@ -1478,6 +1487,8 @@ void arena_mouse_button_down_event(struct arena *arena, int button)
 		return;
 
 	pixel_to_world(&arena->view, x, y, &x_world, &y_world);
+
+	if(arena_mouse_click_button(arena))return;
 
 	switch (arena->state) {
 	case STATE_NORMAL:
