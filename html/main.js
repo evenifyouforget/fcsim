@@ -234,6 +234,10 @@ let gl_env = {
 		return setInterval(inst.exports.call, delay, func, arg);
 	},
 
+	time_precise_ms() {
+		return performance.now();
+	},
+
 	clear_interval(id) {
 		clearInterval(id);
 	},
