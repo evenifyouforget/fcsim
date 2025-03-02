@@ -511,7 +511,13 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
         start_stop(arena);
     }
     if(button.id == ui_button_id{2, 1}) {
-        arena->enable_tick = !arena->enable_tick;
+        arena->single_ticks_remaining = arena->single_ticks_remaining==-1?0:-1;
+    }
+    if(button.id == ui_button_id{2, 2}) {
+        arena->autostop_on_solve = !arena->autostop_on_solve;
+    }
+    if(button.id == ui_button_id{2, 3}) {
+        arena->single_ticks_remaining = 1;
     }
 }
 
@@ -595,8 +601,18 @@ void regenerate_ui_buttons(arena* arena) {
         all_buttons->buttons.push_back(button);
     }
     {
-        ui_button_single button{{2, 1}, 30, vh - 55 - 10 + 4, 50, 20};
-        button.texts.push_back(ui_button_text{arena->enable_tick?"Pause":"Resume", 1});
+        ui_button_single button{{2, 1}, 30, vh - 55 - 20 * 0.5f + 4, 50, 20};
+        button.texts.push_back(ui_button_text{arena->single_ticks_remaining==-1?"Pause":"Resume", 1});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{2, 2}, 30, vh - 55 - 20 * 1.5f + 4, 50, 20};
+        button.texts.push_back(ui_button_text{arena->autostop_on_solve?"Cancel":"On solve", 1});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{2, 3}, 30, vh - 55 - 20 * 2.5f + 4, 50, 20};
+        button.texts.push_back(ui_button_text{"Step", 1});
         all_buttons->buttons.push_back(button);
     }
 }
@@ -679,7 +695,8 @@ extern "C" void block_graphics_init(struct arena *ar)
     ar->ui_buttons = _new<ui_button_collection>();
     regenerate_ui_buttons(ar);
     ar->ui_toolbar_opened = false;
-    ar->enable_tick = true;
+    ar->single_ticks_remaining = -1;
+    ar->autostop_on_solve = false;
 }
 
 extern "C" bool arena_mouse_click_button(struct arena *arena) {
