@@ -52,7 +52,7 @@ The mock STL comes with basic tests.
 You can build the mock STL tests with:
 
 ```sh
-ninja stl_test
+ninja stl test
 ```
 
 Which will produce the executable `stl_test`.
