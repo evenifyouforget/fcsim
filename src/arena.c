@@ -245,7 +245,6 @@ static bool goal_blocks_inside_goal_area(struct design *design)
 void tick_func(void *arg)
 {
 	struct arena *arena = arg;
-	if(!arena->enable_tick)return;
 
 	step(arena->world);
 	arena->tick++;
