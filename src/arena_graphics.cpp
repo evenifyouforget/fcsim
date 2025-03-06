@@ -78,7 +78,6 @@ struct ui_button_single {
 
 struct ui_button_collection {
     std::vector<ui_button_single> buttons;
-    std::vector<area> buttons_buffer;
 };
 
 constexpr float lerp_exact(float a, float b, float t) {
@@ -527,13 +526,13 @@ void regenerate_ui_buttons(arena* arena) {
 
     float vw = arena->view.width;
     float vh = arena->view.height;
-
     {
         ui_button_single button{{0, 0}, 75, vh, 30, 30};
         button.enabled = !arena->ui_toolbar_opened;
-        button.texts.push_back(ui_button_text{"v", 2});
+        //button.texts.push_back(ui_button_text{"v", 2});
         all_buttons->buttons.push_back(button);
     }
+    /*
     {
         ui_button_single button{{1, 0}, 120 + 55 * 3, vh, 60 + 55 * 6 + 8, 128};
         button.enabled = arena->ui_toolbar_opened;
@@ -615,6 +614,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.texts.push_back(ui_button_text{"Step", 1});
         all_buttons->buttons.push_back(button);
     }
+    */
 }
 
 // Draw text, and return the x where the text ends
@@ -643,13 +643,21 @@ void draw_ui(arena* arena) {
     ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
     graphics->clear();
 
+    shell ishell{SHELL_RECT, {}, 0, 0, 0};
+    ishell.rect = {99, 99};
+    block_graphics_add_rect(graphics, ishell, FCSIM_UI_BUTTON, 0, color{0,0,0,0});
+    
+
+    for(auto it = all_buttons->buttons.begin(); it != all_buttons->buttons.end(); ++it) {
+    }
+
+/*
     for(auto it = all_buttons->buttons.begin(); it != all_buttons->buttons.end(); ++it) {
         if(!it->enabled)continue;
         shell ishell{SHELL_RECT, {}, it->x, it->y, 0};
         ishell.rect = {it->w, it->h};
         block_graphics_add_rect(graphics, ishell, FCSIM_UI_BUTTON, it->z_offset, it->highlighted?color{0.25,1,1,1}:color{0,0,0,0});
     }
-
 	block_graphics_draw(graphics, &arena->view, false);
 
 	draw_tick_counter(arena);
@@ -664,19 +672,95 @@ void draw_ui(arena* arena) {
             draw_text_default(arena, jt->text, x, y, jt->scale);
         }
     }
+    */
 }
 
 void arena_draw(struct arena *arena)
 {
-	color sky_color = get_color_by_type(FCSIM_SKY, 1);
-	glClearColor(sky_color.r, sky_color.g, sky_color.b, sky_color.a);
-	glClear(GL_COLOR_BUFFER_BIT);
+    // ok
+	//color sky_color = get_color_by_type(FCSIM_SKY, 1);
+	//glClearColor(sky_color.r, sky_color.g, sky_color.b, sky_color.a);
+	//glClear(GL_COLOR_BUFFER_BIT);
 
-	block_graphics_reset(arena, &arena->design);
-	block_graphics_draw((block_graphics*)arena->block_graphics_v2, &arena->view);
+    // ok
+	//block_graphics_reset(arena, &arena->design);
+	//block_graphics_draw((block_graphics*)arena->block_graphics_v2, &arena->view);
 
-    regenerate_ui_buttons(arena);
-    draw_ui(arena);
+    /*
+    for(int i = 0; i < 10000; ++i) {
+    //regenerate_ui_buttons(arena);
+    ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
+    all_buttons->buttons.clear();
+
+    //float vw = arena->view.width;
+    //float vh = arena->view.height;
+    {
+        ui_button_single button{{0, 0}, 75, 0, 30, 30};
+        //button.enabled = !arena->ui_toolbar_opened;
+        //button.texts.push_back(ui_button_text{"v", 2});
+        all_buttons->buttons.push_back(button);
+    }
+    //draw_ui(arena);
+    block_graphics* graphics = (block_graphics*)arena->block_graphics_v2b;
+    //ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
+    graphics->clear();
+
+    shell ishell{SHELL_RECT, {}, 0, 0, 0};
+    ishell.rect = {99, 99};
+    block_graphics_add_rect(graphics, ishell, FCSIM_UI_BUTTON, 0, color{0,0,0,0});
+    
+
+    for(auto it = all_buttons->buttons.begin(); it != all_buttons->buttons.end(); ++it) {
+    }
+
+    }
+    */
+    
+    /*
+    for(int i = 0; i < 100; ++i) {
+        ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
+        all_buttons->buttons.clear();
+        all_buttons->buttons.push_back(ui_button_single());
+        //ui_button_single button{{0, 0}, 75, 0, 30, 30};
+        //all_buttons->buttons.push_back(button);
+        //for(auto it = all_buttons->buttons.begin(); it != all_buttons->buttons.end(); ++it) {}
+
+        block_graphics* graphics = (block_graphics*)arena->block_graphics_v2b;
+        graphics->clear();
+        block_graphics_add_area(graphics, area(), FCSIM_UI_BUTTON);
+        //shell ishell{SHELL_RECT, {}, 0, 0, 0};
+        //ishell.rect = {99, 99};
+        //block_graphics_add_rect(graphics, ishell, FCSIM_UI_BUTTON, 0, color{0,0,0,0});
+    }
+    */
+
+   /*
+    for(int i = 0; i < 100; ++i) {
+        ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
+        all_buttons->buttons.clear();
+        all_buttons->buttons.push_back(ui_button_single());
+        //all_buttons->buttons.clear();
+
+        block_graphics* graphics = (block_graphics*)arena->block_graphics_v2b;
+        graphics->clear();
+        graphics->push_vertex(0, 0, color(), 0);
+        //block_graphics_add_area(graphics, area(), FCSIM_UI_BUTTON);
+    }
+    */
+
+    for(int i = 0; i < 100; ++i) {
+        ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
+        all_buttons->buttons.clear();
+        all_buttons->buttons.push_back(ui_button_single());
+        //all_buttons->buttons.clear();
+
+        block_graphics* graphics = (block_graphics*)arena->block_graphics_v2b;
+        graphics->clear();
+        graphics->push_vertex(0, 0, color(), 0);
+
+    }
+    
+
 }
 
 void block_graphics_init_single(void*& _graphics) {

@@ -245,6 +245,7 @@ static bool goal_blocks_inside_goal_area(struct design *design)
 
 void tick_func(void *arg)
 {
+	/*
 	struct arena *arena = arg;
 
 	double time_start = time_precise_ms();
@@ -264,6 +265,7 @@ void tick_func(void *arg)
 		double time_end = time_precise_ms();
 		if(time_end - time_start >= arena->tick_ms)break;
 	}
+	*/
 }
 
 void start(struct arena *arena)
