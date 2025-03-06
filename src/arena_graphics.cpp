@@ -434,15 +434,13 @@ void block_graphics_draw(struct block_graphics *graphics, struct view *view)
 	glDisableVertexAttribArray(1);
 }
 
-void draw_text_default(arena* arena, std::string text, float x, float y) {
-    text_stream_update(&arena->tick_counter, text.c_str());
-	text_stream_render(&arena->tick_counter,
-			arena->view.width, arena->view.height, (int)x, (int)y);
-}
-
-void draw_tick_counter(struct arena *arena)
+static void draw_tick_counter(struct arena *arena)
 {
-    draw_text_default(arena, std::to_string(arena->tick), 10, 10);
+    std::string buf = std::to_string(arena->tick);
+
+	text_stream_update(&arena->tick_counter, buf.c_str());
+	text_stream_render(&arena->tick_counter,
+			arena->view.width, arena->view.height, 10, 10);
 }
 
 void arena_draw(struct arena *arena)

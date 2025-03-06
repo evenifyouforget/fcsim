@@ -127,9 +127,4 @@ int main() {
         }
         assert(vec[i][0] == 0);
     }
-    // test string assign by string literal
-    {
-        std::string str;
-        str = "Hello world";
-    }
 }

@@ -29,14 +29,6 @@ std::string& std::string::operator=(const std::string& other) {
     return *this;
 }
 
-std::string& std::string::operator=(const char* other) {
-    _data.clear();
-    for(_length = 0; other[_length]; ++_length) {
-        _data.push_back(other[_length]);
-    }
-    return *this;
-}
-
 std::string std::to_string(int64_t value) {
     bool neg = value < 0;
     if(neg)value = -value;
