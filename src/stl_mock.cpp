@@ -14,12 +14,6 @@ std::string::string(std::string&& other) {
     _length = other._length;
 }
 
-std::string::string(const char* other) {
-    for(_length = 0; other[_length]; ++_length) {
-        _data.push_back(other[_length]);
-    }
-}
-
 void std::string::append(char c) {
     if(_data.size() == _length) {
         _data.push_back(c);
@@ -66,8 +60,4 @@ char* std::string::c_str() {
     }
     _data[_length] = (char)0;
     return &(_data[0]);
-}
-
-size_t std::string::size() const {
-    return _length;
 }

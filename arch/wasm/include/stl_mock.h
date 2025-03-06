@@ -126,12 +126,10 @@ struct string {
     string();
     string(const string&);
     string(string&&);
-    string(const char*);
     char* c_str();
     void append(char);
     string& operator=(const string& other);
     string& operator=(const char* other);
-    size_t size() const;
 };
 
 string to_string(int64_t);
