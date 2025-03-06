@@ -5,6 +5,8 @@
 
 // no destruct
 
+#define __wasm__
+
 template <typename T> struct _nodestruct {
     union {
         T value;
@@ -14,6 +16,8 @@ template <typename T> struct _nodestruct {
 };
 
 // new interface functions
+
+extern "C" void *memcpy(void *dest, const void *src, size_t n);
 
 template <typename T>
 void _new(T* addr) {

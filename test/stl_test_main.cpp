@@ -341,3 +341,12 @@ int main() {
         }
     }
 }
+
+
+extern "C" void *memcpy(void *dest, const void *src, size_t n) {
+    char* idst = (char*)dest;
+    char* isrc = (char*)src;
+    for(size_t i = 0; i < n; ++i) {
+        idst[i] = isrc[i];
+    }
+}
