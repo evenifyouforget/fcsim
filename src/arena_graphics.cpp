@@ -675,7 +675,7 @@ extern "C" void block_graphics_init(struct arena *ar)
 {
     block_graphics_init_single(ar->block_graphics_v2);
     block_graphics_init_single(ar->block_graphics_v2b);
-    ar->ui_buttons = _new<ui_button_collection>();
+    ar->ui_buttons = new ui_button_collection();
     regenerate_ui_buttons(ar);
     ar->ui_toolbar_opened = false;
     ar->enable_tick = true;
