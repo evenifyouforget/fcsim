@@ -246,20 +246,15 @@ static bool goal_blocks_inside_goal_area(struct design *design)
 void tick_func(void *arg)
 {
 	struct arena *arena = arg;
+	if(!arena->enable_tick)return;
 
 	double time_start = time_precise_ms();
-	for(int i = 0; arena->single_ticks_remaining != 0 && i < arena->tick_multiply; ++i) {
-		if(arena->single_ticks_remaining > 0)arena->single_ticks_remaining--;
+	for(int i = 0; i < arena->tick_multiply; ++i) {
 		step(arena->world);
 		arena->tick++;
 		if (!arena->has_won && goal_blocks_inside_goal_area(&arena->design)) {
 			arena->has_won = true;
 			arena->tick_solve = arena->tick;
-			if(arena->autostop_on_solve) {
-				arena->autostop_on_solve = false;
-				arena->single_ticks_remaining = 0;
-				break;
-			}
 		}
 		double time_end = time_precise_ms();
 		if(time_end - time_start >= arena->tick_ms)break;
