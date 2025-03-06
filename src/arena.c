@@ -14,6 +14,10 @@
 #include "arena.h"
 #include "graph.h"
 
+void b2PolyShape_ctor(b2PolyShape *polyShape,
+			     const b2ShapeDef* def, b2Body* body,
+			     const b2Vec2 newOrigin);
+
 const char *block_vertex_shader_src =
 	"attribute vec2 a_coords;"
 	"attribute vec3 a_color;"
