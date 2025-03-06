@@ -31,7 +31,6 @@ obj/linux/graph.o $
 obj/linux/main.o $
 obj/linux/str.o $
 obj/linux/text.o $
-obj/linux/timing.o $
 obj/linux/xml.o $
 obj/linux/box2d/b2BlockAllocator.o $
 obj/linux/box2d/b2Body.o $
@@ -66,7 +65,6 @@ build obj/linux/graph.o: linux-cc src/graph.c
 build obj/linux/main.o: linux-cxx src/main.cpp
 build obj/linux/str.o: linux-cc src/str.c
 build obj/linux/text.o: linux-cc src/text.c
-build obj/linux/timing.o: linux-cxx src/timing.cpp
 build obj/linux/xml.o: linux-cc src/xml.c
 build obj/linux/box2d/b2BlockAllocator.o: linux-cc src/box2d/b2BlockAllocator.c
 build obj/linux/box2d/b2Body.o: linux-cxx src/box2d/b2Body.cpp
