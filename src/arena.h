@@ -78,20 +78,12 @@ struct arena {
 
 	struct block *new_block;
 
-	// for game graphics
-	void* block_graphics_v2; // actual type: block_graphics*
-	// for ui graphics
-	void* block_graphics_v2b; // actual type: block_graphics*
+	void* block_graphics_v2;
 
 	uint64_t tick;
-	uint64_t tick_solve;
 	// this text object has been repurposed for all text rendering
 	struct text_stream tick_counter;
 	bool has_won;
-
-	// ui button templates
-	void* ui_buttons; // actual type: ui_button_collection*
-	bool ui_toolbar_opened;
 };
 
 bool arena_compile_shaders(void);
@@ -100,9 +92,6 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len);
 void arena_show(struct arena *arena);
 void arena_draw(struct arena *arena);
 
-// test if any buttons are clicked, return true if clicked
-bool arena_mouse_click_button(struct arena *arena);
-
 void arena_key_up_event(struct arena *arena, int key);
 void arena_key_down_event(struct arena *arena, int key);
 void arena_mouse_move_event(struct arena *arena, int x, int y);
@@ -110,10 +99,6 @@ void arena_scroll_event(struct arena *arena, int delta);
 void arena_mouse_button_up_event(struct arena *arena, int button);
 void arena_mouse_button_down_event(struct arena *arena, int button);
 void arena_size_event(struct arena *arena, float w, float h);
-
-void start_stop(struct arena *arena);
-bool is_running(struct arena *arena);
-void update_tool(struct arena *arena);
 
 extern GLuint block_program;
 extern GLuint block_program_coord_attrib;
