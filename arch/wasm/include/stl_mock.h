@@ -6,6 +6,10 @@
 #include "string.h"
 #include "stl_compat.h"
 
+#ifndef VECTOR_DEFAULT_CAPACITY
+#define VECTOR_DEFAULT_CAPACITY 8
+#endif
+
 // issues:
 // * wrong behaviour for address-sensitive types
 // * * new
@@ -38,7 +42,7 @@ struct vector {
     size_t _capacity;
     size_t _size;
     vector() {
-        _capacity = 8;
+        _capacity = VECTOR_DEFAULT_CAPACITY;
         _size = 0;
         _storage = (T*)malloc(_capacity * sizeof(T));
     }
