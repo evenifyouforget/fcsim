@@ -63,6 +63,12 @@ To see that the data structures are working correctly, you can use `valgrind` to
 valgrind ./stl_test
 ```
 
+## Memory
+
+The web build also uses a custom `malloc`.
+
+**If the game is crashing, try increasing `MALLOC_PAD_SPACE`.**
+
 # Performance
 
 fcsim promised to be fast. So how fast is it?
