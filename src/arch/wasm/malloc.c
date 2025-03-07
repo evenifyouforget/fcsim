@@ -15,13 +15,23 @@
 // so I set the pad space accordingly
 // and the game does not crash.
 // in the future, if the game is crashing, try setting the pad space higher.
+#ifndef MALLOC_PAD_SPACE
+#define MALLOC_PAD_SPACE 160000
+#endif
+#ifndef MALLOC_MIN_BLOCK
+#define MALLOC_MIN_BLOCK 4
+#endif
+#ifndef MALLOC_INITIAL_ROOT
+#define MALLOC_INITIAL_ROOT MALLOC_MIN_BLOCK
+#endif
+
 #define SIZE_SIZE_T 4
-const size_t __min_block_size = 1 << 4;
-const size_t __pad_space = 160000;
+const size_t __min_block_size = 1 << MALLOC_MIN_BLOCK;
+const size_t __pad_space = MALLOC_PAD_SPACE;
 
 extern unsigned char __heap_base;
 size_t __first_free = (size_t)&__heap_base;
-size_t __root_size = 1 << 8;
+size_t __root_size = 1 << MALLOC_INITIAL_ROOT;
 int __memory_status = 0;
 
 size_t memory_size(void) {
