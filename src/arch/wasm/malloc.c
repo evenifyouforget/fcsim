@@ -46,7 +46,8 @@ void _ensure_root_size(size_t total) {
   total += __pad_space;
   size_t size = memory_size()<<16;
   if (total > size) {
-    size_t retcode = memory_grow( (total>>16)-(size>>16)+1 );
+    // no checking return code. assume it succeeds :)
+    memory_grow( (total>>16)-(size>>16)+1 );
   }
 }
 
@@ -71,7 +72,7 @@ void _remove_block(size_t block) {
     }
   }
   // mark used
-  ((size_t*)block)[1] = NULL;
+  ((void**)block)[1] = NULL;
 }
 
 void _append_tail(size_t r) {
@@ -87,7 +88,7 @@ void _append_tail(size_t r) {
   _link_block(r, second_free);
 }
 
-size_t _malloc_search_block(size_t n) {
+void* _malloc_search_block(size_t n) {
   // search for suitable block
   size_t cur_block = __first_free;
   do{
@@ -108,7 +109,7 @@ size_t _malloc_search_block(size_t n) {
       _append_tail(sibling_block);
     }
     _remove_block(cur_block);
-    return cur_block + SIZE_SIZE_T * 3;
+    return (void*)(cur_block + SIZE_SIZE_T * 3);
   }while(cur_block != __first_free);
   // failed to find a block
   return NULL;
@@ -116,7 +117,7 @@ size_t _malloc_search_block(size_t n) {
 
 void* malloc(size_t n) {
   // word size assumptions
-  _Static_assert(sizeof(size_t) == SIZE_SIZE_T);
+  _Static_assert(sizeof(size_t) == SIZE_SIZE_T, "hardcoded value for sizeof(size_t) is incorrect");
   // 0 case
   if(n == 0)return NULL;
   // alignment
@@ -140,7 +141,7 @@ void* malloc(size_t n) {
     __root_size <<= 1;
   }
   // search for suitable block
-  size_t result = _malloc_search_block(n);
+  void* result = _malloc_search_block(n);
   if(result != NULL)return result;
   // memory available, but no blocks large enough: expand
   do {
@@ -164,7 +165,6 @@ void *calloc(size_t nmemb, size_t size)
 
 void free(void* p) {
   const size_t root = (size_t)&__heap_base;
-  size_t n;
   // null case
   if (p == NULL) return;
   size_t r=(size_t)p;
@@ -186,7 +186,7 @@ void free(void* p) {
       sibling_block = r - r_size;
     }
     size_t sibling_block_next = ((size_t*)sibling_block)[1];
-    if(sibling_block_next == NULL) {
+    if(sibling_block_next == (size_t)NULL) {
       // sibling is in use, can't merge further
       break;
     }
