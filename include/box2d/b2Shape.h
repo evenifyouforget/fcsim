@@ -158,21 +158,7 @@ extern "C" {
 
 void b2ShapeDef_ctor(b2ShapeDef *def);
 
-static void b2CircleDef_ctor(b2CircleDef *circleDef)
-{
-	b2ShapeDef_ctor(&circleDef->m_shapeDef);
-	circleDef->m_shapeDef.type = e_circleShape;
-	circleDef->radius = 1.0;
-}
-
 void b2BoxDef_ctor(b2BoxDef *boxDef);
-
-static void b2PolyDef_ctor(b2PolyDef *polyDef)
-{
-	b2ShapeDef_ctor(&polyDef->m_shapeDef);
-	polyDef->m_shapeDef.type = e_polyShape;
-	polyDef->vertexCount = 0;
-}
 
 void b2ShapeDef_ComputeMass(const b2ShapeDef *shapeDef, b2MassData* massData);
 

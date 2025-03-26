@@ -21,8 +21,8 @@
 
 #include <box2d/b2Math.h>
 
-class b2StackAllocator;
-class b2Contact;
+struct b2StackAllocator;
+struct b2Contact;
 struct b2Body;
 struct b2Joint;
 struct b2TimeStep;

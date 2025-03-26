@@ -28,11 +28,11 @@ struct b2NullContact
 	b2Contact contact;
 };
 
-static void b2NullContact_Evaluate(struct b2Contact *contact)
+static void b2NullContact_Evaluate(UNUSED struct b2Contact *contact)
 {
 }
 
-static b2Manifold* b2NullContact_GetManifolds(struct b2Contact *contact)
+static b2Manifold* b2NullContact_GetManifolds(UNUSED struct b2Contact *contact)
 {
 	return NULL;
 }

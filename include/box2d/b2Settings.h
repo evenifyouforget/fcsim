@@ -20,6 +20,7 @@
 #define B2_SETTINGS_H
 
 #include <stdbool.h>
+#include "unused.h"
 
 #define NOT_USED(x)
 #define b2Assert(A)

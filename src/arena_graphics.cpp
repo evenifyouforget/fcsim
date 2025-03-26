@@ -49,9 +49,9 @@ struct block_graphics {
 	int _vertex_cnt;
     // methods
     void clear();
-    void ensure_layer(int z_offset);
-    uint16_t push_vertex(float x, float y, color col, int z_offset);
-    void push_triangle(uint16_t v1, uint16_t v2, uint16_t v3, int z_offset);
+    void ensure_layer(z_offset_t z_offset);
+    uint16_t push_vertex(float x, float y, color col, z_offset_t z_offset);
+    void push_triangle(uint16_t v1, uint16_t v2, uint16_t v3, z_offset_t z_offset);
     void push_all_layers();
 };
 
@@ -71,9 +71,9 @@ struct ui_button_text {
 struct ui_button_single {
     ui_button_id id = {0, 0};
     float x = 0, y = 0, w = 0, h = 0;
-    int z_offset = 0;
+    z_offset_t z_offset = 0;
     bool enabled = true, clickable = true, highlighted = false;
-    std::vector<ui_button_text> texts;
+    std::vector<ui_button_text> texts = {};
 };
 
 struct ui_button_collection {
@@ -83,13 +83,13 @@ struct ui_button_collection {
 
 constexpr float lerp_exact(float a, float b, float t) {
   // Exact, monotonic, bounded, determinate, and (for a=b=0) consistent:
-  if(a<=0 && b>=0 || a>=0 && b<=0) return t*b + (1-t)*a;
+  if((a<=0 && b>=0) || (a>=0 && b<=0)) return t*b + (1-t)*a;
 
   if(t==1) return b;                        // exact
   // Exact at t=0, monotonic except near t=1,
   // bounded, determinate, and consistent:
   const float x = a + t*(b-a);
-  return t>1 == b>a ? std::max(b,x) : std::min(b,x);  // monotonic near t=1
+  return (t>1) == (b>a) ? std::max(b,x) : std::min(b,x);  // monotonic near t=1
 }
 
 color get_color_by_type(int type_id, int slot) {
@@ -121,13 +121,13 @@ uint16_t block_graphics_layer::push_vertex(float x, float y, color col) {
     return push_vertex(x, y, col.r, col.g, col.b);
 }
 
-void block_graphics::ensure_layer(int z_offset) {
+void block_graphics::ensure_layer(z_offset_t z_offset) {
     while(layers.size() <= z_offset) {
         layers.emplace_back();
     }
 }
 
-uint16_t block_graphics::push_vertex(float x, float y, color col, int z_offset) {
+uint16_t block_graphics::push_vertex(float x, float y, color col, z_offset_t z_offset) {
     ensure_layer(z_offset);
     return layers[z_offset].push_vertex(x, y, col);
 }
@@ -138,7 +138,7 @@ void block_graphics_layer::push_triangle(uint16_t v1, uint16_t v2, uint16_t v3) 
     indices.push_back(v3);
 }
 
-void block_graphics::push_triangle(uint16_t v1, uint16_t v2, uint16_t v3, int z_offset) {
+void block_graphics::push_triangle(uint16_t v1, uint16_t v2, uint16_t v3, z_offset_t z_offset) {
     ensure_layer(z_offset);
     return layers[z_offset].push_triangle(v1, v2, v3);
 }
@@ -242,7 +242,7 @@ std::vector<joint> generate_joints(block* block) {
 }
 
 static void block_graphics_add_rect_single(struct block_graphics *graphics,
-				    struct shell shell, color col, int z_offset)
+				    struct shell shell, color col, z_offset_t z_offset)
 {
 	float sina_half = sinf(shell.angle) / 2;
 	float cosa_half = cosf(shell.angle) / 2;
@@ -252,7 +252,6 @@ static void block_graphics_add_rect_single(struct block_graphics *graphics,
 	float ws = w * sina_half;
 	float hc = h * cosa_half;
 	float hs = h * sina_half;
-	int i;
 
     uint16_t v1 = graphics->push_vertex(shell.x + wc - hs, shell.y + ws + hc, col, z_offset);
     uint16_t v2 = graphics->push_vertex(shell.x - wc - hs, shell.y - ws + hc, col, z_offset);
@@ -264,7 +263,7 @@ static void block_graphics_add_rect_single(struct block_graphics *graphics,
 }
 
 static void block_graphics_add_rect(struct block_graphics *graphics,
-				    struct shell shell, int type_id, int z_offset, color overlay) {
+				    struct shell shell, int type_id, z_offset_t z_offset, color overlay) {
     if(graphics->simple_graphics) {
         block_graphics_add_rect_single(graphics, shell, alpha_over(get_color_by_type(type_id, 1), overlay), z_offset + 1);
         return;
@@ -306,7 +305,7 @@ static void block_graphics_add_area(struct block_graphics *graphics,
 }
 
 static void block_graphics_add_circ_single(struct block_graphics *graphics,
-				    struct shell shell, color col, int z_offset)
+				    struct shell shell, color col, z_offset_t z_offset)
 {
     const int circle_segments = 24;
     uint16_t v_last;
@@ -330,7 +329,7 @@ static void block_graphics_add_circ_single(struct block_graphics *graphics,
 static void block_graphics_add_circ(struct block_graphics *graphics,
 				    struct shell shell, int type_id, color overlay)
 {
-    const int z_offset = 2;
+    const z_offset_t z_offset = 2;
     if(graphics->simple_graphics) {
         block_graphics_add_circ_single(graphics, shell, alpha_over(get_color_by_type(type_id, 1), overlay), z_offset + 1);
         return;
@@ -348,7 +347,7 @@ static void block_graphics_add_circ(struct block_graphics *graphics,
 #define JOINT_OUTER_RADIUS 4
 
 void block_graphics_add_joint(block_graphics* graphics, joint joint, color overlay) {
-    const int z_offset = 4;
+    const z_offset_t z_offset = 4;
     color col = alpha_over(get_color_by_type(FCSIM_JOINT, 1), overlay);
 
     const int circle_segments = 24;
@@ -525,7 +524,7 @@ void regenerate_ui_buttons(arena* arena) {
     ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
     all_buttons->buttons.clear();
 
-    float vw = arena->view.width;
+    //float vw = arena->view.width;
     float vh = arena->view.height;
 
     {
@@ -703,11 +702,11 @@ extern "C" bool arena_mouse_click_button(struct arena *arena) {
     // O(NK)
     // odd z indices won't be used, but we check them anyway
     ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
-    int max_z_offset = 0;
+    z_offset_t max_z_offset = 0;
     for(auto it = all_buttons->buttons.begin(); it != all_buttons->buttons.end(); ++it) {
         max_z_offset = std::max(max_z_offset, it->z_offset);
     }
-    for(int z_offset = max_z_offset; z_offset >= 0; --z_offset) {
+    for(z_offset_t z_offset = max_z_offset; z_offset-- > 0;) {
         for(auto it = all_buttons->buttons.begin(); it != all_buttons->buttons.end(); ++it) {
             if(it->z_offset != z_offset)continue;
             float cx = arena->cursor_x;

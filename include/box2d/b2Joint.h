@@ -74,7 +74,7 @@ struct b2JointDef
 	bool collideConnected;
 };
 
-static void b2JointDef_ctor(b2JointDef *joint_def)
+inline void b2JointDef_ctor(b2JointDef *joint_def)
 {
 	joint_def->type = e_unknownJoint;
 	joint_def->userData = NULL;

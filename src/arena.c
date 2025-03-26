@@ -310,6 +310,7 @@ bool is_running(struct arena *arena) {
 	case STATE_RUNNING:
 	case STATE_RUNNING_PAN:
 	return true;
+	default:break;
 	}
 	return false;
 }

@@ -53,10 +53,8 @@ void b2CollideCircle(b2Manifold* manifold, b2CircleShape* circle1, b2CircleShape
 	manifold->points[0].position = circle2->m_shape.m_position - circle2->m_radius * manifold->normal;
 }
 
-void b2CollidePolyAndCircle(b2Manifold* manifold, const b2PolyShape* poly, const b2CircleShape* circle, bool conservative)
+void b2CollidePolyAndCircle(b2Manifold* manifold, const b2PolyShape* poly, const b2CircleShape* circle, UNUSED bool conservative)
 {
-	NOT_USED(conservative);
-
 	manifold->pointCount = 0;
 
 	// Compute circle position in the frame of the polygon.

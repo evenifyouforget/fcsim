@@ -219,7 +219,7 @@ extern "C" {
 void b2PolyShape_ctor(b2PolyShape *polyShape,
 			     const b2ShapeDef* def, b2Body* body,
 			     const b2Vec2 newOrigin);
-};
+}
 
 b2Shape* b2Shape_Create(const b2ShapeDef* def,
 			b2Body* body, b2Vec2 center)
@@ -240,6 +240,7 @@ b2Shape* b2Shape_Create(const b2ShapeDef* def,
 			b2PolyShape_ctor(mem, def, body, center);
 			return (b2Shape *)mem;
 		}
+	default:break;
 	}
 
 	return NULL;
@@ -261,6 +262,8 @@ void b2Shape_Destroy(b2Shape* shape)
 	case e_polyShape:
 		b2BlockAllocator_Free(&allocator, shape, sizeof(b2PolyShape));
 		break;
+
+	default:break;
 	}
 }
 
@@ -388,10 +391,9 @@ void b2CircleShape_ResetProxy(b2Shape *shape, b2BroadPhase* broadPhase)
 		return;
 	}
 
-	b2Proxy* proxy = b2BroadPhase_GetProxy(broadPhase, shape->m_proxyId);
+	b2BroadPhase_GetProxy(broadPhase, shape->m_proxyId);
 
 	b2BroadPhase_DestroyProxy(broadPhase, shape->m_proxyId);
-	proxy = NULL;
 
 	b2AABB aabb;
 	b2Vec2_Set(&aabb.minVertex, shape->m_position.x - circleShape->m_radius, shape->m_position.y - circleShape->m_radius);
@@ -623,10 +625,9 @@ void b2PolyShape_ResetProxy(b2Shape *shape, b2BroadPhase* broadPhase)
 		return;
 	}
 
-	b2Proxy* proxy = b2BroadPhase_GetProxy(broadPhase, shape->m_proxyId);
+	b2BroadPhase_GetProxy(broadPhase, shape->m_proxyId);
 
 	b2BroadPhase_DestroyProxy(broadPhase, shape->m_proxyId);
-	proxy = NULL;
 
 	b2Mat22 R = b2Mul(shape->m_R, polyShape->m_localOBB.R);
 	b2Mat22 absR = b2Abs(R);

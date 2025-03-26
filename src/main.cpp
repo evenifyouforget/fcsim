@@ -6,6 +6,7 @@ extern "C" {
 #include <GL/glx.h>
 #include <pthread.h>
 #include "poocs.h"
+#include "unused.h"
 
 void key_down(int key);
 void key_up(int key);
@@ -17,7 +18,7 @@ void resize(int w, int h);
 void init(char *xml, int len);
 void draw(void);
 
-void process_events(Display *dpy, Window win)
+void process_events(Display *dpy)
 {
 	XEvent xev;
 
@@ -75,7 +76,10 @@ void time_to_ts(struct timespec *spec, uint64_t *ts)
 	*ts = (uint64_t)spec->tv_sec * 1000 + spec->tv_nsec / 1000000;
 }
 
-void *func(void *arg)
+// we need to pass this function pointer to something,
+// which expects a specific signature.
+// there is no error.
+void *func(UNUSED void *arg)
 {
 	struct timespec this_time;
 	struct timespec next_time;
@@ -200,7 +204,7 @@ int main(void)
 		glXSwapBuffers(dpy, win);
 
 		pthread_mutex_lock(&mutex);
-		process_events(dpy, win);
+		process_events(dpy);
 		pthread_mutex_unlock(&mutex);
 	}
 }

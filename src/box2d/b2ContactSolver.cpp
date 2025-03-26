@@ -263,7 +263,7 @@ bool b2ContactSolver_SolvePositionConstraints(b2ContactSolver *solver, float64 b
 		float64 invMass2 = b2->m_invMass;
 		float64 invI2 = b2->m_invI;
 		b2Vec2 normal = c->normal;
-		b2Vec2 tangent = b2Cross(normal, 1.0);
+		//b2Vec2 tangent = b2Cross(normal, 1.0);
 
 		// Solver normal constraints
 		for (int32 j = 0; j < c->pointCount; ++j)

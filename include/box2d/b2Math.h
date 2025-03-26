@@ -28,7 +28,7 @@
 
 #define MIN_VALUE 5e-324
 
-inline bool b2IsValid(float64 x)
+inline bool b2IsValid(UNUSED float64 x)
 {
 #ifdef _MSC_VER
 	return _finite(x) != 0;
@@ -38,7 +38,7 @@ inline bool b2IsValid(float64 x)
 #endif
 }
 
-static void b2Vec2_SetZero(b2Vec2 *v)
+inline void b2Vec2_SetZero(b2Vec2 *v)
 {
 	v->x = 0.0;
 	v->y = 0.0;
@@ -50,7 +50,7 @@ static void b2Vec2_Set(b2Vec2 *v, float64 x_, float64 y_)
 	v->y = y_;
 }
 
-static b2Vec2 b2Vec2_Make(float64 x, float64 y)
+inline b2Vec2 b2Vec2_Make(float64 x, float64 y)
 {
 	b2Vec2 v;
 	b2Vec2_Set(&v, x, y);
@@ -62,7 +62,7 @@ static float64 b2Vec2_Length(b2Vec2 *v)
 	return sqrt(v->x * v->x + v->y * v->y);
 }
 
-static float64 b2Vec2_Normalize(b2Vec2 *v)
+inline float64 b2Vec2_Normalize(b2Vec2 *v)
 {
 	float64 length = b2Vec2_Length(v);
 	if (length < MIN_VALUE)
@@ -76,7 +76,7 @@ static float64 b2Vec2_Normalize(b2Vec2 *v)
 	return length;
 }
 
-static bool b2Vec2_IsValid(const b2Vec2 *v)
+inline bool b2Vec2_IsValid(const b2Vec2 *v)
 {
 	return b2IsValid(v->x) && b2IsValid(v->y);
 }
@@ -87,20 +87,20 @@ static void b2Mat22_Set(b2Mat22 *m, const b2Vec2& c1, const b2Vec2& c2)
 	m->col2 = c2;
 }
 
-static void b2Mat22_SetAngle(b2Mat22 *m, float64 angle)
+inline void b2Mat22_SetAngle(b2Mat22 *m, float64 angle)
 {
 	float64 c = fp_cos(angle), s = fp_sin(angle);
 	m->col1.x = c; m->col2.x = -s;
 	m->col1.y = s; m->col2.y = c;
 }
 
-static void b2Mat22_SetIdentity(b2Mat22 *m)
+inline void b2Mat22_SetIdentity(b2Mat22 *m)
 {
 	m->col1.x = 1.0; m->col2.x = 0.0;
 	m->col1.y = 0.0; m->col2.y = 1.0;
 }
 
-static b2Mat22 b2Mat22_Invert(b2Mat22 *m)
+inline b2Mat22 b2Mat22_Invert(b2Mat22 *m)
 {
 	float64 a = m->col1.x, b = m->col2.x, c = m->col1.y, d = m->col2.y;
 	b2Mat22 B;
@@ -113,7 +113,7 @@ static b2Mat22 b2Mat22_Invert(b2Mat22 *m)
 }
 
 // Solve A * x = b
-static b2Vec2 b2Mat22_Solve(b2Mat22 *m, const b2Vec2& b)
+inline b2Vec2 b2Mat22_Solve(b2Mat22 *m, const b2Vec2& b)
 {
 	float64 a11 = m->col1.x, a12 = m->col2.x, a21 = m->col1.y, a22 = m->col2.y;
 	float64 det = a11 * a22 - a12 * a21;

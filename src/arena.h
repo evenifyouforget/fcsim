@@ -13,6 +13,8 @@
 
 #define TAU 6.28318530718
 
+typedef uint32_t z_offset_t;
+
 struct view {
 	float x;
 	float y;

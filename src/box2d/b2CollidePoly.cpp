@@ -291,7 +291,7 @@ void b2CollidePoly(b2Manifold* manifold, const b2PolyShape* polyA, const b2PolyS
 	b2Vec2 v11 = vert1s[edge1];
 	b2Vec2 v12 = edge1 + 1 < count1 ? vert1s[edge1+1] : vert1s[0];
 
-	b2Vec2 dv = v12 - v11;
+	//b2Vec2 dv = v12 - v11;
 	b2Vec2 sideNormal = b2Mul(poly1->m_shape.m_R, v12 - v11);
 	float64 sideNormalLenInv = 1.0 / b2Vec2_Length(&sideNormal);
 	sideNormal.x *= sideNormalLenInv;
