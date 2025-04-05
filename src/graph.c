@@ -420,14 +420,20 @@ static void add_rod(struct design *design, struct block *block, struct xml_block
 	j1 = find_closest_joint(&att_list, x1, y1);
 	destroy_joints_list(&att_list);
 
-	if (!j0) {
+	if (j0) {
+		x0 = j0->x;
+		y0 = j0->y;
+	} else {
 		j0 = new_joint(NULL, x0, y0);
 		append_joint(&design->joints, j0);
 	}
 	att0 = new_attach_node(block);
 	append_attach_node(&j0->att, att0);
 
-	if (!j1) {
+	if (j1) {
+		x1 = j1->x;
+		y1 = j1->y;
+	} else {
 		j1 = new_joint(NULL, x1, y1);
 		append_joint(&design->joints, j1);
 	}
@@ -457,7 +463,10 @@ static void add_wheel(struct design *design, struct block *block, struct xml_blo
 	j0 = find_closest_joint(&att_list, x0, y0);
 	destroy_joints_list(&att_list);
 
-	if (!j0) {
+	if (j0) {
+		x0 = j0->x;
+		y0 = j0->y;
+	} else {
 		j0 = new_joint(NULL, x0, y0);
 		append_joint(&design->joints, j0);
 	}
