@@ -38,7 +38,7 @@ static int strtoi(const char *str, int len, int *res)
 
 int is_ws(char c)
 {
-	return c == ' ' || c == '\t' || c == '\n';
+	return c == ' ' || c == '\t' || c == '\n' || c == '\r';
 }
 
 int is_letter(char c)
