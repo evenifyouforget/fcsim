@@ -91,6 +91,7 @@ struct arena {
 	// for ui graphics
 	void* block_graphics_v2b; // actual type: block_graphics*
 
+	uint64_t frame_counter;
 	uint64_t tick;
 	uint64_t tick_solve;
 	// this text object has been repurposed for all text rendering
