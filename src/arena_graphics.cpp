@@ -681,11 +681,11 @@ void draw_tick_counter(struct arena *arena)
     graphics->tps_tracker.push_record(arena->tick);
     x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-    x = draw_text_default(arena, std::to_string(rint(graphics->fps_tracker.get_tps())), x, 10);
+    x = draw_text_default(arena, std::to_string((int64_t)rint(graphics->fps_tracker.get_tps())), x, 10);
     x = draw_text_default(arena, "FPS", x, 10, 1);
     x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-    x = draw_text_default(arena, std::to_string(rint(graphics->tps_tracker.get_tps())), x, 10);
+    x = draw_text_default(arena, std::to_string((int64_t)rint(graphics->tps_tracker.get_tps())), x, 10);
     x = draw_text_default(arena, "TPS", x, 10, 1);
 }
 
