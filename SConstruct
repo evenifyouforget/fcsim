@@ -76,8 +76,14 @@ fpatan_defines = [
     "USE_FPATAN",
     ]
 
-linux_ccflags = []
-test_ccflags = []
+linux_ccflags = [
+    "-O3",
+    "-flto",
+    ]
+test_ccflags = [
+    "-O3",
+    "-flto",
+    ]
 wasm_ccflags = [
     "-O2",
     "--target=wasm32",
