@@ -1,5 +1,8 @@
 "use strict";
 
+const FC_URL = "http://fantasticcontraption.com";
+const SELF_URL = "";
+
 let play_button  = document.getElementById("play");
 let save_button  = document.getElementById("save");
 let save_menu    = document.getElementById("save_menu");
@@ -11,9 +14,10 @@ let design_link  = document.getElementById("link");
 let user_id = localStorage.getItem("userId");
 if (user_id) {
 	login_link.innerHTML = "Log out";
-	login_link.href = "/logout.html"
+	login_link.href = SELF_URL + "/logout.html"
 } else {
 	save_button.disabled = true;
+	login_link.href = SELF_URL + "/login.html"
 }
 
 let opened = false;
@@ -409,7 +413,7 @@ function save_design(event)
 
 	let xml_str = make_cstring(xml);
 
-	let request_promise = fetch("http://fantasticcontraption.com/saveDesign.php", {
+	let request_promise = fetch(FC_URL + "/saveDesign.php", {
 		method: "POST",
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded'
@@ -452,7 +456,7 @@ let module_promise = WebAssembly.instantiateStreaming(
 let design_id = params.get('designId');
 let level_id = params.get('levelId');
 
-let response_promise = fetch("http://fantasticcontraption.com/retrieveLevel.php", {
+let response_promise = fetch(FC_URL + "/retrieveLevel.php", {
 	method: "POST",
 	headers: {
 		'Content-Type': 'application/x-www-form-urlencoded'

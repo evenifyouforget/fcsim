@@ -1,3 +1,5 @@
+const FC_URL = "http://fantasticcontraption.com";
+
 function on_text(text) {
 	let parser = new DOMParser();
 	let xml = parser.parseFromString(text, "text/xml");
@@ -23,7 +25,7 @@ function on_submit(event) {
 
 	let data = new FormData(login);
 
-	let request_promise = fetch("http://fantasticcontraption.com/logIn.php", {
+	let request_promise = fetch(FC_URL + "/logIn.php", {
 		method: "POST",
 		headers: {
 			'Content-Type': 'application/x-www-form-urlencoded'
