@@ -1,10 +1,13 @@
 rule linux-cc
   depfile = $out.d
-  command = cc -O0 -g -MMD -MF $out.d -Iinclude -c -o $out $in
+  command = cc -O0 -g -MMD -MF $out.d -Iinclude -DUSE_FPATAN -c -o $out $in
 
 rule linux-cxx
   depfile = $out.d
-  command = c++ -O0 -g -MMD -MF $out.d -Iinclude -c -o $out $in
+  command = c++ -O0 -g -MMD -MF $out.d -Iinclude -DUSE_FPATAN -c -o $out $in
+
+rule linux-as
+  command = as -o $out $in
 
 rule linux-cxx-stl-test
   depfile = $out.d
@@ -52,6 +55,7 @@ obj/linux/box2d/b2Settings.o $
 obj/linux/box2d/b2Shape.o $
 obj/linux/box2d/b2StackAllocator.o $
 obj/linux/box2d/b2World.o $
+obj/linux/fpmath/fpatan.o $
 obj/linux/fpmath/atan2.o $
 obj/linux/fpmath/sincos.o $
 obj/linux/fpmath/strtod.o
@@ -87,6 +91,7 @@ build obj/linux/box2d/b2Settings.o: linux-cc src/box2d/b2Settings.c
 build obj/linux/box2d/b2Shape.o: linux-cxx src/box2d/b2Shape.cpp
 build obj/linux/box2d/b2StackAllocator.o: linux-cc src/box2d/b2StackAllocator.c
 build obj/linux/box2d/b2World.o: linux-cxx src/box2d/b2World.cpp
+build obj/linux/fpmath/fpatan.o: linux-as src/fpmath/fpatan.s
 build obj/linux/fpmath/atan2.o: linux-cc src/fpmath/atan2.c
 build obj/linux/fpmath/sincos.o: linux-cc src/fpmath/sincos.c
 build obj/linux/fpmath/strtod.o: linux-cc src/fpmath/strtod.c
