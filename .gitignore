@@ -1,10 +1,14 @@
 *.o
 *.d
 *.xml
-fcsim
+fcsim*
 html/fcsim.wasm
 stl_test
 tags
 .ninja_log
 .ninja_deps
 .vscode
+
+# SCons files
+.sconsign*
+build/
