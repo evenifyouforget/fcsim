@@ -1,3 +1,12 @@
+# mock spectres
+AddOption(
+    '--make-atan2-wrong',
+    dest='make_atan2_wrong',
+    type='int',
+    action='store',
+    default=0,
+    help='Make atan2 wrong on purpose about 2^-N of the time. (random seed) Useful to test spectre levels for sufficient sensitivity.')
+
 # source files
 common_sources = [
     "src/arena.c",
@@ -69,12 +78,15 @@ wasm_include = [
     "arch/wasm/include",
     ]
 
+common_defines = []
+linux_defines = []
 test_defines = [
     "__wasm__",
     ]
 fpatan_defines = [
     "USE_FPATAN",
     ]
+wasm_defines = []
 
 linux_ccflags = [
     "-O3",
@@ -98,6 +110,26 @@ wasm_link_flags = [
     "--allow-undefined",
     ]
 
+# fake bad math
+def get_random_mask(n):
+    mask_bits = 0
+    for offset in random.sample(range(64), n):
+        mask_bits |= 1 << offset
+    return mask_bits
+make_atan2_wrong = GetOption('make_atan2_wrong')
+if make_atan2_wrong:
+    import random
+    k = random.randint(0, make_atan2_wrong)
+    mask_bits1 = get_random_mask(k)
+    mask_bits2 = get_random_mask(make_atan2_wrong - k)
+    premask_xor1 = random.getrandbits(64)
+    premask_xor2 = random.getrandbits(64)
+    common_defines.append(f'MAKE_ATAN2_WRONG_MASK_Y={mask_bits1}ull')
+    common_defines.append(f'MAKE_ATAN2_WRONG_MASK_X={mask_bits2}ull')
+    common_defines.append(f'MAKE_ATAN2_WRONG_XOR_Y={premask_xor1}ull')
+    common_defines.append(f'MAKE_ATAN2_WRONG_XOR_X={premask_xor2}ull')
+    print(f'Using atan2 error level {make_atan2_wrong} with mask = {mask_bits1:x} {mask_bits2:x}, xor = {premask_xor1:x} {premask_xor2:x}')
+
 # env
 base_env = Environment(
     ENV = {
@@ -111,6 +143,7 @@ base_env = Environment(
 linux_env = base_env.Clone(
     CCFLAGS = linux_ccflags,
     CPPPATH = common_include,
+    CPPDEFINES = common_defines + linux_defines,
     LIBS = libs
     )
 linux_env.VariantDir("build/linux", ".", False)
@@ -118,13 +151,14 @@ linux_env.VariantDir("build/linux", ".", False)
 test_env = base_env.Clone(
     CCFLAGS = test_ccflags,
     CPPPATH = common_include + wasm_include,
-    CPPDEFINES = test_defines
+    CPPDEFINES = common_defines + test_defines,
     )
 test_env.VariantDir("build/test", ".", False)
 
 wasm_env = base_env.Clone(
     CCFLAGS = wasm_ccflags,
     CPPPATH = common_include + wasm_include,
+    CPPDEFINES = common_defines + wasm_defines,
     CC = 'clang',
     CXX = 'clang++',
     LINK = 'wasm-ld',

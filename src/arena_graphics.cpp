@@ -687,6 +687,21 @@ void draw_tick_counter(struct arena *arena)
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
     x = draw_text_default(arena, std::to_string((int64_t)rint(graphics->tps_tracker.get_tps())), x, 10);
     x = draw_text_default(arena, "TPS", x, 10, 1);
+    // atan2 fault injection
+    {
+        #ifdef MAKE_ATAN2_WRONG_MASK_Y
+        x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
+        x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+        x = draw_text_default(arena, std::to_string(MAKE_ATAN2_WRONG_MASK_Y), x, 10);
+        x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+        x = draw_text_default(arena, std::to_string(MAKE_ATAN2_WRONG_MASK_X), x, 10);
+        x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+        x = draw_text_default(arena, std::to_string(MAKE_ATAN2_WRONG_XOR_Y), x, 10);
+        x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+        x = draw_text_default(arena, std::to_string(MAKE_ATAN2_WRONG_XOR_X), x, 10);
+        x = draw_text_default(arena, "atan2 fault seed", x, 10, 1);
+        #endif
+    }
 }
 
 void draw_ui(arena* arena) {

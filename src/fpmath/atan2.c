@@ -12,6 +12,22 @@ double fp_atan2(double y, double x) {
 }
 #else
 
+#ifdef MAKE_ATAN2_WRONG_MASK_Y
+double old_fp_atan2(double y, double x);
+double fp_atan2(double y, double x) {
+  double result = old_fp_atan2(y, x);
+  unsigned long long int yi = *(unsigned long long int*)&y;
+  unsigned long long int xi = *(unsigned long long int*)&x;
+  if(0 == (MAKE_ATAN2_WRONG_MASK_Y & (MAKE_ATAN2_WRONG_XOR_Y ^ yi))
+  && 0 == (MAKE_ATAN2_WRONG_MASK_X & (MAKE_ATAN2_WRONG_XOR_X ^ yi))) {
+    // be wrong on purpose
+    *(unsigned long long int*)&result ^= 1;
+  }
+  return result;
+}
+#define fp_atan2 old_fp_atan2
+#endif // #ifdef MAKE_ATAN2_WRONG_MASK
+
 /* dla.h */
 #define  CN   134217729.0
 #define  EADD(x,y,z,zz)  \
