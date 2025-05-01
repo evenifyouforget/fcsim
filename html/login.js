@@ -1,4 +1,4 @@
-const FC_URL = "http://fantasticcontraption.com";
+const FC_URL = "https://fantasticcontraption.com";
 
 function on_text(text) {
 	let parser = new DOMParser();

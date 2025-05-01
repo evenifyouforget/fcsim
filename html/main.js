@@ -1,6 +1,6 @@
 "use strict";
 
-const FC_URL = "http://fantasticcontraption.com";
+const FC_URL = "https://fantasticcontraption.com";
 const SELF_URL = "";
 
 let play_button  = document.getElementById("play");
