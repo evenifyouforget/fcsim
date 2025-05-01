@@ -76,10 +76,10 @@ Here are some measurements from the dev's local machine.
 
 | Level/design              | At rest? | Platform     | Ticks per second | Speed up (compared to 30 TPS) |
 |---------------------------|----------|--------------|------------------|-------------------------------|
-| poocs (level 634052)      | yes      | Linux native | 18457892          | 260239                        |
-| poocs (level 634052)      | yes      | Web          | 6561002          | 218700                        |
-| Galois (design 12668445)  | no       | Web          | 7646             | 111                           |
-| Galois (design 12668445)  | yes      | Web          | 92861            | 3095                          |
-| Reach Up (design 5371157) | no       | Web          | 80831            | 2694                          |
+| poocs (level 634052)      | yes      | Linux native | 18457892         | 615263                        |
+| poocs (level 634052)      | yes      | Web          | 7089081          | 236303                        |
+| Galois (design 12668445)  | no       | Web          | 7646             | 255                           |
+| Galois (design 12668445)  | yes      | Web          | 99731            | 3324                          |
+| Reach Up (design 5371157) | no       | Web          | 78209            | 2607                          |
 
 See [#2](https://github.com/evenifyouforget/fcsim/pull/2) and [#9](https://github.com/evenifyouforget/fcsim/pull/9) for full commentary.
