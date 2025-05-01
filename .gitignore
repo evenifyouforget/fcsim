@@ -7,3 +7,4 @@ stl_test
 tags
 .ninja_log
 .ninja_deps
+.vscode
