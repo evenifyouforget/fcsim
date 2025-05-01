@@ -187,6 +187,6 @@ def build_with_variant(env, variant_dir, source_files, *args, **kwargs):
     env.VariantDir(variant_dir, ".", True)
     env.Program(*args, source = source_files, **kwargs)
 build_with_variant(linux_env, "build/linux/", linux_sources_all, target = 'fcsim')
-build_with_variant(linux_env, "build/linux2/", linux_sources_all, target = 'fcsim-fpatan', CPPDEFINES = ['USE_FPATAN'])
+build_with_variant(linux_env, "build/linux2/", linux_sources_all, target = 'fcsim-fpatan', CPPDEFINES = common_defines + linux_defines + ['USE_FPATAN'])
 build_with_variant(test_env, "build/test/", test_sources_all, target = 'stl_test')
 build_with_variant(wasm_env, "build/wasm/", wasm_sources_all, target = 'html/fcsim.wasm')

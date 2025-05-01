@@ -1,0 +1,1348 @@
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+gcc -o build/linux2/src/arena.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/arena.c
+g++ -o build/linux2/src/arena_graphics.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/arena_graphics.cpp
+gcc -o build/linux2/src/box2d/b2BlockAllocator.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2BlockAllocator.c
+g++ -o build/linux2/src/box2d/b2Body.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2Body.cpp
+g++ -o build/linux2/src/box2d/b2BroadPhase.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2BroadPhase.cpp
+gcc -o build/linux2/src/box2d/b2CircleContact.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2CircleContact.c
+g++ -o build/linux2/src/box2d/b2CollideCircle.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2CollideCircle.cpp
+g++ -o build/linux2/src/box2d/b2CollidePoly.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2CollidePoly.cpp
+gcc -o build/linux2/src/box2d/b2Contact.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2Contact.c
+g++ -o build/linux2/src/box2d/b2ContactManager.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2ContactManager.cpp
+g++ -o build/linux2/src/box2d/b2ContactSolver.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2ContactSolver.cpp
+g++ -o build/linux2/src/box2d/b2Island.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2Island.cpp
+g++ -o build/linux2/src/box2d/b2Joint.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2Joint.cpp
+g++ -o build/linux2/src/box2d/b2PairManager.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2PairManager.cpp
+gcc -o build/linux2/src/box2d/b2PolyAndCircleContact.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2PolyAndCircleContact.c
+gcc -o build/linux2/src/box2d/b2PolyContact.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2PolyContact.c
+g++ -o build/linux2/src/box2d/b2RevoluteJoint.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2RevoluteJoint.cpp
+gcc -o build/linux2/src/box2d/b2Settings.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2Settings.c
+g++ -o build/linux2/src/box2d/b2Shape.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2Shape.cpp
+gcc -o build/linux2/src/box2d/b2StackAllocator.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2StackAllocator.c
+g++ -o build/linux2/src/box2d/b2World.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/box2d/b2World.cpp
+gcc -o build/linux2/src/button.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/button.c
+gcc -o build/linux2/src/core.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/core.c
+gcc -o build/linux2/src/export.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/export.c
+gcc -o build/linux2/src/fpmath/atan2.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/fpmath/atan2.c
+gcc -o build/linux2/src/fpmath/sincos.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/fpmath/sincos.c
+gcc -o build/linux2/src/fpmath/strtod.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/fpmath/strtod.c
+gcc -o build/linux2/src/gen.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/gen.c
+gcc -o build/linux2/src/graph.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/graph.c
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+gcc -o build/linux2/src/str.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/str.c
+gcc -o build/linux2/src/text.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/text.c
+g++ -o build/linux2/src/timing.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/timing.cpp
+gcc -o build/linux2/src/xml.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/xml.c
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+Using design ID 12706537
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706537
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706537
+12706537	0	None
+# Score for 12706537 is 0
+Using design ID 12706530
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706530
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706530
+12706530	0	None
+# Score for 12706530 is 0
+Using design ID 12706529
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706529
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706529
+12706529	0	None
+# Score for 12706529 is 0
+Using design ID 12706527
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706527
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706527
+12706527	0	None
+# Score for 12706527 is 0
+Using design ID 12706521
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706521
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706521
+12706521	0	None
+# Score for 12706521 is 0
+Using design ID 12706516
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706516
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706516
+12706516	0	None
+# Score for 12706516 is 0
+Using design ID 12706513
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706513
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706513
+12706513	0	None
+# Score for 12706513 is 0
+Using design ID 12706505
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706505
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706505
+12706505	0	None
+# Score for 12706505 is 0
+Using design ID 12706500
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706500
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706500
+12706500	0	None
+# Score for 12706500 is 0
+Using design ID 12706498
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706498
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706498
+12706498	0	None
+# Score for 12706498 is 0
+Using design ID 12706488
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706488
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706488
+12706488	0	None
+# Score for 12706488 is 0
+Using design ID 12706487
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706487
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706487
+12706487	0	None
+# Score for 12706487 is 0
+Using design ID 12706480
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706480
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706480
+12706480	0	None
+# Score for 12706480 is 0
+Using design ID 12706474
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706474
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706474
+12706474	0	None
+# Score for 12706474 is 0
+Using design ID 12706472
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706472
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706472
+12706472	0	None
+# Score for 12706472 is 0
+Using design ID 12706464
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706464
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706464
+12706464	0	None
+# Score for 12706464 is 0
+Using design ID 12706460
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706460
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706460
+12706460	0	None
+# Score for 12706460 is 0
+Using design ID 12706459
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706459
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706459
+12706459	0	None
+# Score for 12706459 is 0
+Using design ID 12706457
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706457
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706457
+12706457	0	None
+# Score for 12706457 is 0
+Using design ID 12706448
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706448
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706448
+12706448	0	None
+# Score for 12706448 is 0
+Using design ID 12706445
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706445
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706445
+12706445	0	None
+# Score for 12706445 is 0
+Using design ID 12706444
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706444
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706444
+12706444	0	None
+# Score for 12706444 is 0
+Using design ID 12706436
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706436
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706436
+12706436	0	None
+# Score for 12706436 is 0
+Using design ID 12706433
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706433
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706433
+12706433	0	None
+# Score for 12706433 is 0
+Using design ID 12706425
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706425
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706425
+12706425	0	None
+# Score for 12706425 is 0
+Using design ID 12706419
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706419
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706419
+12706419	0	None
+# Score for 12706419 is 0
+Using design ID 12706411
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+Building for design id 12706411
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706411
+12706411	0	None
+# Score for 12706411 is 0
+Using design ID 12706405
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706405
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706405
+12706405	0	None
+# Score for 12706405 is 0
+Using design ID 12706401
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706401
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706401
+12706401	0	None
+# Score for 12706401 is 0
+Using design ID 12706400
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706400
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706400
+12706400	0	None
+# Score for 12706400 is 0
+Using design ID 12706391
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706391
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706391
+12706391	0	None
+# Score for 12706391 is 0
+Using design ID 12706383
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706383
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706383
+12706383	0	None
+# Score for 12706383 is 0
+Using design ID 12706381
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706381
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706381
+12706381	0	None
+# Score for 12706381 is 0
+Using design ID 12706377
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706377
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706377
+12706377	0	None
+# Score for 12706377 is 0
+Using design ID 12706371
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706371
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706371
+12706371	0	None
+# Score for 12706371 is 0
+Using design ID 12706364
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706364
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706364
+12706364	0	None
+# Score for 12706364 is 0
+Using design ID 12706361
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706361
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706361
+12706361	0	None
+# Score for 12706361 is 0
+Using design ID 12706360
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706360
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706360
+12706360	0	None
+# Score for 12706360 is 0
+Using design ID 12706352
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706352
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706352
+12706352	0	None
+# Score for 12706352 is 0
+Using design ID 12706346
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706346
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706346
+12706346	0	None
+# Score for 12706346 is 0
+Using design ID 12706343
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706343
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706343
+12706343	0	None
+# Score for 12706343 is 0
+Using design ID 12706336
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706336
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706336
+12706336	0	None
+# Score for 12706336 is 0
+Using design ID 12706335
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706335
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706335
+12706335	0	None
+# Score for 12706335 is 0
+Using design ID 12706325
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706325
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706325
+12706325	0	None
+# Score for 12706325 is 0
+Using design ID 12706315
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706315
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706315
+12706315	0	None
+# Score for 12706315 is 0
+Using design ID 12706312
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706312
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706312
+12706312	0	None
+# Score for 12706312 is 0
+Using design ID 12706305
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706305
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706305
+12706305	0	None
+# Score for 12706305 is 0
+Using design ID 12706295
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706295
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706295
+12706295	0	None
+# Score for 12706295 is 0
+Using design ID 12706289
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706289
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706289
+12706289	0	None
+# Score for 12706289 is 0
+Using design ID 12706281
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706281
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706281
+12706281	0	None
+# Score for 12706281 is 0
+Using design ID 12706276
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706276
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706276
+12706276	0	None
+# Score for 12706276 is 0
+Using design ID 12706269
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706269
+Running until tick limit
+
+Reached tick limit without finishing
+Did not solve on 794-stable. Disqualified
+All runs done
+# Table for 12706269
+12706269	0	None
+# Score for 12706269 is 0
+Using design ID 12706264
+Fetching design data
+Design data OK
+Encoding to poocs.h
+poocs.h written
+Building for design id 12706264
+Running until tick limit
+
+Reached tick limit without finishing
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+g++ -o fcsim-fpatan build/linux2/src/arena.o build/linux2/src/arena_graphics.o build/linux2/src/button.o build/linux2/src/export.o build/linux2/src/core.o build/linux2/src/gen.o build/linux2/src/graph.o build/linux2/src/str.o build/linux2/src/text.o build/linux2/src/xml.o build/linux2/src/box2d/b2BlockAllocator.o build/linux2/src/box2d/b2Body.o build/linux2/src/box2d/b2BroadPhase.o build/linux2/src/box2d/b2CircleContact.o build/linux2/src/box2d/b2CollideCircle.o build/linux2/src/box2d/b2CollidePoly.o build/linux2/src/box2d/b2Contact.o build/linux2/src/box2d/b2ContactManager.o build/linux2/src/box2d/b2ContactSolver.o build/linux2/src/box2d/b2Island.o build/linux2/src/box2d/b2Joint.o build/linux2/src/box2d/b2PairManager.o build/linux2/src/box2d/b2PolyAndCircleContact.o build/linux2/src/box2d/b2PolyContact.o build/linux2/src/box2d/b2RevoluteJoint.o build/linux2/src/box2d/b2Settings.o build/linux2/src/box2d/b2Shape.o build/linux2/src/box2d/b2StackAllocator.o build/linux2/src/box2d/b2World.o build/linux2/src/fpmath/atan2.o build/linux2/src/fpmath/sincos.o build/linux2/src/fpmath/strtod.o build/linux2/src/main.o build/linux2/src/timing.o build/linux2/src/fpmath/fpatan.o -lX11 -lGL -lpthread
+scons: done building targets.
+scons: Reading SConscript files ...
+Using autorun with tick limit 1000
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build/linux build/test build/wasm build/linux2
+g++ -o build/linux2/src/main.o -c -O3 -flto -DAUTORUN=1000 -DUSE_FPATAN -Iinclude build/linux2/src/main.cpp
+g++ -o build/linux/src/main.o -c -O3 -flto -DAUTORUN=1000 -Iinclude src/main.cpp
+g++ -o fcsim build/linux/src/arena.o build/linux/src/arena_graphics.o build/linux/src/button.o build/linux/src/export.o build/linux/src/core.o build/linux/src/gen.o build/linux/src/graph.o build/linux/src/str.o build/linux/src/text.o build/linux/src/xml.o build/linux/src/box2d/b2BlockAllocator.o build/linux/src/box2d/b2Body.o build/linux/src/box2d/b2BroadPhase.o build/linux/src/box2d/b2CircleContact.o build/linux/src/box2d/b2CollideCircle.o build/linux/src/box2d/b2CollidePoly.o build/linux/src/box2d/b2Contact.o build/linux/src/box2d/b2ContactManager.o build/linux/src/box2d/b2ContactSolver.o build/linux/src/box2d/b2Island.o build/linux/src/box2d/b2Joint.o build/linux/src/box2d/b2PairManager.o build/linux/src/box2d/b2PolyAndCircleContact.o build/linux/src/box2d/b2PolyContact.o build/linux/src/box2d/b2RevoluteJoint.o build/linux/src/box2d/b2Settings.o build/linux/src/box2d/b2Shape.o build/linux/src/box2d/b2StackAllocator.o build/linux/src/box2d/b2World.o build/linux/src/fpmath/atan2.o build/linux/src/fpmath/sincos.o build/linux/src/fpmath/strtod.o build/linux/src/main.o build/linux/src/timing.o build/linux/src/fpmath/fpatan.o -lX11 -lGL -lpthread

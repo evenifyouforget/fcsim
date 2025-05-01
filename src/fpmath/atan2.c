@@ -7,10 +7,22 @@
 // use fpatan x86 instruction
 // see fpatan.s
 double fpatan(double y, double x);
+double old_fp_atan2(double y, double x);
 double fp_atan2(double y, double x) {
-  return fpatan(y, x);
+  double result = fpatan(y, x);
+  double result2 = old_fp_atan2(y, x);
+  if(result != result2) {
+    unsigned long long int yi = *(unsigned long long int*)&y;
+    unsigned long long int xi = *(unsigned long long int*)&x;
+    unsigned long long int ri = *(unsigned long long int*)&result;
+    unsigned long long int si = *(unsigned long long int*)&result2;
+    printf("!!!FPATAN HIT %lld\t%lld\t%lld\t%lld\n", yi, xi, ri, si);
+  }
+  return result;
 }
-#else
+#define fp_atan2 old_fp_atan2
+#endif
+#ifndef ODJFOWJDFO
 
 #ifdef MAKE_ATAN2_WRONG_MASK_Y
 double old_fp_atan2(double y, double x);
