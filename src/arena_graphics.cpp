@@ -690,7 +690,6 @@ void draw_tick_counter(struct arena *arena)
     // atan2 fault injection
     {
         #ifdef MAKE_ATAN2_WRONG_MASK_Y
-        x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
         x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
         x = draw_text_default(arena, std::to_string(MAKE_ATAN2_WRONG_MASK_Y), x, 10);
         x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;

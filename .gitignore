@@ -8,6 +8,7 @@ tags
 .ninja_log
 .ninja_deps
 .vscode
+devtool/pyfcul
 
 # SCons files
 .sconsign*

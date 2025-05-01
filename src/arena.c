@@ -181,6 +181,11 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 	arena->tick = 0;
 	text_stream_create(&arena->tick_counter, MAX_RENDER_TEXT_LENGTH);
 	arena->has_won = false;
+
+#ifdef AUTORUN
+	start_stop(arena);
+	change_speed_factor(arena, 1e9);
+#endif
 }
 
 /* TODO: dedupe */
@@ -253,6 +258,10 @@ void tick_func(void *arg)
 		step(arena->world);
 		arena->tick++;
 		if (!arena->has_won && goal_blocks_inside_goal_area(&arena->design)) {
+			#ifdef AUTORUN
+			//printf("%d\n", arena->tick);
+			exit(0);
+			#endif
 			arena->has_won = true;
 			arena->tick_solve = arena->tick;
 			if(arena->autostop_on_solve) {
@@ -261,6 +270,11 @@ void tick_func(void *arg)
 				break;
 			}
 		}
+		#ifdef AUTORUN
+		if(arena->tick > AUTORUN) {
+			exit(1);
+		}
+		#endif
 		double time_end = time_precise_ms();
 		if(time_end - time_start >= arena->tick_ms)break;
 	}

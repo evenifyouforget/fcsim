@@ -1,5 +1,13 @@
 # mock spectres
 AddOption(
+    '--autorun',
+    dest='autorun',
+    type='int',
+    action='store',
+    default=0,
+    help='Causes native game to start running immediately at max speed, print solve time, and quit after reaching tick limit'
+    )
+AddOption(
     '--make-atan2-wrong',
     dest='make_atan2_wrong',
     type='int',
@@ -110,6 +118,12 @@ wasm_link_flags = [
     "--allow-undefined",
     ]
 
+# autorun
+autorun = GetOption('autorun')
+if autorun:
+    common_defines.append(f'AUTORUN={autorun}')
+    print(f'Using autorun with tick limit {autorun}')
+
 # fake bad math
 def get_random_mask(n):
     mask_bits = 0
@@ -119,7 +133,8 @@ def get_random_mask(n):
 make_atan2_wrong = GetOption('make_atan2_wrong')
 if make_atan2_wrong:
     import random
-    k = random.randint(0, make_atan2_wrong)
+    k = max(0, make_atan2_wrong - 64)
+    k = random.randint(k, make_atan2_wrong - k)
     mask_bits1 = get_random_mask(k)
     mask_bits2 = get_random_mask(make_atan2_wrong - k)
     premask_xor1 = random.getrandbits(64)

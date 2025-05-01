@@ -125,6 +125,7 @@ void arena_size_event(struct arena *arena, float w, float h);
 void start_stop(struct arena *arena);
 bool is_running(struct arena *arena);
 void update_tool(struct arena *arena);
+void change_speed_factor(struct arena *arena, double factor);
 
 extern GLuint block_program;
 extern GLuint block_program_coord_attrib;

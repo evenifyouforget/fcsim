@@ -15,6 +15,7 @@ double fp_atan2(double y, double x) {
 #ifdef MAKE_ATAN2_WRONG_MASK_Y
 double old_fp_atan2(double y, double x);
 double fp_atan2(double y, double x) {
+  printf("%f\t%f\n", y, x);
   double result = old_fp_atan2(y, x);
   unsigned long long int yi = *(unsigned long long int*)&y;
   unsigned long long int xi = *(unsigned long long int*)&x;
