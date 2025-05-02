@@ -1,7 +1,7 @@
 "use strict";
 
 const FC_URL = "https://fantasticcontraption.com";
-const SELF_URL = "/fcsim";
+const SELF_URL = "";
 
 function self_url_full() {
 	// https://stackoverflow.com/a/6257480
