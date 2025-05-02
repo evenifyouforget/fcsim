@@ -3,6 +3,15 @@
 #include <float.h>
 #include <fpmath/fpmath.h>
 
+#ifdef USE_FPATAN
+// use fpatan x86 instruction
+// see fpatan.s
+double fpatan(double y, double x);
+double fp_atan2(double y, double x) {
+  return fpatan(y, x);
+}
+#else
+
 /* dla.h */
 #define  CN   134217729.0
 #define  EADD(x,y,z,zz)  \
@@ -2076,3 +2085,5 @@ double fp_atan2(double y, double x)
   /* Max ULP is 0.502.  */
   return copysign (z, y);
 }
+
+#endif // #ifdef USE_FPATAN

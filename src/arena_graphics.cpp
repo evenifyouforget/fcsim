@@ -9,6 +9,7 @@
 #include <iostream>
 #endif
 #include "stl_compat.h"
+#include "interval.h"
 extern "C" {
 #include "arena.h"
 #include "gl.h"
@@ -32,6 +33,17 @@ struct block_graphics_layer {
     void push_triangle(uint16_t v1, uint16_t v2, uint16_t v3);
 };
 
+struct fps_tracker_t {
+    // number of samples affects smoothing and latency
+    // fps ranges from about 30 to 60, so this takes at most 3 seconds to update
+    static const size_t buffer_size = 90;
+    std::vector<double> records_ms;
+    std::vector<int64_t> records_tick;
+    size_t index = 0;
+    void push_record(int64_t);
+    double get_tps();
+};
+
 struct block_graphics {
     // flags
     bool simple_graphics = false;
@@ -47,6 +59,9 @@ struct block_graphics {
 	GLuint _color_buffer;
 	int _triangle_cnt;
 	int _vertex_cnt;
+    // timing diagnostics
+    fps_tracker_t fps_tracker;
+    fps_tracker_t tps_tracker;
     // methods
     void clear();
     void ensure_layer(int z_offset);
@@ -161,6 +176,29 @@ void block_graphics::push_all_layers() {
 
 void block_graphics::clear() {
     layers.clear();
+}
+
+void fps_tracker_t::push_record(int64_t tick_value) {
+    // get new sample values
+    double time_value = time_precise_ms();
+    // fill arrays if not filled already
+    while(records_ms.size() < buffer_size) {
+        records_ms.push_back(0);
+        records_tick.push_back(0);
+    }
+    // add new value
+    index = (index + 1) % buffer_size;
+    records_ms[index] = time_value;
+    records_tick[index] = tick_value;
+}
+
+double fps_tracker_t::get_tps() {
+    if(records_ms.size() < buffer_size) {
+        // not enough data
+        return 0;
+    }
+    size_t prev_index = (index + 1) % buffer_size;
+    return 1000 * (records_tick[index] - records_tick[prev_index]) / (records_ms[index] - records_ms[prev_index]);
 }
 
 shell get_shell(block* block) {
@@ -628,14 +666,27 @@ float draw_text_default(arena* arena, std::string text, float x, float y, float 
 
 void draw_tick_counter(struct arena *arena)
 {
+    block_graphics* graphics = (block_graphics*)arena->block_graphics_v2b;
     float x = 10;
     x = draw_text_default(arena, std::to_string(arena->tick), x, 10);
     x = draw_text_default(arena, "ticks", x, 10, 1);
     if(arena->has_won) {
         x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
+        x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
         x = draw_text_default(arena, std::to_string(arena->tick_solve), x, 10);
         x = draw_text_default(arena, "at solve", x, 10, 1);
     }
+    // fps/tps counter
+    graphics->fps_tracker.push_record(arena->frame_counter++);
+    graphics->tps_tracker.push_record(arena->tick);
+    x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
+    x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+    x = draw_text_default(arena, std::to_string((int64_t)rint(graphics->fps_tracker.get_tps())), x, 10);
+    x = draw_text_default(arena, "FPS", x, 10, 1);
+    x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
+    x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+    x = draw_text_default(arena, std::to_string((int64_t)rint(graphics->tps_tracker.get_tps())), x, 10);
+    x = draw_text_default(arena, "TPS", x, 10, 1);
 }
 
 void draw_ui(arena* arena) {

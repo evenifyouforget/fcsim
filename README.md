@@ -14,33 +14,38 @@ sh install_requirements.sh
 
 This uses `apt` to install everything listed in `requirements.system`.
 
-On older systems, some files may not be in the right location. You can try running:
-
-```sh
-source path_fix.sh
-```
-
-This applies some automatic fixes.
-
 ## Actual build
 
 Build everything:
 
 ```sh
-ninja
+scons
 ```
 
-## Build Linux client
+Clean:
 
 ```sh
-ninja fcsim
+scons -c
 ```
 
-## Build web client
+The build system used to use `ninja`, but `ninja` has been deprecated in favour of `scons`.
 
-```sh
-ninja html/fcsim.wasm
-```
+# `fcsim` vs `fcsim-fpatan` and others
+
+The spectre level does not test `atan2`, so it is possible `794` (the target spectre) is actually several different spectres.
+
+Considering our test machine to implement the true target spectre, Pawel discovered in 2025 that it uses certain x86 specialized instructions such as `fpatan`.
+Such instructions are not available in web.
+
+In light of this, we are making a distinction between `794-stable` and `794-target`:
+
+* `794-stable` uses only the original software implementations of `atan2` and other math functions. The build `fcsim` uses this. It is 100% portable. It might not correspond to an actual spectre that exists in real FC.
+* `794-target` is what `794` should actually be, according to our test machine. (Pawel's machine) It requires `fpatan`, `fsin`, and possibly other specialized instructions. It is only available on x86. It definitely corresponds to a real spectre that exists in real FC.
+
+The build `fcsim-fpatan` has `fpatan` but is still missing `fsin` and possibly others, so it does not implement `794-target`.
+Feel free to call it `794-fpatan` instead.
+
+Hopefully at some point we can fully reverse engineer these specialized instructions and implement them in software, such that we can implement `794-target` in a fully portable way.
 
 # Development
 
@@ -49,13 +54,7 @@ ninja html/fcsim.wasm
 The web build does not support STL, so we need a mock STL.
 The mock STL comes with basic tests.
 
-You can build the mock STL tests with:
-
-```sh
-ninja stl_test
-```
-
-Which will produce the executable `stl_test`.
+The regular build will produce the executable `stl_test`.
 
 To see that the data structures are working correctly, you can use `valgrind` to check for memory leaks and other memory issues:
 
@@ -77,10 +76,10 @@ Here are some measurements from the dev's local machine.
 
 | Level/design              | At rest? | Platform     | Ticks per second | Speed up (compared to 30 TPS) |
 |---------------------------|----------|--------------|------------------|-------------------------------|
-| poocs (level 634052)      | yes      | Linux native | 7807170          | 260239                        |
-| poocs (level 634052)      | yes      | Web          | 6561002          | 218700                        |
-| Galois (design 12668445)  | no       | Web          | 3330             | 111                           |
-| Galois (design 12668445)  | yes      | Web          | 92861            | 3095                          |
-| Reach Up (design 5371157) | no       | Web          | 80831            | 2694                          |
+| poocs (level 634052)      | yes      | Linux native | 18457892         | 615263                        |
+| poocs (level 634052)      | yes      | Web          | 7089081          | 236303                        |
+| Galois (design 12668445)  | no       | Web          | 7646             | 255                           |
+| Galois (design 12668445)  | yes      | Web          | 99731            | 3324                          |
+| Reach Up (design 5371157) | no       | Web          | 78209            | 2607                          |
 
-See [#2](https://github.com/evenifyouforget/fcsim/pull/2) for full commentary.
+See [#2](https://github.com/evenifyouforget/fcsim/pull/2) and [#9](https://github.com/evenifyouforget/fcsim/pull/9) for full commentary.
