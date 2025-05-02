@@ -111,6 +111,7 @@ base_env = Environment(
 linux_env = base_env.Clone(
     CCFLAGS = linux_ccflags,
     CPPPATH = common_include,
+    # if using CCPDEFINES, need to match for fpatan variant
     LIBS = libs
     )
 linux_env.VariantDir("build/linux", ".", False)
