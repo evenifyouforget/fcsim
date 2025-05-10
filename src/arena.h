@@ -13,12 +13,14 @@
 
 #define TAU 6.28318530718
 
+#define LOOP_CONTEST_END_TICKS 100000
+
 struct view {
 	float x;
 	float y;
 	float scale;
 	float width;
-	float height;
+	float height; // loop_contest_end_ticks
 };
 
 enum state {
