@@ -247,7 +247,7 @@ static bool goal_blocks_inside_goal_area(struct arena *ar)
 				// in general, this code is safe, but would calculate incorrectly if there are multiple goal pieces
 				double mod_angle = fp_atan2(block->shape.circ.y, block->shape.circ.x);
 				double mod_turns = mod_angle / tau;
-				ar->goal_piece_turns = mod_turns + rint(mod_turns - ar->goal_piece_turns);
+				ar->goal_piece_turns = mod_turns + rint(ar->goal_piece_turns - mod_turns);
 			}
 			any = true;
 			if (!block_inside_area(block, &design->goal_area))
