@@ -687,6 +687,15 @@ void draw_tick_counter(struct arena *arena)
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
     x = draw_text_default(arena, std::to_string((int64_t)rint(graphics->tps_tracker.get_tps())), x, 10);
     x = draw_text_default(arena, "TPS", x, 10, 1);
+    // loop contest display
+    double turns = std::abs(arena->goal_piece_turns);
+    double predicted_turns = turns / std::max<uint64_t>(std::min<uint64_t>(arena->tick, 10000000), 1) * 10000000;
+    x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+    x = draw_text_default(arena, std::to_string((int64_t)turns), x, 10, (arena->tick > 10000000 ? 4 : 2));
+    x = draw_text_default(arena, "revolutions", x, 10, 1);
+    x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+    x = draw_text_default(arena, std::to_string((int64_t)predicted_turns), x, 10);
+    x = draw_text_default(arena, "predicted", x, 10, 1);
 }
 
 void draw_ui(arena* arena) {

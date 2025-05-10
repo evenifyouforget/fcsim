@@ -103,6 +103,9 @@ struct arena {
 	// ui button templates
 	void* ui_buttons; // actual type: ui_button_collection*
 	bool ui_toolbar_opened;
+
+	// loop contest
+	double goal_piece_turns;
 };
 
 bool arena_compile_shaders(void);
