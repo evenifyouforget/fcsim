@@ -267,7 +267,7 @@ void tick_func(void *arg)
 		if(arena->single_ticks_remaining > 0)arena->single_ticks_remaining--;
 		step(arena->world);
 		arena->tick++;
-		if (!arena->has_won && goal_blocks_inside_goal_area(&arena)) {
+		if (!arena->has_won && goal_blocks_inside_goal_area(arena)) {
 			arena->has_won = true;
 			arena->tick_solve = arena->tick;
 			if(arena->autostop_on_solve) {
