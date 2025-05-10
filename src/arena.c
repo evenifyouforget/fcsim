@@ -245,7 +245,7 @@ static bool goal_blocks_inside_goal_area(struct arena *ar)
 				// stop updating after 10 million ticks
 				const double tau = 6.283185307179586;
 				// in general, this code is safe, but would calculate incorrectly if there are multiple goal pieces
-				double mod_angle = fp_atan2(block->shape.circ.y, block->shape.circ.x);
+				double mod_angle = fp_atan2(block->body->m_position.x, block->body->m_position.y);
 				double mod_turns = mod_angle / tau;
 				ar->goal_piece_turns = mod_turns + rint(ar->goal_piece_turns - mod_turns);
 			}
