@@ -1,6 +1,8 @@
 *.o
 *.d
 *.xml
+#fcsim*
+#html/fcsim.wasm
 stl_test
 tags
 .ninja_log
