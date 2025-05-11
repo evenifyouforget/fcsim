@@ -181,6 +181,8 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 	arena->tick = 0;
 	text_stream_create(&arena->tick_counter, MAX_RENDER_TEXT_LENGTH);
 	arena->has_won = false;
+
+	arena->goal_piece_turns = 0;
 }
 
 /* TODO: dedupe */
@@ -227,13 +229,25 @@ void arena_key_up_event(struct arena *arena, int key)
 
 static int block_inside_area(struct block *block, struct area *area);
 
-static bool goal_blocks_inside_goal_area(struct design *design)
+static bool goal_blocks_inside_goal_area(struct arena *ar)
 {
 	struct block *block;
 	bool any = false;
 
+	struct design *design = &ar->design;
+
 	for (block = design->player_blocks.head; block; block = block->next) {
 		if (block->goal) {
+			// loop contest logic
+			if(ar->tick == 1) {
+				ar->goal_piece_turns = 0; // reset. will be computed correctly the next frame
+			} else if(ar->tick <= LOOP_CONTEST_END_TICKS) {
+				// stop updating after tick limit
+				// in general, this code is safe, but would calculate incorrectly if there are multiple goal pieces
+				double mod_angle = fp_atan2(block->body->m_position.x, block->body->m_position.y);
+				double mod_turns = mod_angle / TAU;
+				ar->goal_piece_turns = mod_turns + rint(ar->goal_piece_turns - mod_turns);
+			}
 			any = true;
 			if (!block_inside_area(block, &design->goal_area))
 				return false;
@@ -252,7 +266,7 @@ void tick_func(void *arg)
 		if(arena->single_ticks_remaining > 0)arena->single_ticks_remaining--;
 		step(arena->world);
 		arena->tick++;
-		if (!arena->has_won && goal_blocks_inside_goal_area(&arena->design)) {
+		if (!arena->has_won && goal_blocks_inside_goal_area(arena)) {
 			arena->has_won = true;
 			arena->tick_solve = arena->tick;
 			if(arena->autostop_on_solve) {

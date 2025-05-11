@@ -13,12 +13,14 @@
 
 #define TAU 6.28318530718
 
+#define LOOP_CONTEST_END_TICKS 100000
+
 struct view {
 	float x;
 	float y;
 	float scale;
 	float width;
-	float height;
+	float height; // loop_contest_end_ticks
 };
 
 enum state {
@@ -103,6 +105,9 @@ struct arena {
 	// ui button templates
 	void* ui_buttons; // actual type: ui_button_collection*
 	bool ui_toolbar_opened;
+
+	// loop contest
+	double goal_piece_turns;
 };
 
 bool arena_compile_shaders(void);
