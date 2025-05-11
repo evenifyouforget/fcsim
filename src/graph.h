@@ -226,6 +226,7 @@ void free_world(b2World *world, struct design *design);
 void step(struct b2World *world);
 void get_shell(struct shell *shell, struct shape *shape);
 int get_block_joints(struct block *block, struct joint **res);
+bool share_block(struct design *design, struct joint *j1, struct joint *j2);
 
 
 #endif
