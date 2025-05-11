@@ -318,6 +318,7 @@ char *export_design(struct design *design, char *user, char *name, char *desc)
 	if (design->level_id >= 0)
 		append_int(&str, design->level_id);
 	append_str(&str, "</levelId>");
+	append_str(&str, "<isSolution>0</isSolution>");
 	append_str(&str, "<level>");
 	append_block_list(&str, &design->level_blocks, "levelBlocks");
 	append_block_list(&str, &design->player_blocks, "playerBlocks");

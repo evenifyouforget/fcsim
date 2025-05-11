@@ -439,34 +439,6 @@ struct joint *joint_hit_test(struct arena *arena, float x, float y)
 	return best_joint;
 }
 
-bool block_has_joint(struct block *block, struct joint *joint)
-{
-	struct joint *j[5];
-	int n;
-	int i;
-
-	n = get_block_joints(block, j);
-
-	for (i = 0; i < n; i++) {
-		if (j[i] == joint)
-			return true;
-	}
-
-	return false;
-}
-
-bool share_block(struct design *design, struct joint *j1, struct joint *j2)
-{
-	struct block *block;
-
-	for (block = design->player_blocks.head; block; block = block->next) {
-		if (block_has_joint(block, j1) && block_has_joint(block, j2))
-			return true;
-	}
-
-	return false;
-}
-
 struct joint *joint_hit_test_exclude_rod(struct arena *arena, float x, float y, struct rod *rod, bool attached)
 {
 	struct design *design = &arena->design;

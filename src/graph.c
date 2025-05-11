@@ -414,7 +414,6 @@ static struct joint *find_closest_joint(struct attach_list *list, double x, doub
 {
 	double best_dist = 10.0;
 	struct joint *best_joint = NULL;
-	struct attach_node *best_att = NULL;
 	struct attach_node *att;
 
 	for (att = list->head; att; att = att->next) {
@@ -429,18 +428,42 @@ static struct joint *find_closest_joint(struct attach_list *list, double x, doub
 			if (dist < best_dist) {
 				best_dist = dist;
 				best_joint = joints[i];
-				best_att = att;
 			}
 		}
 	}
 
-	if (best_att) {
-		remove_attach_node(list, best_att);
-		free(best_att);
-	}
-
 	return best_joint;
 }
+
+static bool block_has_joint(struct block *block, struct joint *joint)
+{
+	struct joint *j[5];
+	int n;
+	int i;
+
+	n = get_block_joints(block, j);
+
+	for (i = 0; i < n; i++) {
+		if (j[i] == joint)
+			return true;
+	}
+
+	return false;
+}
+
+
+bool share_block(struct design *design, struct joint *j1, struct joint *j2)
+{
+	struct block *block;
+
+	for (block = design->player_blocks.head; block; block = block->next) {
+		if (block_has_joint(block, j1) && block_has_joint(block, j2))
+			return true;
+	}
+
+	return false;
+}
+
 
 static void add_rod(struct design *design, struct block *block, struct xml_block *xml_block)
 {
@@ -458,14 +481,25 @@ static void add_rod(struct design *design, struct block *block, struct xml_block
 	j1 = find_closest_joint(&att_list, x1, y1);
 	destroy_joints_list(&att_list);
 
-	if (!j0) {
+	if (j0 && j1) {
+		if (j0 == j1 || share_block(design, j0, j1))
+			j1 = NULL;
+	}
+
+	if (j0) {
+		x0 = j0->x;
+		y0 = j0->y;
+	} else {
 		j0 = new_joint(NULL, x0, y0);
 		append_joint(&design->joints, j0);
 	}
 	att0 = new_attach_node(block);
 	append_attach_node(&j0->att, att0);
 
-	if (!j1) {
+	if (j1) {
+		x1 = j1->x;
+		y1 = j1->y;
+	} else {
 		j1 = new_joint(NULL, x1, y1);
 		append_joint(&design->joints, j1);
 	}
@@ -495,7 +529,10 @@ static void add_wheel(struct design *design, struct block *block, struct xml_blo
 	j0 = find_closest_joint(&att_list, x0, y0);
 	destroy_joints_list(&att_list);
 
-	if (!j0) {
+	if (j0) {
+		x0 = j0->x;
+		y0 = j0->y;
+	} else {
 		j0 = new_joint(NULL, x0, y0);
 		append_joint(&design->joints, j0);
 	}
