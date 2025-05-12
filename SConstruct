@@ -76,9 +76,22 @@ fpatan_defines = [
     "USE_FPATAN",
     ]
 
-common_ccflags = [
+werror_ccflags = [
+    # actually caught an error originally in loop-contest
     "-Werror=incompatible-pointer-types",
+    # preemptively catch some other common errors
+    "-Werror=uninitialized",
+    "-Werror=maybe-uninitialized",
+    "-Werror=return-type",
+    "-Werror=implicit-function-declaration",
+    "-Werror=sign-compare",
+    "-Werror=format",
+    "-Werror=int-conversion",
+    "-Werror=pointer-sign",
+    "-Werror=strict-aliasing",
+    "-Werror=unused-variable",
     ]
+common_ccflags = werror_ccflags
 linux_ccflags = [
     "-O3",
     "-flto",

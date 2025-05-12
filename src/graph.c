@@ -84,10 +84,6 @@ struct material water_rod_material = {
 	.collision_mask = WATER_COLLISION_MASK,
 };
 
-static float goal_r = 1.000f;
-static float goal_g = 0.400f;
-static float goal_b = 0.400f;
-
 static void init_block_list(struct block_list *list)
 {
 	list->head = NULL;

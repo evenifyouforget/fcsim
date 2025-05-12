@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include <math.h>
 #include <float.h>
 #include <fpmath/fpmath.h>
@@ -44,19 +45,7 @@ typedef union { int4 i[2]; double x; double d; } mynumber;
 /**/ d11            = {{0x22b13c25, 0xbfb74580} }, /* -0.090... */
 /**/ d13            = {{0x8b31cbce, 0x3fb375f0} }, /*  0.076... */
   /* polynomial II */
-/**/ f3             = {{0x55555555, 0xbfd55555} }, /* -1/3      */
-/**/ ff3            = {{0x55555555, 0xbc755555} }, /* -1/3-f3   */
-/**/ f5             = {{0x9999999a, 0x3fc99999} }, /*  1/5      */
-/**/ ff5            = {{0x9999999a, 0xbc699999} }, /*  1/5-f5   */
-/**/ f7             = {{0x92492492, 0xbfc24924} }, /* -1/7      */
-/**/ ff7            = {{0x92492492, 0xbc624924} }, /* -1/7-f7   */
-/**/ f9             = {{0x1c71c71c, 0x3fbc71c7} }, /*  1/9      */
-/**/ ff9            = {{0x1c71c71c, 0x3c5c71c7} }, /*  1/9-f9   */
-/**/ f11            = {{0x745d1746, 0xbfb745d1} }, /* -1/11     */
-/**/ f13            = {{0x13b13b14, 0x3fb3b13b} }, /*  1/13     */
-/**/ f15            = {{0x11111111, 0xbfb11111} }, /* -1/15     */
-/**/ f17            = {{0x1e1e1e1e, 0x3fae1e1e} }, /*  1/17     */
-/**/ f19            = {{0xbca1af28, 0xbfaaf286} }, /* -1/19     */
+// all were unused. removed
   /* constants    */
 /**/ inv16          = {{0x00000000, 0x3fb00000} }, /*  1/16         */
 /**/ opi            = {{0x54442d18, 0x400921fb} }, /*  pi           */
@@ -69,28 +58,6 @@ typedef union { int4 i[2]; double x; double d; } mynumber;
 /**/ mqpi           = {{0x54442d18, 0xbfe921fb} }, /* -pi/4         */
 /**/ tqpi           = {{0x7f3321d2, 0x4002d97c} }, /*  3pi/4        */
 /**/ mtqpi          = {{0x7f3321d2, 0xc002d97c} }, /* -3pi/4        */
-/**/ u1             = {{0x00000000, 0x3c314c2a} }, /*  9.377e-19    */
-/**/ u2             = {{0x00000000, 0x3bf955e4} }, /*  8.584e-20    */
-/**/ u3             = {{0x00000000, 0x3bf955e4} }, /*  8.584e-20    */
-/**/ u4             = {{0x00000000, 0x3bf955e4} }, /*  8.584e-20    */
-/**/ u5             = {{0x00000000, 0x3aaef2d1} }, /*  5e-26        */
-/**/ u6             = {{0x00000000, 0x3a6eeb36} }, /*  3.122e-27    */
-/**/ u7             = {{0x00000000, 0x3a6eeb36} }, /*  3.122e-27    */
-/**/ u8             = {{0x00000000, 0x3a6eeb36} }, /*  3.122e-27    */
-/**/ u91            = {{0x00000000, 0x3c6dffc0} }, /*  1.301e-17    */
-/**/ u92            = {{0x00000000, 0x3c527bd0} }, /*  4.008e-18    */
-/**/ u93            = {{0x00000000, 0x3c3cd057} }, /*  1.562e-18    */
-/**/ u94            = {{0x00000000, 0x3c329cdf} }, /*  1.009e-18    */
-/**/ ua1            = {{0x00000000, 0x3c3a1edf} }, /*  1.416e-18    */
-/**/ ua2            = {{0x00000000, 0x3c33f0e1} }, /*  1.081e-18    */
-/**/ ub             = {{0x00000000, 0x3a98c56d} }, /*  2.001e-26    */
-/**/ uc             = {{0x00000000, 0x3a9375de} }, /*  1.572e-26    */
-/**/ ud[MM]         ={{{0x00000000, 0x38c6eddf} }, /*  3.450e-35    */
-/**/                  {{0x00000000, 0x35c6ef60} }, /*  1.226e-49    */
-/**/                  {{0x00000000, 0x32c6ed2f} }, /*  4.354e-64    */
-/**/                  {{0x00000000, 0x23c6eee8} }, /*  2.465e-136   */
-/**/                  {{0x00000000, 0x11c6ed16} }},/*  4.955e-223   */
-/**/ ue             = {{0x00000000, 0x38900e9d} }, /*  3.02e-36     */
 /**/ two500         = {{0x00000000, 0x5f300000} }, /*  2**500       */
 /**/ twom500        = {{0x00000000, 0x20b00000} }; /*  2**(-500)    */
 
@@ -1817,9 +1784,9 @@ double fp_atan2(double y, double x)
     }
 
   /* y=+-0 */
-  if (uy == 0x00000000)
+  if ((uint32_t)uy == 0x00000000)
     {
-      if (dy == 0x00000000)
+      if ((uint32_t)dy == 0x00000000)
 	{
 	  if ((ux & 0x80000000) == 0x00000000)
 	    return 0;
@@ -1827,9 +1794,9 @@ double fp_atan2(double y, double x)
 	    return opi.d;
 	}
     }
-  else if (uy == 0x80000000)
+  else if ((uint32_t)uy == 0x80000000)
     {
-      if (dy == 0x00000000)
+      if ((uint32_t)dy == 0x00000000)
 	{
 	  if ((ux & 0x80000000) == 0x00000000)
 	    return -0.0;
@@ -1848,16 +1815,16 @@ double fp_atan2(double y, double x)
     }
 
   /* x=+-INF */
-  if (ux == 0x7ff00000)
+  if ((uint32_t)ux == 0x7ff00000)
     {
-      if (dx == 0x00000000)
+      if ((uint32_t)dx == 0x00000000)
 	{
-	  if (uy == 0x7ff00000)
+	  if ((uint32_t)uy == 0x7ff00000)
 	    {
 	      if (dy == 0x00000000)
 		return qpi.d;
 	    }
-	  else if (uy == 0xfff00000)
+	  else if ((uint32_t)uy == 0xfff00000)
 	    {
 	      if (dy == 0x00000000)
 		return mqpi.d;
@@ -1871,18 +1838,18 @@ double fp_atan2(double y, double x)
 	    }
 	}
     }
-  else if (ux == 0xfff00000)
+  else if ((uint32_t)ux == 0xfff00000)
     {
-      if (dx == 0x00000000)
+      if ((uint32_t)dx == 0x00000000)
 	{
-	  if (uy == 0x7ff00000)
+	  if ((uint32_t)uy == 0x7ff00000)
 	    {
-	      if (dy == 0x00000000)
+	      if ((uint32_t)dy == 0x00000000)
 		return tqpi.d;
 	    }
-	  else if (uy == 0xfff00000)
+	  else if ((uint32_t)uy == 0xfff00000)
 	    {
-	      if (dy == 0x00000000)
+	      if ((uint32_t)dy == 0x00000000)
 		return mtqpi.d;
 	    }
 	  else
@@ -1896,14 +1863,14 @@ double fp_atan2(double y, double x)
     }
 
   /* y=+-INF */
-  if (uy == 0x7ff00000)
+  if ((uint32_t)uy == 0x7ff00000)
     {
-      if (dy == 0x00000000)
+      if ((uint32_t)dy == 0x00000000)
 	return hpi.d;
     }
-  else if (uy == 0xfff00000)
+  else if ((uint32_t)uy == 0xfff00000)
     {
-      if (dy == 0x00000000)
+      if ((uint32_t)dy == 0x00000000)
 	return mhpi.d;
     }
 
@@ -1919,7 +1886,6 @@ double fp_atan2(double y, double x)
     {
       if (x > 0)
 	{
-	  double ret;
 	  z = ay / ax;
 	  return copysign (z, y);
 	}

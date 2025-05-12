@@ -37,7 +37,7 @@ void dtostr_frac(char *buf, double val)
 {
 	uint8_t tmp[18];
 	uint64_t u;
-	int l;
+	int l = 0;
 	int i;
 
 	u = val * 1e18;
@@ -49,7 +49,7 @@ void dtostr_frac(char *buf, double val)
 		u /= 10;
 	}
 
-	for (i = 0; i < 18; i++) {
+	for (i = 0; i < 18; i++) { // compiler says remove the condition if it is always true
 		if (tmp[i] != 0) {
 			l = i;
 			break;

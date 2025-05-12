@@ -17,7 +17,7 @@ int main() {
         for(int j = 0; j < i; ++j) {
             vec.push_back(j);
         }
-        assert(vec.size() == i);
+        assert(vec.size() == (size_t)i);
     }
     // test vector index
     for(int i = 0; i < 100; ++i) {
@@ -26,7 +26,7 @@ int main() {
             vec.push_back(j);
             assert(vec[j] == j);
         }
-        assert(vec.size() == i);
+        assert(vec.size() == (size_t)i);
     }
     // test vector clear
     for(int i = 0; i < 100; ++i) {
@@ -35,13 +35,13 @@ int main() {
             vec.push_back(j);
             assert(vec[j] == j);
         }
-        assert(vec.size() == i);
+        assert(vec.size() == (size_t)i);
         vec.clear();
         for(int j = 0; j < i; ++j) {
             vec.push_back(2 * j);
             assert(vec[j] == 2 * j);
         }
-        assert(vec.size() == i);
+        assert(vec.size() == (size_t)i);
     }
     // test string construct destruct
     {
@@ -142,7 +142,7 @@ int main() {
         assert(str.size() == 0);
         for(int i = 1; i < 10; ++i) {
             str.append('0' + i);
-            assert(str.size() == i);
+            assert(str.size() == (size_t)i);
         }
     }
     // test to_string 0

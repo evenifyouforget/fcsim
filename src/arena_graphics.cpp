@@ -137,7 +137,7 @@ uint16_t block_graphics_layer::push_vertex(float x, float y, color col) {
 }
 
 void block_graphics::ensure_layer(int z_offset) {
-    while(layers.size() <= z_offset) {
+    while((int)layers.size() <= z_offset) {
         layers.emplace_back();
     }
 }
@@ -290,7 +290,6 @@ static void block_graphics_add_rect_single(struct block_graphics *graphics,
 	float ws = w * sina_half;
 	float hc = h * cosa_half;
 	float hs = h * sina_half;
-	int i;
 
     uint16_t v1 = graphics->push_vertex(shell.x + wc - hs, shell.y + ws + hc, col, z_offset);
     uint16_t v2 = graphics->push_vertex(shell.x - wc - hs, shell.y - ws + hc, col, z_offset);
@@ -563,7 +562,7 @@ void regenerate_ui_buttons(arena* arena) {
     ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
     all_buttons->buttons.clear();
 
-    float vw = arena->view.width;
+    //float vw = arena->view.width;
     float vh = arena->view.height;
 
     {

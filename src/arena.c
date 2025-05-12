@@ -757,7 +757,6 @@ void update_wheel_joints2(struct wheel *wheel)
 		3.141592653589793,
 		4.71238898038469,
 	};
-	double spoke_x, spoke_y;
 	double x, y;
 	int i;
 

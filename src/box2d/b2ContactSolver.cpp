@@ -73,8 +73,7 @@ void b2ContactSolver_ctor(b2ContactSolver *solver, b2Contact** contacts, int32 c
 				ccp->normalImpulse = cp->normalImpulse;
 				ccp->tangentImpulse = cp->tangentImpulse;
 				ccp->separation = cp->separation;
-				unsigned long long dupa = 0x7fffffffe0000000LLU;
-				ccp->positionImpulse = *(double *)&dupa;
+				ccp->positionImpulse = NAN;
 
 				b2Vec2 r1 = cp->position - b1->m_position;
 				b2Vec2 r2 = cp->position - b2->m_position;
@@ -263,7 +262,6 @@ bool b2ContactSolver_SolvePositionConstraints(b2ContactSolver *solver, float64 b
 		float64 invMass2 = b2->m_invMass;
 		float64 invI2 = b2->m_invI;
 		b2Vec2 normal = c->normal;
-		b2Vec2 tangent = b2Cross(normal, 1.0);
 
 		// Solver normal constraints
 		for (int32 j = 0; j < c->pointCount; ++j)
