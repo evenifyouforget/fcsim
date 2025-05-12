@@ -105,6 +105,7 @@ struct arena {
 	// ui button templates
 	void* ui_buttons; // actual type: ui_button_collection*
 	bool ui_toolbar_opened;
+	bool ui_speedbar_opened;
 };
 
 bool arena_compile_shaders(void);
@@ -138,6 +139,10 @@ extern GLuint joint_program_coord_attrib;
 
 // c++ compat
 void block_graphics_init(struct arena *ar);
+#ifndef ARENA_C
+extern int _fcsim_base_fps_mod;
 extern double _fcsim_target_tps;
+#endif
+void change_speed_factor(struct arena *arena, double new_factor, int new_base_fps_mod);
 
 #endif

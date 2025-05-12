@@ -564,6 +564,42 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
     if(button.id == ui_button_id{2, 3}) {
         arena->single_ticks_remaining = 1;
     }
+    if(button.id == ui_button_id{3, 0}) {
+        arena->ui_speedbar_opened = true;
+    }
+    if(button.id == ui_button_id{4, 1}) {
+        arena->ui_speedbar_opened = false;
+    }
+    if(button.id == ui_button_id{4, 2}) {
+        change_speed_factor(arena, 1, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 3}) {
+        change_speed_factor(arena, 2, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 4}) {
+        change_speed_factor(arena, 4, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 5}) {
+        change_speed_factor(arena, 8, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 6}) {
+        change_speed_factor(arena, 100, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 7}) {
+        change_speed_factor(arena, 1e3, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 8}) {
+        change_speed_factor(arena, 1e4, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 9}) {
+        change_speed_factor(arena, 1e5, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 10}) {
+        change_speed_factor(arena, 1e12, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 11}) {
+        change_speed_factor(arena, NO_CHANGE, (_fcsim_base_fps_mod + 1) % BASE_FPS_TABLE_SIZE);
+    }
 }
 
 void regenerate_ui_buttons(arena* arena) {
@@ -660,6 +696,97 @@ void regenerate_ui_buttons(arena* arena) {
         button.texts.push_back(ui_button_text{"Step", 1});
         all_buttons->buttons.push_back(button);
     }
+
+    float top_bar_x_offset = -50 + (!arena->ui_toolbar_opened?90:484);
+
+    {
+        ui_button_single button{{3, 0}, top_bar_x_offset + 75, vh, 30, 30};
+        button.enabled = !arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"v", 2});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 0}, top_bar_x_offset + 120 + 55 * 4.5f, vh, 60 + 55 * 9 + 8, 128};
+        button.enabled = arena->ui_speedbar_opened;
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 1}, top_bar_x_offset + 75, vh, 30, 128, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"^", 2, 0, -30});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 2}, top_bar_x_offset + 120, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"1", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"1x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 3}, top_bar_x_offset + 120 + 55, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"2", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"2x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 4}, top_bar_x_offset + 120 + 55 * 2, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"3", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"4x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 5}, top_bar_x_offset + 120 + 55 * 3, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"4", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"8x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 6}, top_bar_x_offset + 120 + 55 * 4, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"5", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"100x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 7}, top_bar_x_offset + 120 + 55 * 5, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"6", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"1000x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 8}, top_bar_x_offset + 120 + 55 * 6, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"7", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"10000x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 9}, top_bar_x_offset + 120 + 55 * 7, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"8", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"100000x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 10}, top_bar_x_offset + 120 + 55 * 8, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"9", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"MAX", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 11}, top_bar_x_offset + 120 + 55 * 9, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"0", 2, 0, 10});
+        button.texts.push_back(ui_button_text{"Change", 1, 0, -5});
+        button.texts.push_back(ui_button_text{"base TPS", 1, 0, -15});
+        all_buttons->buttons.push_back(button);
+    }
 }
 
 // Draw text, and return the x where the text ends
@@ -706,7 +833,7 @@ void draw_tick_counter(struct arena *arena)
     x = draw_text_default(arena, "FPS", x, 10, 1);
     x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-    x = draw_text_default(arena, std::to_string((int64_t)rint(tps_value)), x, 10);
+    x = draw_text_default(arena, tps_value >= 1e12?"Infinity":std::to_string((int64_t)rint(tps_value)), x, 10);
     x = draw_text_default(arena, !tps_is_prediction?"TPS average":"TPS predicted", x, 10, 1);
 }
 

@@ -6,6 +6,7 @@
 #include <box2d/b2World.h>
 #include <box2d/b2CMath.h>
 
+#define ARENA_C
 #include "gl.h"
 #include "xml.h"
 #include "interval.h"
@@ -415,7 +416,7 @@ void arena_key_down_event(struct arena *arena, int key)
 		break;
 	case 18: /* 9 */
 		// maximum hyperspeed
-		change_speed_factor(arena, 1e9, NO_CHANGE);
+		change_speed_factor(arena, 1e12, NO_CHANGE);
 		break;
 	case 19: /* 0 */
 		// cycle base speeds
