@@ -4,7 +4,9 @@
 #include "graph.h"
 #include "text.h"
 
-#define BASE_FPS 30
+#define NO_CHANGE -1
+#define BASE_FPS_TABLE {30, 36}
+#define BASE_FPS_TABLE_SIZE 2
 #ifdef __wasm__
 #define MIN_MSPT 33
 #else
