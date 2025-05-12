@@ -35,13 +35,15 @@ struct block_graphics_layer {
 
 struct fps_tracker_t {
     // number of samples affects smoothing and latency
-    // fps ranges from about 30 to 60, so this takes at most 3 seconds to update
-    static const size_t buffer_size = 90;
+    // fps ranges from about 30 to 144, so this takes 3.5 ~ 17 seconds to update
+    static const size_t buffer_size = 512;
     std::vector<double> records_ms;
     std::vector<int64_t> records_tick;
     size_t index = 0;
+    size_t samples = 0;
     void push_record(int64_t);
-    double get_tps();
+    double get_tps(size_t interval = buffer_size - 1);
+    void clear();
 };
 
 struct block_graphics {
@@ -190,15 +192,21 @@ void fps_tracker_t::push_record(int64_t tick_value) {
     index = (index + 1) % buffer_size;
     records_ms[index] = time_value;
     records_tick[index] = tick_value;
+    samples++;
 }
 
-double fps_tracker_t::get_tps() {
-    if(records_ms.size() < buffer_size) {
+double fps_tracker_t::get_tps(size_t interval) {
+    if(samples < interval + 1) {
         // not enough data
         return 0;
     }
-    size_t prev_index = (index + 1) % buffer_size;
+    size_t prev_index = (index + buffer_size - interval) % buffer_size;
     return 1000 * (records_tick[index] - records_tick[prev_index]) / (records_ms[index] - records_ms[prev_index]);
+}
+
+void fps_tracker_t::clear() {
+    records_ms.clear();
+    samples = 0;
 }
 
 shell get_shell(block* block) {
@@ -665,6 +673,7 @@ float draw_text_default(arena* arena, std::string text, float x, float y, float 
 
 void draw_tick_counter(struct arena *arena)
 {
+    const bool is_running_arena = is_running(arena);
     block_graphics* graphics = (block_graphics*)arena->block_graphics_v2b;
     float x = 10;
     x = draw_text_default(arena, std::to_string(arena->tick), x, 10);
@@ -678,14 +687,27 @@ void draw_tick_counter(struct arena *arena)
     // fps/tps counter
     graphics->fps_tracker.push_record(arena->frame_counter++);
     graphics->tps_tracker.push_record(arena->tick);
+    double fps_value = graphics->fps_tracker.get_tps();
+    // try to average over 2 seconds
+    size_t tps_interval = std::min<size_t>(fps_tracker_t::buffer_size - 1, std::max<size_t>(1, (size_t)(fps_value * 2)));
+    double tps_value = graphics->tps_tracker.get_tps(tps_interval);
+    bool tps_is_prediction = tps_value == 0 || !is_running_arena;
+    if(!is_running_arena) {
+        // reset when not running
+        graphics->tps_tracker.clear();
+    }
+    if(tps_is_prediction) {
+        // if not running, or not enough data, show a static prediction
+        tps_value = _fcsim_target_tps;
+    }
     x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-    x = draw_text_default(arena, std::to_string((int64_t)rint(graphics->fps_tracker.get_tps())), x, 10);
+    x = draw_text_default(arena, std::to_string((int64_t)rint(fps_value)), x, 10);
     x = draw_text_default(arena, "FPS", x, 10, 1);
     x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-    x = draw_text_default(arena, std::to_string((int64_t)rint(graphics->tps_tracker.get_tps())), x, 10);
-    x = draw_text_default(arena, "TPS", x, 10, 1);
+    x = draw_text_default(arena, std::to_string((int64_t)rint(tps_value)), x, 10);
+    x = draw_text_default(arena, !tps_is_prediction?"TPS average":"TPS predicted", x, 10, 1);
 }
 
 void draw_ui(arena* arena) {

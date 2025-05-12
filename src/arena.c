@@ -294,9 +294,10 @@ void change_speed(struct arena *arena, int ms, int multiply)
 	}
 }
 
-double _fcsim_speed_factor = 1;
+double _fcsim_speed_factor = 2;
 int _fcsim_base_fps_mod = 0;
 int _fcsim_base_fps_table[] = BASE_FPS_TABLE;
+double _fcsim_target_tps = 60;
 void change_speed_factor(struct arena *arena, double new_factor, int new_base_fps_mod) {
 	// only change values if not given NO_CHANGE
 	if(new_factor != NO_CHANGE) {
@@ -309,6 +310,7 @@ void change_speed_factor(struct arena *arena, double new_factor, int new_base_fp
 	double factor = _fcsim_speed_factor;
 	int base_fps = _fcsim_base_fps_table[_fcsim_base_fps_mod];
 	if(factor < 1)factor = 1;
+	_fcsim_target_tps = factor * base_fps;
 	double mspt = 1000 / (base_fps * factor);
 	long long int multiples = 1 + (long long int)(MIN_MSPT / mspt);
 	long long int mspt_int = (long long int)(1000 * multiples / (base_fps * factor));

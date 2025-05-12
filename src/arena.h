@@ -138,5 +138,6 @@ extern GLuint joint_program_coord_attrib;
 
 // c++ compat
 void block_graphics_init(struct arena *ar);
+extern double _fcsim_target_tps;
 
 #endif
