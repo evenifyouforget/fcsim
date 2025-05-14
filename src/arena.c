@@ -299,6 +299,7 @@ double _fcsim_speed_factor = 2;
 int _fcsim_base_fps_mod = 0;
 int _fcsim_base_fps_table[] = BASE_FPS_TABLE;
 double _fcsim_target_tps = 60;
+int _fcsim_speed_preset = 2;
 void change_speed_factor(struct arena *arena, double new_factor, int new_base_fps_mod) {
 	// only change values if not given NO_CHANGE
 	if(new_factor != NO_CHANGE) {
@@ -316,6 +317,50 @@ void change_speed_factor(struct arena *arena, double new_factor, int new_base_fp
 	long long int multiples = 1 + (long long int)(MIN_MSPT / mspt);
 	long long int mspt_int = (long long int)(1000 * multiples / (base_fps * factor));
 	change_speed(arena, (int)mspt_int, (int)multiples);
+}
+
+void change_speed_preset(struct arena *arena, int preset_index) {
+	_fcsim_speed_preset = preset_index;
+	double new_factor = 1;
+	switch(preset_index) {
+		case 1: {
+			new_factor = 1;
+			break;
+		}
+		case 2: {
+			new_factor = 2;
+			break;
+		}
+		case 3: {
+			new_factor = 4;
+			break;
+		}
+		case 4: {
+			new_factor = 10;
+			break;
+		}
+		case 5: {
+			new_factor = 100;
+			break;
+		}
+		case 6: {
+			new_factor = 1000;
+			break;
+		}
+		case 7: {
+			new_factor = 1e4;
+			break;
+		}
+		case 8: {
+			new_factor = 1e5;
+			break;
+		}
+		case 9: {
+			new_factor = 2e9;
+			break;
+		}
+	}
+	change_speed_factor(arena, new_factor, NO_CHANGE);
 }
 
 void mouse_up_new_block(struct arena *arena);
@@ -361,6 +406,8 @@ void start_stop(struct arena *arena)
 		arena->state = STATE_NORMAL_PAN;
 		break;
 	}
+	// also unpause
+	arena->single_ticks_remaining = -1;
 }
 
 void arena_key_down_event(struct arena *arena, int key)
@@ -391,32 +438,32 @@ void arena_key_down_event(struct arena *arena, int key)
 		arena->tool_hidden = TOOL_CCW_WHEEL;
 		break;
 	case 10: /* 1 */
-		change_speed_factor(arena, 1, NO_CHANGE);
+		change_speed_preset(arena, 1);
 		break;
 	case 11: /* 2 */
-		change_speed_factor(arena, 2, NO_CHANGE);
+		change_speed_preset(arena, 2);
 		break;
 	case 12: /* 3 */
-		change_speed_factor(arena, 4, NO_CHANGE);
+		change_speed_preset(arena, 3);
 		break;
 	case 13: /* 4 */
-		change_speed_factor(arena, 8, NO_CHANGE);
+		change_speed_preset(arena, 4);
 		break;
 	case 14: /* 5 */
-		change_speed_factor(arena, 100, NO_CHANGE);
+		change_speed_preset(arena, 5);
 		break;
 	case 15: /* 6 */
-		change_speed_factor(arena, 1e3, NO_CHANGE);
+		change_speed_preset(arena, 6);
 		break;
 	case 16: /* 7 */
-		change_speed_factor(arena, 1e4, NO_CHANGE);
+		change_speed_preset(arena, 7);
 		break;
 	case 17: /* 8 */
-		change_speed_factor(arena, 1e5, NO_CHANGE);
+		change_speed_preset(arena, 8);
 		break;
 	case 18: /* 9 */
 		// maximum hyperspeed
-		change_speed_factor(arena, 2e9, NO_CHANGE);
+		change_speed_preset(arena, 9);
 		break;
 	case 19: /* 0 */
 		// cycle base speeds
