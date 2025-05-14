@@ -554,6 +554,8 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
     }
     if(button.id == ui_button_id{2, 0}) {
         start_stop(arena);
+        // also unpause
+        arena->single_ticks_remaining = -1;
     }
     if(button.id == ui_button_id{2, 1}) {
         arena->single_ticks_remaining = arena->single_ticks_remaining==-1?0:-1;
