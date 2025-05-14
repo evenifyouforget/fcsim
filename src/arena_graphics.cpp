@@ -595,7 +595,7 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
         change_speed_factor(arena, 1e5, NO_CHANGE);
     }
     if(button.id == ui_button_id{4, 10}) {
-        change_speed_factor(arena, 1e12, NO_CHANGE);
+        change_speed_factor(arena, 2e9, NO_CHANGE);
     }
     if(button.id == ui_button_id{4, 11}) {
         change_speed_factor(arena, NO_CHANGE, (_fcsim_base_fps_mod + 1) % BASE_FPS_TABLE_SIZE);
@@ -833,7 +833,7 @@ void draw_tick_counter(struct arena *arena)
     x = draw_text_default(arena, "FPS", x, 10, 1);
     x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-    x = draw_text_default(arena, tps_value >= 1e12?"Infinity":std::to_string((int64_t)rint(tps_value)), x, 10);
+    x = draw_text_default(arena, tps_value >= 1e9?"Infinity":std::to_string((int64_t)rint(tps_value)), x, 10);
     x = draw_text_default(arena, !tps_is_prediction?"TPS average":"TPS predicted", x, 10, 1);
 }
 
