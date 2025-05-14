@@ -6,6 +6,7 @@
 #include <box2d/b2World.h>
 #include <box2d/b2CMath.h>
 
+#define ARENA_C
 #include "gl.h"
 #include "xml.h"
 #include "interval.h"
@@ -294,11 +295,26 @@ void change_speed(struct arena *arena, int ms, int multiply)
 	}
 }
 
-void change_speed_factor(struct arena *arena, double factor) {
+double _fcsim_speed_factor = 2;
+int _fcsim_base_fps_mod = 0;
+int _fcsim_base_fps_table[] = BASE_FPS_TABLE;
+double _fcsim_target_tps = 60;
+void change_speed_factor(struct arena *arena, double new_factor, int new_base_fps_mod) {
+	// only change values if not given NO_CHANGE
+	if(new_factor != NO_CHANGE) {
+		_fcsim_speed_factor = new_factor;
+	}
+	if(new_base_fps_mod != NO_CHANGE) {
+		_fcsim_base_fps_mod = new_base_fps_mod;
+	}
+	// calculate new speed factor
+	double factor = _fcsim_speed_factor;
+	int base_fps = _fcsim_base_fps_table[_fcsim_base_fps_mod];
 	if(factor < 1)factor = 1;
-	double mspt = 1000 / (BASE_FPS * factor);
+	_fcsim_target_tps = factor * base_fps;
+	double mspt = 1000 / (base_fps * factor);
 	long long int multiples = 1 + (long long int)(MIN_MSPT / mspt);
-	long long int mspt_int = (long long int)(1000 * multiples / (BASE_FPS * factor));
+	long long int mspt_int = (long long int)(1000 * multiples / (base_fps * factor));
 	change_speed(arena, (int)mspt_int, (int)multiples);
 }
 
@@ -375,31 +391,36 @@ void arena_key_down_event(struct arena *arena, int key)
 		arena->tool_hidden = TOOL_CCW_WHEEL;
 		break;
 	case 10: /* 1 */
-		change_speed_factor(arena, 1);
+		change_speed_factor(arena, 1, NO_CHANGE);
 		break;
 	case 11: /* 2 */
-		change_speed_factor(arena, 2);
+		change_speed_factor(arena, 2, NO_CHANGE);
 		break;
 	case 12: /* 3 */
-		change_speed_factor(arena, 4);
+		change_speed_factor(arena, 4, NO_CHANGE);
 		break;
 	case 13: /* 4 */
-		change_speed_factor(arena, 8);
+		change_speed_factor(arena, 8, NO_CHANGE);
 		break;
 	case 14: /* 5 */
-		change_speed_factor(arena, 100);
+		change_speed_factor(arena, 100, NO_CHANGE);
 		break;
 	case 15: /* 6 */
-		change_speed_factor(arena, 1e3);
+		change_speed_factor(arena, 1e3, NO_CHANGE);
 		break;
 	case 16: /* 7 */
-		change_speed_factor(arena, 1e4);
+		change_speed_factor(arena, 1e4, NO_CHANGE);
 		break;
 	case 17: /* 8 */
-		change_speed_factor(arena, 1e5);
+		change_speed_factor(arena, 1e5, NO_CHANGE);
 		break;
 	case 18: /* 9 */
-		change_speed_factor(arena, 1e9);
+		// maximum hyperspeed
+		change_speed_factor(arena, 1e12, NO_CHANGE);
+		break;
+	case 19: /* 0 */
+		// cycle base speeds
+		change_speed_factor(arena, NO_CHANGE, (_fcsim_base_fps_mod + 1) % BASE_FPS_TABLE_SIZE);
 		break;
 	case 50: /* shift */
 		arena->shift = true;
@@ -757,7 +778,6 @@ void update_wheel_joints2(struct wheel *wheel)
 		3.141592653589793,
 		4.71238898038469,
 	};
-	double spoke_x, spoke_y;
 	double x, y;
 	int i;
 

@@ -76,6 +76,22 @@ fpatan_defines = [
     "USE_FPATAN",
     ]
 
+werror_ccflags = [
+    # actually caught an error originally in loop-contest
+    "-Werror=incompatible-pointer-types",
+    # preemptively catch some other common errors
+    "-Werror=uninitialized",
+    "-Werror=maybe-uninitialized",
+    "-Werror=return-type",
+    "-Werror=implicit-function-declaration",
+    "-Werror=sign-compare",
+    "-Werror=format",
+    "-Werror=int-conversion",
+    "-Werror=pointer-sign",
+    "-Werror=strict-aliasing",
+    "-Werror=unused-variable",
+    ]
+common_ccflags = werror_ccflags
 linux_ccflags = [
     "-O3",
     "-flto",
@@ -109,7 +125,7 @@ base_env = Environment(
     )
 
 linux_env = base_env.Clone(
-    CCFLAGS = linux_ccflags,
+    CCFLAGS = common_ccflags + linux_ccflags,
     CPPPATH = common_include,
     # if using CCPDEFINES, need to match for fpatan variant
     LIBS = libs
@@ -117,14 +133,14 @@ linux_env = base_env.Clone(
 linux_env.VariantDir("build/linux", ".", False)
 
 test_env = base_env.Clone(
-    CCFLAGS = test_ccflags,
+    CCFLAGS = common_ccflags + test_ccflags,
     CPPPATH = common_include + wasm_include,
     CPPDEFINES = test_defines
     )
 test_env.VariantDir("build/test", ".", False)
 
 wasm_env = base_env.Clone(
-    CCFLAGS = wasm_ccflags,
+    CCFLAGS = common_ccflags + wasm_ccflags,
     CPPPATH = common_include + wasm_include,
     CC = 'clang',
     CXX = 'clang++',

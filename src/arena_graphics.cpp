@@ -35,13 +35,15 @@ struct block_graphics_layer {
 
 struct fps_tracker_t {
     // number of samples affects smoothing and latency
-    // fps ranges from about 30 to 60, so this takes at most 3 seconds to update
-    static const size_t buffer_size = 90;
+    // fps ranges from about 30 to 144, so this takes 3.5 ~ 17 seconds to update
+    static const size_t buffer_size = 512;
     std::vector<double> records_ms;
     std::vector<int64_t> records_tick;
     size_t index = 0;
+    size_t samples = 0;
     void push_record(int64_t);
-    double get_tps();
+    double get_tps(size_t interval = buffer_size - 1);
+    void clear();
 };
 
 struct block_graphics {
@@ -137,7 +139,7 @@ uint16_t block_graphics_layer::push_vertex(float x, float y, color col) {
 }
 
 void block_graphics::ensure_layer(int z_offset) {
-    while(layers.size() <= z_offset) {
+    while((int)layers.size() <= z_offset) {
         layers.emplace_back();
     }
 }
@@ -190,15 +192,21 @@ void fps_tracker_t::push_record(int64_t tick_value) {
     index = (index + 1) % buffer_size;
     records_ms[index] = time_value;
     records_tick[index] = tick_value;
+    samples++;
 }
 
-double fps_tracker_t::get_tps() {
-    if(records_ms.size() < buffer_size) {
+double fps_tracker_t::get_tps(size_t interval) {
+    if(samples < interval + 1) {
         // not enough data
         return 0;
     }
-    size_t prev_index = (index + 1) % buffer_size;
+    size_t prev_index = (index + buffer_size - interval) % buffer_size;
     return 1000 * (records_tick[index] - records_tick[prev_index]) / (records_ms[index] - records_ms[prev_index]);
+}
+
+void fps_tracker_t::clear() {
+    records_ms.clear();
+    samples = 0;
 }
 
 shell get_shell(block* block) {
@@ -290,7 +298,6 @@ static void block_graphics_add_rect_single(struct block_graphics *graphics,
 	float ws = w * sina_half;
 	float hc = h * cosa_half;
 	float hs = h * sina_half;
-	int i;
 
     uint16_t v1 = graphics->push_vertex(shell.x + wc - hs, shell.y + ws + hc, col, z_offset);
     uint16_t v2 = graphics->push_vertex(shell.x - wc - hs, shell.y - ws + hc, col, z_offset);
@@ -557,13 +564,49 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
     if(button.id == ui_button_id{2, 3}) {
         arena->single_ticks_remaining = 1;
     }
+    if(button.id == ui_button_id{3, 0}) {
+        arena->ui_speedbar_opened = true;
+    }
+    if(button.id == ui_button_id{4, 1}) {
+        arena->ui_speedbar_opened = false;
+    }
+    if(button.id == ui_button_id{4, 2}) {
+        change_speed_factor(arena, 1, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 3}) {
+        change_speed_factor(arena, 2, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 4}) {
+        change_speed_factor(arena, 4, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 5}) {
+        change_speed_factor(arena, 8, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 6}) {
+        change_speed_factor(arena, 100, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 7}) {
+        change_speed_factor(arena, 1e3, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 8}) {
+        change_speed_factor(arena, 1e4, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 9}) {
+        change_speed_factor(arena, 1e5, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 10}) {
+        change_speed_factor(arena, 1e12, NO_CHANGE);
+    }
+    if(button.id == ui_button_id{4, 11}) {
+        change_speed_factor(arena, NO_CHANGE, (_fcsim_base_fps_mod + 1) % BASE_FPS_TABLE_SIZE);
+    }
 }
 
 void regenerate_ui_buttons(arena* arena) {
     ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
     all_buttons->buttons.clear();
 
-    float vw = arena->view.width;
+    //float vw = arena->view.width;
     float vh = arena->view.height;
 
     {
@@ -653,6 +696,97 @@ void regenerate_ui_buttons(arena* arena) {
         button.texts.push_back(ui_button_text{"Step", 1});
         all_buttons->buttons.push_back(button);
     }
+
+    float top_bar_x_offset = -50 + (!arena->ui_toolbar_opened?90:484);
+
+    {
+        ui_button_single button{{3, 0}, top_bar_x_offset + 75, vh, 30, 30};
+        button.enabled = !arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"v", 2});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 0}, top_bar_x_offset + 120 + 55 * 4.5f, vh, 60 + 55 * 9 + 8, 128};
+        button.enabled = arena->ui_speedbar_opened;
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 1}, top_bar_x_offset + 75, vh, 30, 128, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"^", 2, 0, -30});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 2}, top_bar_x_offset + 120, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"1", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"1x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 3}, top_bar_x_offset + 120 + 55, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"2", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"2x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 4}, top_bar_x_offset + 120 + 55 * 2, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"3", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"4x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 5}, top_bar_x_offset + 120 + 55 * 3, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"4", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"8x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 6}, top_bar_x_offset + 120 + 55 * 4, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"5", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"100x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 7}, top_bar_x_offset + 120 + 55 * 5, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"6", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"1000x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 8}, top_bar_x_offset + 120 + 55 * 6, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"7", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"10000x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 9}, top_bar_x_offset + 120 + 55 * 7, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"8", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"100000x", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 10}, top_bar_x_offset + 120 + 55 * 8, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"9", 2, 0, 5});
+        button.texts.push_back(ui_button_text{"MAX", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{4, 11}, top_bar_x_offset + 120 + 55 * 9, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_speedbar_opened;
+        button.texts.push_back(ui_button_text{"0", 2, 0, 10});
+        button.texts.push_back(ui_button_text{"Change", 1, 0, -5});
+        button.texts.push_back(ui_button_text{"base TPS", 1, 0, -15});
+        all_buttons->buttons.push_back(button);
+    }
 }
 
 // Draw text, and return the x where the text ends
@@ -666,6 +800,7 @@ float draw_text_default(arena* arena, std::string text, float x, float y, float 
 
 void draw_tick_counter(struct arena *arena)
 {
+    const bool is_running_arena = is_running(arena);
     block_graphics* graphics = (block_graphics*)arena->block_graphics_v2b;
     float x = 10;
     x = draw_text_default(arena, std::to_string(arena->tick), x, 10);
@@ -679,14 +814,27 @@ void draw_tick_counter(struct arena *arena)
     // fps/tps counter
     graphics->fps_tracker.push_record(arena->frame_counter++);
     graphics->tps_tracker.push_record(arena->tick);
+    double fps_value = graphics->fps_tracker.get_tps();
+    // try to average over 2 seconds
+    size_t tps_interval = std::min<size_t>(fps_tracker_t::buffer_size - 1, std::max<size_t>(1, (size_t)(fps_value * 2)));
+    double tps_value = graphics->tps_tracker.get_tps(tps_interval);
+    bool tps_is_prediction = tps_value == 0 || !is_running_arena;
+    if(!is_running_arena) {
+        // reset when not running
+        graphics->tps_tracker.clear();
+    }
+    if(tps_is_prediction) {
+        // if not running, or not enough data, show a static prediction
+        tps_value = _fcsim_target_tps;
+    }
     x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-    x = draw_text_default(arena, std::to_string((int64_t)rint(graphics->fps_tracker.get_tps())), x, 10);
+    x = draw_text_default(arena, std::to_string((int64_t)rint(fps_value)), x, 10);
     x = draw_text_default(arena, "FPS", x, 10, 1);
     x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-    x = draw_text_default(arena, std::to_string((int64_t)rint(graphics->tps_tracker.get_tps())), x, 10);
-    x = draw_text_default(arena, "TPS", x, 10, 1);
+    x = draw_text_default(arena, tps_value >= 1e12?"Infinity":std::to_string((int64_t)rint(tps_value)), x, 10);
+    x = draw_text_default(arena, !tps_is_prediction?"TPS average":"TPS predicted", x, 10, 1);
 }
 
 void draw_ui(arena* arena) {

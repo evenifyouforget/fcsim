@@ -3,6 +3,13 @@
 const FC_URL = "https://fantasticcontraption.com";
 const SELF_URL = "";
 
+function self_url_full() {
+	// https://stackoverflow.com/a/6257480
+	// ends in /
+	// no query parameters
+	return location.protocol + '//' + location.host + location.pathname;
+}
+
 let play_button  = document.getElementById("play");
 let save_button  = document.getElementById("save");
 let save_menu    = document.getElementById("save_menu");
@@ -325,6 +332,7 @@ function to_key(code)
 	if (code == "Digit7") return 16;
 	if (code == "Digit8") return 17;
 	if (code == "Digit9") return 18;
+	if (code == "Digit0") return 19;
 	if (code == "ShiftLeft") return 50;
 	if (code == "ControlLeft") return 37;
 	return 0;
@@ -387,7 +395,7 @@ function alloc_str(str)
 function on_text(text)
 {
 	console.log(text);
-	design_link.innerHTML = "fcsim.com/?designId=" + text;
+	design_link.innerHTML = self_url_full() + "?designId=" + text;
 	design_link.style.display = "block";
 }
 

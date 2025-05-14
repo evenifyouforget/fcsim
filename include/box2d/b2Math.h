@@ -28,6 +28,11 @@
 
 #define MIN_VALUE 5e-324
 
+#ifndef NAN
+// https://stackoverflow.com/a/7212363
+#define NAN (0.0 / 0.0)
+#endif
+
 inline bool b2IsValid(float64 x)
 {
 #ifdef _MSC_VER
