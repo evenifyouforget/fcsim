@@ -103,24 +103,25 @@ static void init_attach_list(struct attach_list *list)
 }
 
 uint32_t piece_color_table[FCSIM_NUM_TYPES][2] = {
-	{0xff007f09, 0xff01be02},
-	{0xff007f09, 0xff01be02},
-	{0xffc5550e, 0xfff8dc2f},
-	{0xffbd591b, 0xfff98931},
-	{0xffb86461, 0xfffe6766},
-	{0xffb86461, 0xfffe6766},
-	{0xffb86461, 0xfffe6766},
-	{0xffb86461, 0xfffe6766},
-	{0xff0b6afc, 0xff8cfce4},
-	{0xfffd8003, 0xffffed00},
-	{0xffce49a3, 0xffffcfce},
-	{0xfffeffff, 0xff0001fe},
-	{0xffb55a04, 0xff6a3502},
-	{0x00ffffff, 0xff808080},
-	{0xff7878ee, 0xffbedcf8},
-	{0xffbc6667, 0xfff29291},
-	{0x00000000, 0xff87bdf1},
-	{0xff404886, 0xff3a3b54},
+	{0xff007f09, 0xff01be02}, // FCSIM_STAT_RECT
+	{0xff007f09, 0xff01be02}, // FCSIM_STAT_CIRCLE
+	{0xffc5550e, 0xfff8dc2f}, // FCSIM_DYN_RECT
+	{0xffbd591b, 0xfff98931}, // FCSIM_DYN_CIRCLE
+	{0xffb86461, 0xfffe6766}, // FCSIM_GOAL_RECT
+	{0xffb86461, 0xfffe6766}, // FCSIM_GOAL_CIRCLE
+	{0xffb86461, 0xfffe6766}, // FCSIM_CW_GOAL_CIRCLE
+	{0xffb86461, 0xfffe6766}, // FCSIM_CCW_GOAL_CIRCLE
+	{0xff0b6afc, 0xff8cfce4}, // FCSIM_WHEEL
+	{0xfffd8003, 0xffffed00}, // FCSIM_CW_WHEEL
+	{0xffce49a3, 0xffffcfce}, // FCSIM_CCW_WHEEL
+	{0xfffeffff, 0xff0001fe}, // FCSIM_ROD
+	{0xffb55a04, 0xff6a3502}, // FCSIM_SOLID_ROD
+	{0x00ffffff, 0xff808080}, // FCSIM_JOINT
+	{0xff7878ee, 0xffbedcf8}, // FCSIM_BUILD_AREA
+	{0xffbc6667, 0xfff29291}, // FCSIM_GOAL_AREA
+	{0x00000000, 0xff87bdf1}, // FCSIM_SKY
+	{0xff404886, 0xff3a3b54}, // FCSIM_UI_BUTTON
+// FCSIM_NUM_TYPES
 };
 
 void get_color_by_type(int type_id, int slot, struct color * c) {
