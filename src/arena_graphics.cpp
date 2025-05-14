@@ -681,16 +681,19 @@ void regenerate_ui_buttons(arena* arena) {
         ui_button_single button{{2, 0}, 30, vh - 30, 50, 50, 2};
         button.texts.push_back(ui_button_text{"Space", 1.5, 0, 8});
         button.texts.push_back(ui_button_text{is_running(arena)?"Stop":"Start", 1, 0, -8});
+        button.highlighted = is_running(arena);
         all_buttons->buttons.push_back(button);
     }
     {
         ui_button_single button{{2, 1}, 30, vh - 55 - 20 * 0.5f + 4, 50, 20};
         button.texts.push_back(ui_button_text{arena->single_ticks_remaining==-1?"Pause":"Resume", 1});
+        button.highlighted = arena->single_ticks_remaining!=-1;
         all_buttons->buttons.push_back(button);
     }
     {
         ui_button_single button{{2, 2}, 30, vh - 55 - 20 * 1.5f + 4, 50, 20};
         button.texts.push_back(ui_button_text{arena->autostop_on_solve?"Cancel":"On solve", 1});
+        button.highlighted = arena->autostop_on_solve;
         all_buttons->buttons.push_back(button);
     }
     {
