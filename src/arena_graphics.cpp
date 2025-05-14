@@ -573,31 +573,31 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
         arena->ui_speedbar_opened = false;
     }
     if(button.id == ui_button_id{4, 2}) {
-        change_speed_factor(arena, 1, NO_CHANGE);
+        change_speed_preset(arena, 1);
     }
     if(button.id == ui_button_id{4, 3}) {
-        change_speed_factor(arena, 2, NO_CHANGE);
+        change_speed_preset(arena, 2);
     }
     if(button.id == ui_button_id{4, 4}) {
-        change_speed_factor(arena, 4, NO_CHANGE);
+        change_speed_preset(arena, 3);
     }
     if(button.id == ui_button_id{4, 5}) {
-        change_speed_factor(arena, 8, NO_CHANGE);
+        change_speed_preset(arena, 4);
     }
     if(button.id == ui_button_id{4, 6}) {
-        change_speed_factor(arena, 100, NO_CHANGE);
+        change_speed_preset(arena, 5);
     }
     if(button.id == ui_button_id{4, 7}) {
-        change_speed_factor(arena, 1e3, NO_CHANGE);
+        change_speed_preset(arena, 6);
     }
     if(button.id == ui_button_id{4, 8}) {
-        change_speed_factor(arena, 1e4, NO_CHANGE);
+        change_speed_preset(arena, 7);
     }
     if(button.id == ui_button_id{4, 9}) {
-        change_speed_factor(arena, 1e5, NO_CHANGE);
+        change_speed_preset(arena, 8);
     }
     if(button.id == ui_button_id{4, 10}) {
-        change_speed_factor(arena, 1e12, NO_CHANGE);
+        change_speed_preset(arena, 9);
     }
     if(button.id == ui_button_id{4, 11}) {
         change_speed_factor(arena, NO_CHANGE, (_fcsim_base_fps_mod + 1) % BASE_FPS_TABLE_SIZE);
@@ -633,6 +633,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_toolbar_opened;
         button.texts.push_back(ui_button_text{"W", 2, 0, 5});
         button.texts.push_back(ui_button_text{"CW Wheel", 1, 0, -10});
+        button.highlighted = arena->tool_hidden == TOOL_CW_WHEEL;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -640,6 +641,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_toolbar_opened;
         button.texts.push_back(ui_button_text{"C", 2, 0, 5});
         button.texts.push_back(ui_button_text{"CCW Wheel", 1, 0, -10});
+        button.highlighted = arena->tool_hidden == TOOL_CCW_WHEEL;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -647,6 +649,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_toolbar_opened;
         button.texts.push_back(ui_button_text{"U", 2, 0, 5});
         button.texts.push_back(ui_button_text{"Wheel", 1, 0, -10});
+        button.highlighted = arena->tool_hidden == TOOL_WHEEL;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -654,6 +657,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_toolbar_opened;
         button.texts.push_back(ui_button_text{"R", 2, 0, 5});
         button.texts.push_back(ui_button_text{"Water", 1, 0, -10});
+        button.highlighted = arena->tool_hidden == TOOL_ROD;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -661,6 +665,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_toolbar_opened;
         button.texts.push_back(ui_button_text{"S", 2, 0, 5});
         button.texts.push_back(ui_button_text{"Wood", 1, 0, -10});
+        button.highlighted = arena->tool_hidden == TOOL_SOLID_ROD;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -668,6 +673,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_toolbar_opened;
         button.texts.push_back(ui_button_text{"M", 2, 0, 5});
         button.texts.push_back(ui_button_text{"Move", 1, 0, -10});
+        button.highlighted = arena->tool_hidden == TOOL_MOVE;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -675,6 +681,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_toolbar_opened;
         button.texts.push_back(ui_button_text{"D", 2, 0, 5});
         button.texts.push_back(ui_button_text{"Delete", 1, 0, -10});
+        button.highlighted = arena->tool_hidden == TOOL_DELETE;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -726,6 +733,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_speedbar_opened;
         button.texts.push_back(ui_button_text{"1", 2, 0, 5});
         button.texts.push_back(ui_button_text{"1x", 1, 0, -10});
+        button.highlighted = _fcsim_speed_preset == 1;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -733,6 +741,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_speedbar_opened;
         button.texts.push_back(ui_button_text{"2", 2, 0, 5});
         button.texts.push_back(ui_button_text{"2x", 1, 0, -10});
+        button.highlighted = _fcsim_speed_preset == 2;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -740,6 +749,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_speedbar_opened;
         button.texts.push_back(ui_button_text{"3", 2, 0, 5});
         button.texts.push_back(ui_button_text{"4x", 1, 0, -10});
+        button.highlighted = _fcsim_speed_preset == 3;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -747,6 +757,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_speedbar_opened;
         button.texts.push_back(ui_button_text{"4", 2, 0, 5});
         button.texts.push_back(ui_button_text{"8x", 1, 0, -10});
+        button.highlighted = _fcsim_speed_preset == 4;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -754,6 +765,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_speedbar_opened;
         button.texts.push_back(ui_button_text{"5", 2, 0, 5});
         button.texts.push_back(ui_button_text{"100x", 1, 0, -10});
+        button.highlighted = _fcsim_speed_preset == 5;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -761,6 +773,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_speedbar_opened;
         button.texts.push_back(ui_button_text{"6", 2, 0, 5});
         button.texts.push_back(ui_button_text{"1000x", 1, 0, -10});
+        button.highlighted = _fcsim_speed_preset == 6;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -768,6 +781,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_speedbar_opened;
         button.texts.push_back(ui_button_text{"7", 2, 0, 5});
         button.texts.push_back(ui_button_text{"10000x", 1, 0, -10});
+        button.highlighted = _fcsim_speed_preset == 7;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -775,6 +789,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_speedbar_opened;
         button.texts.push_back(ui_button_text{"8", 2, 0, 5});
         button.texts.push_back(ui_button_text{"100000x", 1, 0, -10});
+        button.highlighted = _fcsim_speed_preset == 8;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -782,6 +797,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_speedbar_opened;
         button.texts.push_back(ui_button_text{"9", 2, 0, 5});
         button.texts.push_back(ui_button_text{"MAX", 1, 0, -10});
+        button.highlighted = _fcsim_speed_preset == 9;
         all_buttons->buttons.push_back(button);
     }
     {

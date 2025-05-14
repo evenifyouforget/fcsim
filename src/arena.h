@@ -142,7 +142,9 @@ void block_graphics_init(struct arena *ar);
 #ifndef ARENA_C
 extern int _fcsim_base_fps_mod;
 extern double _fcsim_target_tps;
+extern int _fcsim_speed_preset;
 #endif
 void change_speed_factor(struct arena *arena, double new_factor, int new_base_fps_mod);
+void change_speed_preset(struct arena *arena, int preset_index);
 
 #endif
