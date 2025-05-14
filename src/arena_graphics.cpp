@@ -820,6 +820,7 @@ float draw_text_default(arena* arena, std::string text, float x, float y, float 
 void draw_tick_counter(struct arena *arena)
 {
     const bool is_running_arena = is_running(arena);
+    const bool is_running_arena_and_not_paused = is_running_arena && arena->single_ticks_remaining==-1;
     block_graphics* graphics = (block_graphics*)arena->block_graphics_v2b;
     float x = 10;
     x = draw_text_default(arena, std::to_string(arena->tick), x, 10);
@@ -837,8 +838,8 @@ void draw_tick_counter(struct arena *arena)
     // try to average over 2 seconds
     size_t tps_interval = std::min<size_t>(fps_tracker_t::buffer_size - 1, std::max<size_t>(1, (size_t)(fps_value * 2)));
     double tps_value = graphics->tps_tracker.get_tps(tps_interval);
-    bool tps_is_prediction = tps_value == 0 || !is_running_arena;
-    if(!is_running_arena) {
+    bool tps_is_prediction = tps_value == 0 || !is_running_arena_and_not_paused;
+    if(!is_running_arena_and_not_paused) {
         // reset when not running
         graphics->tps_tracker.clear();
     }
