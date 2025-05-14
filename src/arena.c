@@ -406,6 +406,8 @@ void start_stop(struct arena *arena)
 		arena->state = STATE_NORMAL_PAN;
 		break;
 	}
+	// also unpause
+	arena->single_ticks_remaining = -1;
 }
 
 void arena_key_down_event(struct arena *arena, int key)
