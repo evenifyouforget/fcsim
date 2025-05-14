@@ -464,6 +464,11 @@ let module_promise = WebAssembly.instantiateStreaming(
 let design_id = params.get('designId');
 let level_id = params.get('levelId');
 
+// homepage behaviour: default brown
+if(!design_id && !level_id) {
+	design_id = '12706185';
+}
+
 let response_promise = fetch(FC_URL + "/retrieveLevel.php", {
 	method: "POST",
 	headers: {
