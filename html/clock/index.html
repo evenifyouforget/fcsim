@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="clock.css">
+  <script src="clock.js"></script>
+</head>
+<body>
+  <h1>JS Clock Test</h1>
+
+  <input type="number" id="numberInput" value="33"/>
+  <button id="updateButton">Update interval (ms)</button>
+
+  <div class="display">Predicted TPS: <span id="numberOutput">...</span></div>
+  <div class="display">Actual TPS: <span id="numberOutput2">...</span></div>
+
+  fcsim uses <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/setInterval">setInterval</a> for the update clock. This is accurate on most modern browsers, but in case you suspect your TPS is wrong due to a clock issue, this page might help diagnose it! We sample the real time using <a href="https://developer.mozilla.org/en-US/docs/Web/API/Performance/now">performance.now()</a> and calculate the TPS averaged over the last 3 seconds or so, in the same way fcsim does.
+  <br/>
+  If the actual TPS displayed here is completely different than the predicted TPS, you have a clock issue.
+</body>
+</html>
