@@ -8,7 +8,7 @@
 #define BASE_FPS_TABLE {30, 36}
 #define BASE_FPS_TABLE_SIZE 2
 #ifdef __wasm__
-#define MIN_MSPT 33
+#define MIN_MSPT 10
 #else
 #define MIN_MSPT 5
 #endif
