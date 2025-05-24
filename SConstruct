@@ -128,14 +128,16 @@ linux_env = base_env.Clone(
     CCFLAGS = common_ccflags + linux_ccflags,
     CPPPATH = common_include,
     # if using CCPDEFINES, need to match for fpatan variant
-    LIBS = libs
+    LIBS = libs,
+    PLATFORM = 'linux'
     )
 linux_env.VariantDir("build/linux", ".", False)
 
 test_env = base_env.Clone(
     CCFLAGS = common_ccflags + test_ccflags,
     CPPPATH = common_include + wasm_include,
-    CPPDEFINES = test_defines
+    CPPDEFINES = test_defines,
+    PLATFORM = 'linux'
     )
 test_env.VariantDir("build/test", ".", False)
 
