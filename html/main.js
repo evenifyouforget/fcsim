@@ -242,6 +242,7 @@ let gl_env = {
 	},
 
 	set_interval(func, delay, arg) {
+		console.log("Set clock to " + delay.toString() + " ms (expected " + (1000/delay).toString() + " Hz)");
 		return setInterval(inst.exports.call, delay, func, arg);
 	},
 
