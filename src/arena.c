@@ -177,8 +177,6 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 		     arena->joint_coords, GL_STREAM_DRAW);
 	*/
 
-	arena->tick_ms = 17;
-	arena->tick_multiply = 1;
 	arena->tick = 0;
 	text_stream_create(&arena->tick_counter, MAX_RENDER_TEXT_LENGTH);
 	arena->has_won = false;
@@ -186,6 +184,8 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 	arena->preview_gp_trajectory = false;
 	arena->preview_design = NULL;
 	arena->preview_world = NULL;
+
+	change_speed_preset(arena, 2);
 }
 
 /* TODO: dedupe */
@@ -252,7 +252,7 @@ void start(struct arena *arena)
 {
 	free_world(arena->world, &arena->design);
 	arena->world = gen_world(&arena->design);
-	arena->ival = set_interval(tick_func, arena->tick_ms, arena);
+	//arena->ival = set_interval(tick_func, arena->tick_ms, arena);
 	arena->hover_joint = NULL;
 	arena->tick = 0;
 	arena->has_won = false;
@@ -262,18 +262,15 @@ void stop(struct arena *arena)
 {
 	free_world(arena->world, &arena->design);
 	arena->world = gen_world(&arena->design);
-	clear_interval(arena->ival);
+	//clear_interval(arena->ival);
 }
 
 void change_speed(struct arena *arena, int ms, int multiply)
 {
 	arena->tick_ms = ms;
 	arena->tick_multiply = multiply;
-	if (arena->state == STATE_RUNNING ||
-	    arena->state == STATE_RUNNING_PAN) {
-		clear_interval(arena->ival);
-		arena->ival = set_interval(tick_func, ms, arena);
-	}
+	clear_interval(arena->ival);
+	arena->ival = set_interval(tick_func, ms, arena);
 }
 
 double _fcsim_speed_factor = 2;

@@ -12,7 +12,7 @@ extern "C" void tick_func(void *arg)
 	arena* the_arena = (arena*)arg;
 
 	double time_start = time_precise_ms();
-	for(int i = 0; the_arena->single_ticks_remaining != 0 && i < the_arena->tick_multiply; ++i) {
+	for(int i = 0; is_running(the_arena) && the_arena->single_ticks_remaining != 0 && i < the_arena->tick_multiply; ++i) {
 		if(the_arena->single_ticks_remaining > 0)the_arena->single_ticks_remaining--;
 		step(the_arena->world);
 		the_arena->tick++;
@@ -54,6 +54,7 @@ extern "C" void tick_func(void *arg)
         }
         // tick until time budget is exhausted
         while(all_trails->accepting()) {
+            all_trails->submit_frame(the_arena->preview_design);
             step(the_arena->preview_world);
             double time_end = time_precise_ms();
             if(time_end - time_start >= the_arena->tick_ms)break;
@@ -62,7 +63,7 @@ extern "C" void tick_func(void *arg)
 }
 
 bool multi_trail_t::accepting() {
-    const size_t PREVIEW_TICK_LIMIT = 1000;
+    const size_t PREVIEW_TICK_LIMIT = 10000;
     return trails.size() == 0 || trails[0].datapoints.size() < PREVIEW_TICK_LIMIT;
 }
 

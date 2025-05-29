@@ -11,11 +11,11 @@
 #include "stl_compat.h"
 #include "interval.h"
 extern "C" {
-#include "arena.h"
 #include "gl.h"
 #include "graph.h"
 #include <box2d/b2Body.h>
 }
+#include "arena.hpp"
 #include "math.h"
 
 template <typename T> void append_vector(std::vector<T>& a, std::vector<T>& b) {
@@ -917,6 +917,26 @@ void draw_ui(arena* arena) {
     }
 }
 
+void preview_trail_draw(arena* arena) {
+    const double LINE_RADIUS = 2;
+
+    block_graphics* graphics = (block_graphics*)arena->block_graphics_v2;
+
+    multi_trail_t* all_trails = (multi_trail_t*)arena->preview_trail;
+    for(size_t trail_index = 0; trail_index < all_trails->trails.size(); ++trail_index) {
+        trail_t& the_trail = all_trails->trails[trail_index];
+        if(the_trail.datapoints.size() < 2) {
+            continue;
+        }
+        b2Vec2 last = the_trail.datapoints[0];
+        for(size_t datapoint_index = 1; datapoint_index < the_trail.datapoints.size(); ++datapoint_index) {
+            b2Vec2 current = the_trail.datapoints[datapoint_index];
+            block_graphics_add_line(graphics, last, current, LINE_RADIUS, get_color_by_type(FCSIM_GOAL_CIRCLE, 0), 4);
+            last = current;
+        }
+    }
+}
+
 void arena_draw(struct arena *arena)
 {
 	color sky_color = get_color_by_type(FCSIM_SKY, 1);
@@ -924,6 +944,9 @@ void arena_draw(struct arena *arena)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	block_graphics_reset(arena, &arena->design);
+    if(arena->preview_gp_trajectory && arena->preview_trail) {
+        preview_trail_draw(arena);
+    }
 	block_graphics_draw((block_graphics*)arena->block_graphics_v2, &arena->view);
 
     regenerate_ui_buttons(arena);
