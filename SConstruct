@@ -6,6 +6,7 @@ common_sources = [
     "src/export.c",
     "src/core.c",
     "src/gen.c",
+    "src/graph_algorithm.cpp",
     "src/graph.c",
     "src/str.c",
     "src/text.c",
