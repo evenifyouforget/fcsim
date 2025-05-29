@@ -101,7 +101,9 @@ struct arena {
 	bool has_won;
 	int single_ticks_remaining; // -1 for normal playback, 0 to disable, positive for step n frames
 	bool autostop_on_solve;
+
 	bool preview_gp_trajectory;
+	struct design* preview_design;
 
 	// ui button templates
 	void* ui_buttons; // actual type: ui_button_collection*

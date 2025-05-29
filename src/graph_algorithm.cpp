@@ -60,9 +60,10 @@ design* _clean_copy(std::unordered_map<void*, void*> pointer_map, design* old_ob
     CLEAN_COPY(*new_obj, *old_obj, level_blocks.tail);
     CLEAN_COPY(*new_obj, *old_obj, player_blocks.head);
     CLEAN_COPY(*new_obj, *old_obj, player_blocks.tail);
-    new_obj->build_area = new_obj->build_area;
-    new_obj->goal_area = new_obj->goal_area;
-    new_obj->level_id = new_obj->level_id;
+    new_obj->build_area = old_obj->build_area;
+    new_obj->goal_area = old_obj->goal_area;
+    new_obj->level_id = old_obj->level_id;
+    new_obj->modcount = old_obj->modcount;
     return new_obj;
 }
 

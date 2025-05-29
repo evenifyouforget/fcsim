@@ -184,6 +184,7 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 	arena->has_won = false;
 
 	arena->preview_gp_trajectory = false;
+	arena->preview_design = NULL;
 }
 
 /* TODO: dedupe */
@@ -773,6 +774,8 @@ void delete_block(struct arena *arena, struct block *block)
 	free(block);
 
 	mark_overlaps(arena);
+
+	design->modcount++;
 }
 
 void action_pan(struct arena *arena, int x, int y)
@@ -970,6 +973,8 @@ void update_move(struct arena *arena, double dx, double dy)
 	}
 
 	mark_overlaps(arena);
+
+	arena->design.modcount++;
 }
 
 void action_move(struct arena *arena, int x, int y)
@@ -1304,6 +1309,8 @@ void block_dfs(struct arena *arena, struct block *block, bool value, bool all)
 			joint_dfs(arena, shape->wheel.spokes[i], value, all);
 		break;
 	}
+
+	arena->design.modcount++;
 }
 
 void joint_dfs(struct arena *arena, struct joint *joint, bool value, bool all)
@@ -1324,6 +1331,8 @@ void joint_dfs(struct arena *arena, struct joint *joint, bool value, bool all)
 
 	for (node = joint->att.head; node; node = node->next)
 		block_dfs(arena, node->block, value, all);
+
+	arena->design.modcount++;
 }
 
 void resolve_joint(struct arena *arena, struct joint *joint)
@@ -1418,6 +1427,8 @@ void mouse_down_rod(struct arena *arena, float x, float y)
 	arena->state = STATE_NEW_ROD;
 
 	mark_overlaps(arena);
+
+	design->modcount++;
 }
 
 void mouse_down_wheel(struct arena *arena, float x, float y)
@@ -1501,6 +1512,8 @@ void mouse_down_wheel(struct arena *arena, float x, float y)
 	arena->state = STATE_NEW_WHEEL;
 
 	mark_overlaps(arena);
+
+	design->modcount++;
 }
 
 bool inside_area(struct area *area, double x, double y)

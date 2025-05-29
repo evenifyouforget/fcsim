@@ -190,6 +190,7 @@ struct design {
 	struct area build_area;
 	struct area goal_area;
 	int level_id;
+	int modcount; // increments whenever any change is made
 };
 
 enum shell_type {
