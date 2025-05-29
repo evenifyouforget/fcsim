@@ -1,13 +1,14 @@
 # source files
 common_sources = [
     "src/arena.c",
+    "src/arena_algorithm.cpp",
     "src/arena_graphics.cpp",
     "src/button.c",
     "src/export.c",
     "src/core.c",
     "src/gen.c",
-    "src/graph_algorithm.cpp",
     "src/graph.c",
+    "src/graph_algorithm.cpp",
     "src/str.c",
     "src/text.c",
     "src/xml.c",

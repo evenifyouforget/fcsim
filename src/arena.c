@@ -231,7 +231,7 @@ void arena_key_up_event(struct arena *arena, int key)
 
 static int block_inside_area(struct block *block, struct area *area);
 
-static bool goal_blocks_inside_goal_area(struct design *design)
+bool goal_blocks_inside_goal_area(struct design *design)
 {
 	struct block *block;
 	bool any = false;
@@ -245,29 +245,6 @@ static bool goal_blocks_inside_goal_area(struct design *design)
 	}
 
 	return any;
-}
-
-void tick_func(void *arg)
-{
-	struct arena *arena = arg;
-
-	double time_start = time_precise_ms();
-	for(int i = 0; arena->single_ticks_remaining != 0 && i < arena->tick_multiply; ++i) {
-		if(arena->single_ticks_remaining > 0)arena->single_ticks_remaining--;
-		step(arena->world);
-		arena->tick++;
-		if (!arena->has_won && goal_blocks_inside_goal_area(&arena->design)) {
-			arena->has_won = true;
-			arena->tick_solve = arena->tick;
-			if(arena->autostop_on_solve) {
-				arena->autostop_on_solve = false;
-				arena->single_ticks_remaining = 0;
-				break;
-			}
-		}
-		double time_end = time_precise_ms();
-		if(time_end - time_start >= arena->tick_ms)break;
-	}
 }
 
 void start(struct arena *arena)
