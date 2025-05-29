@@ -104,6 +104,8 @@ struct arena {
 
 	bool preview_gp_trajectory;
 	struct design* preview_design;
+	b2World *preview_world;
+	void *preview_trail; // real type: multi_trail_t*
 
 	// ui button templates
 	void* ui_buttons; // actual type: ui_button_collection*
