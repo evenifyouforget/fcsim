@@ -28,7 +28,25 @@ Clean:
 scons -c
 ```
 
+If you are having any build issues, try cleaning and then building.
+
 The build system used to use `ninja`, but `ninja` has been deprecated in favour of `scons`.
+
+## Running the web build locally
+
+To run the web build, you need to serve from the `html` directory. For example:
+
+```sh
+cd html
+python3 -m http.server
+```
+
+Should get you a server at http://0.0.0.0:8000.
+
+If you are having issues with the web build, try clearing your browser cache.
+
+If you see a CORS issue, try enabling CORS everywhere.
+There are certain browser extensions for this.
 
 # `fcsim` vs `fcsim-fpatan` and others
 
@@ -67,6 +85,9 @@ valgrind ./stl_test
 The web build also uses a custom `malloc`.
 
 **If the game is crashing, try increasing `MALLOC_PAD_SPACE`.**
+
+You can also check the memory usage using your browser developer tools.
+This can be useful to diagnose memory leaks.
 
 # Performance
 
