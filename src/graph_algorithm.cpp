@@ -9,7 +9,7 @@ extern "C" {
 }
 
 #define CLEAN_COPY(dest, src, attribute_name) (dest).attribute_name = _clean_copy(pointer_map, (src).attribute_name);
-#define CHECK_RETURN(ptr_type, old_obj, new_obj) if(old_obj==nullptr)return nullptr;if(pointer_map.count(old_obj)){return (ptr_type*)pointer_map.at(old_obj);}ptr_type* new_obj = _new<ptr_type>();pointer_map.insert(std::make_pair(old_obj, new_obj));
+#define CHECK_RETURN(ptr_type, old_obj, new_obj) if(old_obj==nullptr)return nullptr;if(pointer_map.count(old_obj)){return (ptr_type*)pointer_map.at(old_obj);}ptr_type* new_obj = _new<ptr_type>();pointer_map.insert(std::make_pair<void*, void*>(old_obj, new_obj));
 
 attach_node* _clean_copy(std::unordered_map<void*, void*> pointer_map, attach_node* old_obj);
 block* _clean_copy(std::unordered_map<void*, void*> pointer_map, block* old_obj);

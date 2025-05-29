@@ -141,6 +141,45 @@ struct string {
 
 string to_string(int64_t);
 
+template <typename A, typename B> struct pair {
+    A first;
+    B second;
+};
+
+template <typename A, typename B> pair<A, B> make_pair(A first, B second) {
+    return {first, second};
+};
+
+// Terrible implementation based on std::vector. Worse by a factor of O(N)
+template <typename K, typename V> struct unordered_map {
+    vector<K> keys;
+    vector<V> values;
+    size_t count(const K& key) {
+        for(size_t i = 0; i < keys.size(); ++i) {
+            if(keys[i] == key) {
+                return 1;
+            }
+        }
+        return 0;
+    }
+    // different return type, non-compliant
+    void insert(const pair<K,V>& data) {
+        if(!count(data.first)) {
+            keys.push_back(data.first);
+            values.push_back(data.second);
+        }
+    }
+    // no exception. non-compliant
+    V& at(const K& key) {
+        for(size_t i = 0; i < keys.size(); ++i) {
+            if(keys[i] == key) {
+                return values[i];
+            }
+        }
+        return values[0];
+    }
+};
+
 }
 
 #endif
