@@ -351,6 +351,28 @@ static void block_graphics_add_area(struct block_graphics *graphics,
     block_graphics_add_rect(graphics, area_shell, type_id, 0, color{0,0,0,0});
 }
 
+void block_graphics_add_line(block_graphics* graphics, b2Vec2 start, b2Vec2 end, double radius, color col, int z_offset) {
+    const double dx1 = end.x - start.x;
+    const double dy1 = end.y - start.y;
+
+    const double dist = sqrt(dx1 * dx1 + dy1 * dy1); // hypot not available
+    const double mul = radius / std::max(1e-10, dist);
+
+    const double dx2 = dx1 * mul;
+    const double dy2 = dy1 * mul;
+
+    const double dx3 = dx2 - dy2;
+    const double dy3 = dx2 + dy2;
+
+    uint16_t v1 = graphics->push_vertex(end.x   + dx3, end.y   + dy3, col, z_offset);
+    uint16_t v2 = graphics->push_vertex(end.x   + dy3, end.y   - dx3, col, z_offset);
+    uint16_t v3 = graphics->push_vertex(start.x - dx3, start.y - dy3, col, z_offset);
+    uint16_t v4 = graphics->push_vertex(start.x - dy3, start.y + dx3, col, z_offset);
+
+    graphics->push_triangle(v1, v2, v3, z_offset);
+    graphics->push_triangle(v1, v4, v3, z_offset);
+}
+
 static void block_graphics_add_circ_single(struct block_graphics *graphics,
 				    struct shell shell, color col, int z_offset)
 {
