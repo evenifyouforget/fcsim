@@ -182,6 +182,8 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 	arena->tick = 0;
 	text_stream_create(&arena->tick_counter, MAX_RENDER_TEXT_LENGTH);
 	arena->has_won = false;
+
+	arena->preview_gp_trajectory = false;
 }
 
 /* TODO: dedupe */

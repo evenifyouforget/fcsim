@@ -601,13 +601,16 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
     if(button.id == ui_button_id{4, 11}) {
         change_speed_factor(arena, NO_CHANGE, (_fcsim_base_fps_mod + 1) % BASE_FPS_TABLE_SIZE);
     }
+    if(button.id == ui_button_id{5, 0}) {
+        arena->preview_gp_trajectory ^= 1; // toggle
+    }
 }
 
 void regenerate_ui_buttons(arena* arena) {
     ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
     all_buttons->buttons.clear();
 
-    //float vw = arena->view.width;
+    float vw = arena->view.width;
     float vh = arena->view.height;
 
     {
@@ -805,6 +808,12 @@ void regenerate_ui_buttons(arena* arena) {
         button.texts.push_back(ui_button_text{"0", 2, 0, 10});
         button.texts.push_back(ui_button_text{"Change", 1, 0, -5});
         button.texts.push_back(ui_button_text{"base TPS", 1, 0, -15});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{5, 0}, vw - 30, vh - 30, 70, 50, 2};
+        button.texts.push_back(ui_button_text{"Preview", 1, 0, 10});
+        button.texts.push_back(ui_button_text{arena->preview_gp_trajectory?"ON":"OFF", 1, 0, -10});
         all_buttons->buttons.push_back(button);
     }
 }
