@@ -206,6 +206,7 @@ double fps_tracker_t::get_tps(size_t interval) {
 
 void fps_tracker_t::clear() {
     records_ms.clear();
+    records_tick.clear();
     samples = 0;
 }
 
