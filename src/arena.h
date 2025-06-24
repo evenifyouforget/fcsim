@@ -143,6 +143,9 @@ int block_inside_area(struct block *block, struct area *area);
 bool goal_blocks_inside_goal_area(struct design *design);
 void tick_func(void *arg);
 
+// lower = better, actually solving will give the lowest possible value
+double goal_heuristic(struct design *design);
+
 void start_stop(struct arena *arena);
 bool is_running(struct arena *arena);
 void update_tool(struct arena *arena);

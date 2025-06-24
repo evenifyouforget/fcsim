@@ -106,3 +106,22 @@ extern "C" bool goal_blocks_inside_goal_area(design* design)
     }
     return false;
 }
+
+extern "C" double goal_heuristic(struct design *design) {
+    const double IN_GOAL_BONUS = 1e8;
+    double score = 0;
+    for (block* block_ptr = design->player_blocks.head; block_ptr != nullptr; block_ptr = block_ptr->next) {
+        if (block_ptr->goal) {
+            if (block_inside_area(block_ptr, &design->goal_area)) {
+                score -= IN_GOAL_BONUS;
+            } else {
+                	struct area bb;
+	                get_block_bb(block_ptr, &bb);
+                    double dx = bb.x - design->goal_area.x;
+                    double dy = bb.y - design->goal_area.y;
+                    score += dx * dx + dy * dy; // distance squared
+            }
+        }
+    }
+    return score;
+}
