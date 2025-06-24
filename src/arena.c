@@ -630,7 +630,7 @@ void get_block_bb(struct block *block, struct area *area)
 void gen_block(b2World *world, struct block *block);
 void b2World_CleanBodyList(b2World *world);
 
-void mark_overlaps_data(struct design *design, b2World *world)
+void mark_overlaps_data(struct design *design, b2World *world, struct block* ignore_block)
 {
     b2Contact *contact;
     struct block *block;
@@ -655,7 +655,7 @@ void mark_overlaps_data(struct design *design, b2World *world)
     }
 
     for (block = design->player_blocks.head; block; block = block->next) {
-        if (!block->visited)
+        if (!block->visited && block != ignore_block)
             block->overlap = false;
     }
 
@@ -665,7 +665,7 @@ void mark_overlaps_data(struct design *design, b2World *world)
 
 void mark_overlaps(struct arena *arena)
 {
-    mark_overlaps_data(&arena->design, arena->world);
+    mark_overlaps_data(&arena->design, arena->world, arena->new_block);
 }
 
 void delete_rod_joints(struct design *design, struct rod *rod)
@@ -1171,10 +1171,10 @@ void mouse_up_move(struct arena *arena)
 
 void mouse_up_new_block(struct arena *arena)
 {
-    if (!is_design_legal(&arena->design)) {
-        delete_block(arena, arena->new_block);
-        arena->hover_joint = NULL;
-    }
+	if (arena->new_block->overlap) {
+		delete_block(arena, arena->new_block);
+		arena->hover_joint = NULL;
+	}
 }
 
 void arena_mouse_button_up_event(struct arena *arena, int button)

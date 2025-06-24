@@ -149,7 +149,7 @@ void mouse_up_move(struct arena *arena);
 void mouse_up_new_block(struct arena *arena);
 bool is_design_legal(struct design *design);
 void mark_overlaps(struct arena *arena);
-void mark_overlaps_data(struct design *design, b2World *world);
+void mark_overlaps_data(struct design *design, b2World *world, struct block* ignore_block);
 
 void get_rect_bb(struct shell *shell, struct area *area);
 void get_circ_bb(struct shell *shell, struct area *area);

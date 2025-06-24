@@ -947,6 +947,19 @@ void draw_tick_counter(struct arena *arena)
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
     x = draw_text_default(arena, tps_value >= 1e9?"Infinity":std::to_string((int64_t)rint(tps_value)), x, 10);
     x = draw_text_default(arena, !tps_is_prediction?"TPS average":"TPS predicted", x, 10, 1);
+    x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+    x = draw_text_default(arena, std::to_string(arena->state), x, 10);
+    x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+    if(!arena->garden) {
+        x = draw_text_default(arena, "No garden", x, 10, 1);
+    } else {
+        garden_t* garden = (garden_t*)arena->garden;
+        x = draw_text_default(arena, std::to_string(garden->creatures[0].tick), x, 10, 1);
+        if(garden->creatures[0].trails.trails.size() > 0) {
+            x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+            x = draw_text_default(arena, std::to_string(garden->creatures[0].trails.trails[0].datapoints.size()), x, 10, 1);
+        }
+    }
 }
 
 void draw_ui(arena* arena) {

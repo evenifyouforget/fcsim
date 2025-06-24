@@ -84,7 +84,7 @@ extern "C" void tick_func(void *arg)
             if(creature.tick == 0) {
                 // check if it is legal
                 // we don't remember this, so we may check it redundantly
-                mark_overlaps_data(creature.design_ptr, creature.world_ptr);
+                mark_overlaps_data(creature.design_ptr, creature.world_ptr, nullptr);
                 if(!is_design_legal(creature.design_ptr)) {
                     illegal_creature_index = j;
                 }
