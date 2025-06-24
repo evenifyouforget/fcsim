@@ -9,6 +9,7 @@ common_sources = [
     "src/gen.c",
     "src/graph.c",
     "src/graph_algorithm.cpp",
+    "src/random.cpp",
     "src/str.c",
     "src/text.c",
     "src/xml.c",
