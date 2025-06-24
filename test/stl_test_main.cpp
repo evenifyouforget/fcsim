@@ -167,4 +167,44 @@ int main() {
             assert(str.size() == 2);
         }
     }
+    // unordered_map: empty map, count
+    {
+        std::unordered_map<int, int> map;
+        assert(map.count(1) == 0);
+    }
+    // unordered_map: insert and count
+    {
+        std::unordered_map<int, int> map;
+        map.insert(std::make_pair(1, 42));
+        assert(map.count(1) == 1);
+        assert(map.count(2) == 0);
+    }
+    // unordered_map: at returns correct value
+    {
+        std::unordered_map<int, int> map;
+        map.insert(std::make_pair(1, 42));
+        assert(map.at(1) == 42);
+    }
+    // unordered_map: at inserts default if not present
+    {
+        std::unordered_map<int, int> map;
+        int& ref = map.at(2);
+        assert(map.count(2) == 1);
+        // Default value is 0 for int
+        assert(ref == 0);
+    }
+    // unordered_map: insert does not overwrite existing value
+    {
+        std::unordered_map<int, int> map;
+        map.insert(std::make_pair(1, 42));
+        map.insert(std::make_pair(1, 99));
+        assert(map.at(1) == 42);
+    }
+    // unordered_map: at returns reference, assignment works
+    {
+        std::unordered_map<int, int> map;
+        map.insert(std::make_pair(1, 42));
+        map.at(1) = 100;
+        assert(map.at(1) == 100);
+    }
 }
