@@ -135,6 +135,11 @@ void mouse_up_move(struct arena *arena);
 void mouse_up_new_block(struct arena *arena);
 bool is_design_legal(struct design *design);
 
+void get_rect_bb(struct shell *shell, struct area *area);
+void get_circ_bb(struct shell *shell, struct area *area);
+void get_block_bb(struct block *block, struct area *area);
+
+int block_inside_area(struct block *block, struct area *area);
 bool goal_blocks_inside_goal_area(struct design *design);
 void tick_func(void *arg);
 

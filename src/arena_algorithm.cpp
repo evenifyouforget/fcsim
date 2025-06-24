@@ -82,3 +82,27 @@ void multi_trail_t::submit_frame(design* current_design) {
 		}
 	}
 }
+
+extern "C" int block_inside_area(struct block *block, struct area *area)
+{
+	struct area bb;
+
+	get_block_bb(block, &bb);
+
+	return bb.x - bb.w / 2 >= area->x - area->w / 2
+	    && bb.x + bb.w / 2 <= area->x + area->w / 2
+	    && bb.y - bb.h / 2 >= area->y - area->h / 2
+	    && bb.y + bb.h / 2 <= area->y + area->h / 2;
+}
+
+extern "C" bool goal_blocks_inside_goal_area(design* design)
+{
+    for (block* block_ptr = design->player_blocks.head; block_ptr != nullptr; block_ptr = block_ptr->next) {
+        if (block_ptr->goal) {
+            if (!block_inside_area(block_ptr, &design->goal_area))
+                return false;
+            return true;
+        }
+    }
+    return false;
+}

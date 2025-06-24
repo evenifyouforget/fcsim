@@ -230,24 +230,6 @@ void arena_key_up_event(struct arena *arena, int key)
 	update_tool(arena);
 }
 
-static int block_inside_area(struct block *block, struct area *area);
-
-bool goal_blocks_inside_goal_area(struct design *design)
-{
-	struct block *block;
-	bool any = false;
-
-	for (block = design->player_blocks.head; block; block = block->next) {
-		if (block->goal) {
-			any = true;
-			if (!block_inside_area(block, &design->goal_area))
-				return false;
-		}
-	}
-
-	return any;
-}
-
 void start(struct arena *arena)
 {
 	free_world(arena->world, &arena->design);
@@ -605,7 +587,7 @@ struct block *block_hit_test(struct arena *arena, float x, float y)
 	return NULL;
 }
 
-static void get_rect_bb(struct shell *shell, struct area *area)
+void get_rect_bb(struct shell *shell, struct area *area)
 {
 	float sina = fp_sin(shell->angle);
 	float cosa = fp_cos(shell->angle);
@@ -620,7 +602,7 @@ static void get_rect_bb(struct shell *shell, struct area *area)
 	area->h = fabs(ws) + fabs(hc);
 }
 
-static void get_circ_bb(struct shell *shell, struct area *area)
+void get_circ_bb(struct shell *shell, struct area *area)
 {
 	area->x = shell->x;
 	area->y = shell->y;
@@ -628,7 +610,7 @@ static void get_circ_bb(struct shell *shell, struct area *area)
 	area->h = shell->circ.radius * 2;
 }
 
-static void get_block_bb(struct block *block, struct area *area)
+void get_block_bb(struct block *block, struct area *area)
 {
 	struct shell shell;
 
@@ -643,18 +625,6 @@ static void get_block_bb(struct block *block, struct area *area)
 		get_circ_bb(&shell, area);
 	else
 		get_rect_bb(&shell, area);
-}
-
-static int block_inside_area(struct block *block, struct area *area)
-{
-	struct area bb;
-
-	get_block_bb(block, &bb);
-
-	return bb.x - bb.w / 2 >= area->x - area->w / 2
-	    && bb.x + bb.w / 2 <= area->x + area->w / 2
-	    && bb.y - bb.h / 2 >= area->y - area->h / 2
-	    && bb.y + bb.h / 2 <= area->y + area->h / 2;
 }
 
 void gen_block(b2World *world, struct block *block);
