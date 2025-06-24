@@ -22,6 +22,8 @@
 #define GARDEN_MAX_CREATURES 4
 #define GARDEN_MAX_TICKS 10000
 
+#define MAX_RENDER_TEXT_LENGTH 1000
+
 struct view {
 	float x;
 	float y;
@@ -65,7 +67,7 @@ struct joint_head {
 };
 
 struct arena {
-	struct design design;
+	struct design *design;
 	b2World *world;
 
 	int ival;

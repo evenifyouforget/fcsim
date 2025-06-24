@@ -67,7 +67,7 @@ char *export_design(struct design *design, char *user, char *name, char *desc);
 
 char *export(char *user, char *name, char *desc)
 {
-	return export_design(&the_arena.design, user, name, desc);
+	return export_design(the_arena.design, user, name, desc);
 }
 
 void draw(void)

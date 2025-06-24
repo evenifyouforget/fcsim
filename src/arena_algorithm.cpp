@@ -9,6 +9,8 @@
 
 extern "C" {
 #include "random.h"
+#include "xml.h"
+#include "text.h"
 }
 
 extern "C" void tick_func(void *arg)
@@ -20,7 +22,7 @@ extern "C" void tick_func(void *arg)
 		if(the_arena->single_ticks_remaining > 0)the_arena->single_ticks_remaining--;
 		step(the_arena->world);
 		the_arena->tick++;
-		if (!the_arena->has_won && goal_blocks_inside_goal_area(&the_arena->design)) {
+		if (!the_arena->has_won && goal_blocks_inside_goal_area(the_arena->design)) {
 			the_arena->has_won = true;
 			the_arena->tick_solve = the_arena->tick;
 			if(the_arena->autostop_on_solve) {
@@ -39,7 +41,7 @@ extern "C" void tick_func(void *arg)
             the_arena->preview_trail = _new<multi_trail_t>();
         }
         multi_trail_t* all_trails = (multi_trail_t*)the_arena->preview_trail;
-        if(the_arena->preview_design == nullptr || the_arena->preview_design->modcount != the_arena->design.modcount) {
+        if(the_arena->preview_design == nullptr || the_arena->preview_design->modcount != the_arena->design->modcount) {
             // refresh preview design
             // manually clear old data
             if(the_arena->preview_world) {
@@ -51,7 +53,7 @@ extern "C" void tick_func(void *arg)
             }
             the_arena->preview_design = nullptr;
             // populate new data from clone
-            the_arena->preview_design = clean_copy_design(&the_arena->design);
+            the_arena->preview_design = clean_copy_design(the_arena->design);
             the_arena->preview_world = gen_world(the_arena->preview_design);
             // clear trails
             all_trails->trails.clear();
@@ -256,7 +258,7 @@ void reset_garden(arena* arena_ptr) {
     garden->clear();
     for(int i = 0; i < GARDEN_MAX_CREATURES; ++i) {
         creature_t new_creature;
-        new_creature.init_copy_design(&arena_ptr->design);
+        new_creature.init_copy_design(arena_ptr->design);
         garden->creatures.push_back(new_creature);
     }
 }
@@ -276,15 +278,64 @@ void take_best_design_from_garden(arena* arena_ptr) {
     }
     // free the old design and world
     if(arena_ptr->world) {
-        free_world(arena_ptr->world, &arena_ptr->design);
+        free_world(arena_ptr->world, arena_ptr->design);
         arena_ptr->world = nullptr;
     }
-    free_design_data_only(&arena_ptr->design);
-    // need to make a temporary copy, because clean_copy_design gives us a pointer to a new design
-    design* temp_design = clean_copy_design(best_creature->design_ptr);
-    arena_ptr->design = *temp_design;
-    // clean up our temporary design
-    free_design(temp_design);
+    free_design_data_only(arena_ptr->design);
+    // copy the best design into the arena's design
+    arena_ptr->design = clean_copy_design(best_creature->design_ptr);
     // regenerate the world
-    arena_ptr->world = gen_world(&arena_ptr->design);
+    arena_ptr->world = gen_world(arena_ptr->design);
+}
+
+extern "C" void arena_init(struct arena *arena, float w, float h, char *xml, int len)
+{
+	struct xml_level level;
+
+    arena->design = _new<design>();
+
+	arena->view.x = 0.0f;
+	arena->view.y = 0.0f;
+	arena->view.width = w;
+	arena->view.height = h;
+	arena->view.scale = 1.0f;
+	arena->cursor_x = 0;
+	arena->cursor_y = 0;
+
+	arena->shift = false;
+	arena->ctrl = false;
+
+	arena->tool = TOOL_MOVE;
+	arena->tool_hidden = TOOL_MOVE;
+	arena->state = STATE_NORMAL;
+	arena->hover_joint = NULL;
+	arena->hover_block = NULL;
+
+	arena->root_joints_moving = NULL;
+	arena->root_blocks_moving = NULL;
+	arena->blocks_moving = NULL;
+
+	xml_parse(xml, len, &level);
+	convert_xml(&level, arena->design);
+
+	arena->world = gen_world(arena->design);
+
+	block_graphics_init(arena);
+
+	/*
+	glGenBuffers(1, &arena->joint_coord_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, arena->joint_coord_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(arena->joint_coords),
+		     arena->joint_coords, GL_STREAM_DRAW);
+	*/
+
+	arena->tick = 0;
+	text_stream_create(&arena->tick_counter, MAX_RENDER_TEXT_LENGTH);
+	arena->has_won = false;
+
+	arena->preview_gp_trajectory = false;
+	arena->preview_design = NULL;
+	arena->preview_world = NULL;
+
+	change_speed_preset(arena, 2);
 }

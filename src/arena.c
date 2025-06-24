@@ -15,8 +15,6 @@
 #include "arena.h"
 #include "graph.h"
 
-#define MAX_RENDER_TEXT_LENGTH 1000
-
 const char *block_vertex_shader_src =
 	"attribute vec2 a_coords;"
 	"attribute vec3 a_color;"
@@ -138,56 +136,6 @@ bool arena_compile_shaders(void)
 	return true;
 }
 
-void arena_init(struct arena *arena, float w, float h, char *xml, int len)
-{
-	struct xml_level level;
-
-	arena->view.x = 0.0f;
-	arena->view.y = 0.0f;
-	arena->view.width = w;
-	arena->view.height = h;
-	arena->view.scale = 1.0f;
-	arena->cursor_x = 0;
-	arena->cursor_y = 0;
-
-	arena->shift = false;
-	arena->ctrl = false;
-
-	arena->tool = TOOL_MOVE;
-	arena->tool_hidden = TOOL_MOVE;
-	arena->state = STATE_NORMAL;
-	arena->hover_joint = NULL;
-	arena->hover_block = NULL;
-
-	arena->root_joints_moving = NULL;
-	arena->root_blocks_moving = NULL;
-	arena->blocks_moving = NULL;
-
-	xml_parse(xml, len, &level);
-	convert_xml(&level, &arena->design);
-
-	arena->world = gen_world(&arena->design);
-
-	block_graphics_init(arena);
-
-	/*
-	glGenBuffers(1, &arena->joint_coord_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, arena->joint_coord_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(arena->joint_coords),
-		     arena->joint_coords, GL_STREAM_DRAW);
-	*/
-
-	arena->tick = 0;
-	text_stream_create(&arena->tick_counter, MAX_RENDER_TEXT_LENGTH);
-	arena->has_won = false;
-
-	arena->preview_gp_trajectory = false;
-	arena->preview_design = NULL;
-	arena->preview_world = NULL;
-
-	change_speed_preset(arena, 2);
-}
-
 /* TODO: dedupe */
 static void u64tostr(char *buf, uint64_t val)
 {
@@ -232,8 +180,8 @@ void arena_key_up_event(struct arena *arena, int key)
 
 void start(struct arena *arena)
 {
-	free_world(arena->world, &arena->design);
-	arena->world = gen_world(&arena->design);
+	free_world(arena->world, arena->design);
+	arena->world = gen_world(arena->design);
 	//arena->ival = set_interval(tick_func, arena->tick_ms, arena);
 	arena->hover_joint = NULL;
 	arena->tick = 0;
@@ -242,8 +190,8 @@ void start(struct arena *arena)
 
 void stop(struct arena *arena)
 {
-	free_world(arena->world, &arena->design);
-	arena->world = gen_world(&arena->design);
+	free_world(arena->world, arena->design);
+	arena->world = gen_world(arena->design);
 	//clear_interval(arena->ival);
 }
 
@@ -450,7 +398,7 @@ static float distance(float x0, float y0, float x1, float y1)
 
 struct joint *joint_hit_test(struct arena *arena, float x, float y)
 {
-	struct design *design = &arena->design;
+	struct design *design = arena->design;
 	struct joint *best_joint = NULL;
 	struct joint *joint;
 	double best_dist = 8.0f;
@@ -469,7 +417,7 @@ struct joint *joint_hit_test(struct arena *arena, float x, float y)
 
 struct joint *joint_hit_test_exclude_rod(struct arena *arena, float x, float y, struct rod *rod, bool attached)
 {
-	struct design *design = &arena->design;
+	struct design *design = arena->design;
 	struct joint *best_joint = NULL;
 	struct joint *joint;
 	double best_dist = 8.0f;
@@ -510,7 +458,7 @@ bool has_wheel(struct joint *joint, struct wheel *not_this_one)
 
 struct joint *joint_hit_test_exclude_wheel(struct arena *arena, float x, float y, struct wheel *wheel, bool attached)
 {
-	struct design *design = &arena->design;
+	struct design *design = arena->design;
 	struct joint *best_joint = NULL;
 	struct joint *joint;
 	double best_dist = 8.0f;
@@ -576,7 +524,7 @@ bool block_is_hit(struct block *block, float x, float y)
 
 struct block *block_hit_test(struct arena *arena, float x, float y)
 {
-	struct design *design = &arena->design;
+	struct design *design = arena->design;
 	struct block *block;
 
 	for (block = design->player_blocks.tail; block; block = block->prev) {
@@ -665,7 +613,7 @@ void mark_overlaps_data(struct design *design, b2World *world, struct block* ign
 
 void mark_overlaps(struct arena *arena)
 {
-    mark_overlaps_data(&arena->design, arena->world, arena->new_block);
+    mark_overlaps_data(arena->design, arena->world, arena->new_block);
 }
 
 void delete_rod_joints(struct design *design, struct rod *rod)
@@ -708,7 +656,7 @@ void delete_wheel_joints(struct design *design, struct wheel *wheel)
 
 void delete_block(struct arena *arena, struct block *block)
 {
-	struct design *design = &arena->design;
+	struct design *design = arena->design;
 	struct shape *shape = &block->shape;
 
 	switch (shape->type) {
@@ -937,7 +885,7 @@ void update_move(struct arena *arena, double dx, double dy)
 
 	mark_overlaps(arena);
 
-	arena->design.modcount++;
+	arena->design->modcount++;
 }
 
 void action_move(struct arena *arena, int x, int y)
@@ -975,7 +923,7 @@ void attach_new_rod(struct design *design, struct block *block, struct joint *jo
 
 void attach_new_wheel(struct arena *arena, struct block *block, struct joint *joint)
 {
-	struct design *design = &arena->design;
+	struct design *design = arena->design;
 	struct wheel *wheel = &block->shape.wheel;
 
 	remove_joint(&design->joints, wheel->center);
@@ -1004,7 +952,7 @@ void detach_new_rod(struct design *design, struct block *block, double x, double
 
 void detach_new_wheel(struct arena *arena, struct block *block, double x, double y)
 {
-	struct design *design = &arena->design;
+	struct design *design = arena->design;
 	struct wheel *wheel = &block->shape.wheel;
 
 	remove_attach_node(&wheel->center->att, wheel->center_att);
@@ -1054,7 +1002,7 @@ void action_new_rod(struct arena *arena, int x, int y)
 
 	if (!attached) {
 		if (joint) {
-			attach_new_rod(&arena->design, arena->new_block, joint);
+			attach_new_rod(arena->design, arena->new_block, joint);
 		} else {
 			rod->to->x = x_world;
 			rod->to->y = y_world;
@@ -1062,10 +1010,10 @@ void action_new_rod(struct arena *arena, int x, int y)
 		}
 	} else {
 		if (!joint) {
-			detach_new_rod(&arena->design, arena->new_block, x_world, y_world);
+			detach_new_rod(arena->design, arena->new_block, x_world, y_world);
 		} else if (joint != rod->to) {
-			detach_new_rod(&arena->design, arena->new_block, x_world, y_world);
-			attach_new_rod(&arena->design, arena->new_block, joint);
+			detach_new_rod(arena->design, arena->new_block, x_world, y_world);
+			attach_new_rod(arena->design, arena->new_block, joint);
 		}
 	}
 
@@ -1161,7 +1109,7 @@ void mouse_up_move(struct arena *arena)
     arena->move_orig_block = NULL;
 
     // Use new is_design_legal function
-    if (!is_design_legal(&arena->design))
+    if (!is_design_legal(arena->design))
         update_move(arena, 0.0, 0.0);
 
     arena->root_joints_moving = NULL;
@@ -1263,7 +1211,7 @@ void block_dfs(struct arena *arena, struct block *block, bool value, bool all)
 		break;
 	}
 
-	arena->design.modcount++;
+	arena->design->modcount++;
 }
 
 void joint_dfs(struct arena *arena, struct joint *joint, bool value, bool all)
@@ -1285,7 +1233,7 @@ void joint_dfs(struct arena *arena, struct joint *joint, bool value, bool all)
 	for (node = joint->att.head; node; node = node->next)
 		block_dfs(arena, node->block, value, all);
 
-	arena->design.modcount++;
+	arena->design->modcount++;
 }
 
 void resolve_joint(struct arena *arena, struct joint *joint)
@@ -1332,7 +1280,7 @@ void mouse_down_move(struct arena *arena, float x, float y)
 
 void mouse_down_rod(struct arena *arena, float x, float y)
 {
-	struct design *design = &arena->design;
+	struct design *design = arena->design;
 	struct block *block;
 	struct joint *j0, *j1;
 	struct attach_node *att0, *att1;
@@ -1386,7 +1334,7 @@ void mouse_down_rod(struct arena *arena, float x, float y)
 
 void mouse_down_wheel(struct arena *arena, float x, float y)
 {
-	struct design *design = &arena->design;
+	struct design *design = arena->design;
 	struct block *block;
 	struct joint *j0;
 	struct attach_node *att0;
@@ -1503,7 +1451,7 @@ void mouse_down_tool(struct arena *arena, float x, float y)
 		return;
 	}
 
-	if (block_list_len(&arena->design.player_blocks) >= 120)
+	if (block_list_len(&arena->design->player_blocks) >= 120)
 		return;
 
 	if (arena->tool == TOOL_ROD || arena->tool == TOOL_SOLID_ROD) {
@@ -1535,7 +1483,7 @@ void arena_mouse_button_down_event(struct arena *arena, int button)
 
 	switch (arena->state) {
 	case STATE_NORMAL:
-		if (inside_area(&arena->design.build_area, x_world, y_world))
+		if (inside_area(&arena->design->build_area, x_world, y_world))
 			mouse_down_tool(arena, x_world, y_world);
 		else
 			arena->state = STATE_NORMAL_PAN;

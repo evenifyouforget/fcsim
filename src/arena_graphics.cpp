@@ -1039,7 +1039,7 @@ void arena_draw(struct arena *arena)
 	glClearColor(sky_color.r, sky_color.g, sky_color.b, sky_color.a);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	block_graphics_reset(arena, &arena->design);
+	block_graphics_reset(arena, arena->design);
     if(arena->preview_gp_trajectory && arena->preview_trail) {
         preview_trail_draw(arena);
     }
