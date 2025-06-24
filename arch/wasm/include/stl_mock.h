@@ -61,7 +61,7 @@ struct vector {
         }
         free(_storage);
     }
-    size_t size() {
+    size_t size() const {
         return _size;
     }
     void _expand() {
