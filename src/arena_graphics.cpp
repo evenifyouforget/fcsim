@@ -854,7 +854,7 @@ void regenerate_ui_buttons(arena* arena) {
         all_buttons->buttons.push_back(button);
     }
     {
-        ui_button_single button{{7, 0}, top_bar_x_offset + 120 + 55 * 4.5f, vh, 60 + 55 * 9 + 8, 128};
+        ui_button_single button{{7, 0}, top_bar_x_offset + 120 + 55 * 1.0f, vh, 60 + 55 * 2 + 8, 128};
         button.enabled = arena->ui_garden_opened;
         all_buttons->buttons.push_back(button);
     }
@@ -862,6 +862,29 @@ void regenerate_ui_buttons(arena* arena) {
         ui_button_single button{{7, 1}, top_bar_x_offset + 75, vh, 30, 128, 2};
         button.enabled = arena->ui_garden_opened;
         button.texts.push_back(ui_button_text{"^", 2, 0, -30});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{7, 2}, top_bar_x_offset + 120, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_garden_opened;
+        button.texts.push_back(ui_button_text{(
+            arena->use_garden?"Active":arena->garden?"Frozen":"None"
+        ), 1, 0, 5});
+        button.texts.push_back(ui_button_text{"Garden", 1, 0, -5});
+        button.highlighted = arena->use_garden;
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{7, 3}, top_bar_x_offset + 120 + 55, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_garden_opened;
+        button.texts.push_back(ui_button_text{"Reset", 1, 0, 0});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{7, 4}, top_bar_x_offset + 120 + 55 * 2, vh - 30, 50, 50, 2};
+        button.enabled = arena->ui_garden_opened;
+        button.texts.push_back(ui_button_text{"Take", 1, 0, 5});
+        button.texts.push_back(ui_button_text{"Best", 1, 0, -5});
         all_buttons->buttons.push_back(button);
     }
 }
