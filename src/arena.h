@@ -15,6 +15,10 @@
 
 #define TAU 6.28318530718
 
+#define GARDEN_ACTION_NONE -1
+#define GARDEN_ACTION_RESET 3
+#define GARDEN_ACTION_TAKE_BEST 4
+
 struct view {
 	float x;
 	float y;
@@ -111,6 +115,7 @@ struct arena {
 	// keeping the highest fitness (lowest error score) designs, in hopes of reaching a solution
 	bool use_garden; // note: disabling garden will not delete the garden, just stops iterating
 	void* garden; // actual type: garden_t*
+	int garden_queued_action;
 
 	// ui button templates
 	void* ui_buttons; // actual type: ui_button_collection*

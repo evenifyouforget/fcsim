@@ -632,6 +632,15 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
     if(button.id == ui_button_id{7, 1}) {
         arena->ui_garden_opened = false;
     }
+    if(button.id == ui_button_id{7, 2}) {
+        arena->use_garden ^= 1; // toggle
+    }
+    if(button.id == ui_button_id{7, 3}) {
+        arena->garden_queued_action = GARDEN_ACTION_RESET;
+    }
+    if(button.id == ui_button_id{7, 4}) {
+        arena->garden_queued_action = GARDEN_ACTION_TAKE_BEST;
+    }
 }
 
 void regenerate_ui_buttons(arena* arena) {
@@ -878,6 +887,7 @@ void regenerate_ui_buttons(arena* arena) {
         ui_button_single button{{7, 3}, top_bar_x_offset + 120 + 55, vh - 30, 50, 50, 2};
         button.enabled = arena->ui_garden_opened;
         button.texts.push_back(ui_button_text{"Reset", 1, 0, 0});
+        button.highlighted = arena->garden_queued_action == GARDEN_ACTION_RESET;
         all_buttons->buttons.push_back(button);
     }
     {
@@ -885,6 +895,7 @@ void regenerate_ui_buttons(arena* arena) {
         button.enabled = arena->ui_garden_opened;
         button.texts.push_back(ui_button_text{"Take", 1, 0, 5});
         button.texts.push_back(ui_button_text{"Best", 1, 0, -5});
+        button.highlighted = arena->garden_queued_action == GARDEN_ACTION_TAKE_BEST;
         all_buttons->buttons.push_back(button);
     }
 }
