@@ -239,4 +239,52 @@ int main() {
         map.at(1) = 100;
         assert(map.at(1) == 100);
     }
+    // unordered_map: larger data (trivial)
+    {
+        std::unordered_map<int, int> map;
+        for(int i = 0; i < 100; ++i) {
+            int k = i;
+            int v = i * 2;
+            map.insert(std::make_pair(k, v));
+        }
+        for(int i = 0; i < 100; ++i) {
+            int k = i;
+            int v = i * 2;
+            assert(map.at(k) == v);
+        }
+    }
+    // unordered_map: larger data (non-trivial, evenly distributed)
+    {
+        std::unordered_map<int, int> map;
+        int k = 1;
+        int v = 1;
+        for(int i = 0; i < 100; ++i) {
+            k = k * 5 % 107;
+            v = v * 3 % 113;
+            map.insert(std::make_pair(k, v));
+        }
+        k = 1;
+        v = 1;
+        for(int i = 0; i < 100; ++i) {
+            k = k * 5 % 107;
+            v = v * 3 % 113;
+            assert(map.at(k) == v);
+        }
+    }
+    // unordered_map: larger data (non-trivial, unevenly distributed)
+    {
+        std::unordered_map<int, int> map;
+        for(int i = 0; i < 250; ++i) {
+            int k = i * i * i * i;
+            int v = i * 2;
+            map.insert(std::make_pair(k, v));
+        }
+        for(int i = 0; i < 250; ++i) {
+            int k = i * i * i * i;
+            int v = i * 2;
+            assert(map.at(k) == v);
+            assert(map.count(k) == 1);
+            assert(map.count(k + 2) == 0); // impossible gap
+        }
+    }
 }
