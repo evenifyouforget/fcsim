@@ -185,14 +185,6 @@ int main() {
         map.insert(std::make_pair(1, 42));
         assert(map.at(1) == 42);
     }
-    // unordered_map: at inserts default if not present
-    {
-        std::unordered_map<int, int> map;
-        int& ref = map.at(2);
-        assert(map.count(2) == 1);
-        // Default value is 0 for int
-        assert(ref == 0);
-    }
     // unordered_map: insert does not overwrite existing value
     {
         std::unordered_map<int, int> map;
