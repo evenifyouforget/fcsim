@@ -2,6 +2,12 @@
 #include <cassert>
 
 int main() {
+    // test new default value
+    {
+        int default_value;
+        _new<int>(&default_value);
+        assert(default_value == 0);
+    }
     // test vector construct destruct
     {
         std::vector<int> vec;
@@ -126,6 +132,40 @@ int main() {
             assert(vec[j][0] == 2 * j);
         }
         assert(vec[i][0] == 0);
+    }
+    // test vector resize size (both up and down)
+    {
+        std::vector<int> vec;
+        for(int i = 0; i < 100; ++i) {
+            vec.resize(i);
+            assert(vec.size() == (size_t)i);
+        }
+        for(int i = 100; i >= 0; --i) {
+            vec.resize(i);
+            assert(vec.size() == (size_t)i);
+        }
+    }
+    // test vector resize keeps data
+    {
+        std::vector<int> vec;
+        for(int i = 1; i < 100; ++i) {
+            vec.resize(i);
+            assert(vec.size() == (size_t)i);
+            vec[i-1] = i - 1;
+            for(int j = 0; j < i; ++j) {
+                assert(vec[j] == j);
+            }
+        }
+    }
+    // test vector resize default elements
+    {
+        int default_value;
+        _new<int>(&default_value);
+        std::vector<int> vec;
+        vec.resize(10);
+        for(int i = 0; i < 10; ++i) {
+            assert(vec[i] == default_value);
+        }
     }
     // test string assign by string literal
     {
