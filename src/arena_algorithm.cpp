@@ -65,6 +65,12 @@ extern "C" void tick_func(void *arg)
         }
     }
 
+    if(the_arena->garden_queued_action == GARDEN_ACTION_RESET) {
+        reset_garden(the_arena);
+    }else if(the_arena->garden_queued_action == GARDEN_ACTION_TAKE_BEST) {
+        take_best_design_from_garden(the_arena);
+    }
+    the_arena->garden_queued_action = GARDEN_ACTION_NONE;
     if(the_arena->use_garden) {
         // use the remaining time budget for garden simulation
         ensure_garden_exists(the_arena);
