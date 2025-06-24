@@ -977,22 +977,35 @@ void draw_ui(arena* arena) {
     }
 }
 
-void preview_trail_draw(arena* arena) {
+void draw_single_trail(block_graphics* graphics, const trail_t& the_trail, color col) {
+    if(the_trail.datapoints.size() < 2) {
+        return;
+    }
     const double LINE_RADIUS = 2;
+    b2Vec2 last = the_trail.datapoints[0];
+    for(size_t datapoint_index = 1; datapoint_index < the_trail.datapoints.size(); ++datapoint_index) {
+        b2Vec2 current = the_trail.datapoints[datapoint_index];
+        block_graphics_add_line(graphics, last, current, LINE_RADIUS, col, 4);
+        last = current;
+    }
+}
 
+void preview_trail_draw(arena* arena) {
     block_graphics* graphics = (block_graphics*)arena->block_graphics_v2;
 
+    // draw main path trails
     multi_trail_t* all_trails = (multi_trail_t*)arena->preview_trail;
     for(size_t trail_index = 0; trail_index < all_trails->trails.size(); ++trail_index) {
         trail_t& the_trail = all_trails->trails[trail_index];
-        if(the_trail.datapoints.size() < 2) {
-            continue;
-        }
-        b2Vec2 last = the_trail.datapoints[0];
-        for(size_t datapoint_index = 1; datapoint_index < the_trail.datapoints.size(); ++datapoint_index) {
-            b2Vec2 current = the_trail.datapoints[datapoint_index];
-            block_graphics_add_line(graphics, last, current, LINE_RADIUS, get_color_by_type(FCSIM_GOAL_CIRCLE, 0), 4);
-            last = current;
+        draw_single_trail(graphics, the_trail, get_color_by_type(FCSIM_GOAL_CIRCLE, 0));
+    }
+
+    // also draw garden trails
+    if(arena->garden) {
+        garden_t* garden = (garden_t*)arena->garden;
+        for(size_t i = 0; i < garden->creatures.size(); ++i) {
+            creature_t& the_creature = garden->creatures[i];
+            draw_single_trail(graphics, the_creature.trail, get_color_by_type(FCSIM_GOAL_CIRCLE, 0));
         }
     }
 }
