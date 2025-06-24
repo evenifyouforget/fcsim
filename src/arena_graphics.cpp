@@ -990,23 +990,33 @@ void draw_single_trail(block_graphics* graphics, const trail_t& the_trail, color
     }
 }
 
+void draw_multi_trail(block_graphics* graphics, const multi_trail_t& all_trails, color col) {
+    for(size_t trail_index = 0; trail_index < all_trails.trails.size(); ++trail_index) {
+        const trail_t& the_trail = all_trails.trails[trail_index];
+        draw_single_trail(graphics, the_trail, col);
+    }
+}
+
 void preview_trail_draw(arena* arena) {
     block_graphics* graphics = (block_graphics*)arena->block_graphics_v2;
 
     // draw main path trails
     multi_trail_t* all_trails = (multi_trail_t*)arena->preview_trail;
-    for(size_t trail_index = 0; trail_index < all_trails->trails.size(); ++trail_index) {
-        trail_t& the_trail = all_trails->trails[trail_index];
-        draw_single_trail(graphics, the_trail, get_color_by_type(FCSIM_GOAL_CIRCLE, 0));
-    }
+    draw_multi_trail(graphics, *all_trails, get_color_by_type(FCSIM_GOAL_CIRCLE, 0));
+}
 
-    // also draw garden trails
-    if(arena->garden) {
-        garden_t* garden = (garden_t*)arena->garden;
-        for(size_t i = 0; i < garden->creatures.size(); ++i) {
-            creature_t& the_creature = garden->creatures[i];
-            draw_single_trail(graphics, the_creature.trail, get_color_by_type(FCSIM_GOAL_CIRCLE, 0));
-        }
+void garden_trail_draw(arena* arena) {
+    block_graphics* graphics = (block_graphics*)arena->block_graphics_v2;
+
+    if(!arena->garden) {
+        return;
+    }
+    garden_t* garden = (garden_t*)arena->garden;
+
+    // draw garden trails
+    for(size_t i = 0; i < garden->creatures.size(); ++i) {
+        creature_t& the_creature = garden->creatures[i];
+        draw_multi_trail(graphics, the_creature.trails, get_color_by_type(FCSIM_GOAL_CIRCLE, 1));
     }
 }
 
@@ -1020,6 +1030,7 @@ void arena_draw(struct arena *arena)
     if(arena->preview_gp_trajectory && arena->preview_trail) {
         preview_trail_draw(arena);
     }
+    garden_trail_draw(arena);
 	block_graphics_draw((block_graphics*)arena->block_graphics_v2, &arena->view);
 
     regenerate_ui_buttons(arena);

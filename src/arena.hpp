@@ -23,7 +23,7 @@ struct multi_trail_t {
 };
 
 struct creature_t {
-    trail_t trail;
+    multi_trail_t trails;
     design* design_ptr = nullptr;
     b2World* world_ptr = nullptr;
     int tick = 0;
@@ -36,7 +36,7 @@ struct creature_t {
 struct garden_t {
     std::vector<creature_t> creatures;
     // dynamically updating estimate of how many ticks per creature we can fit in our time budget per frame
-    int ticks_per_creature = 1;
+    size_t ticks_per_creature = 1;
     void clear();
 };
 

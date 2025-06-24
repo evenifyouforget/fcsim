@@ -7,6 +7,10 @@
 #include "stl_compat.h"
 #include "interval.h"
 
+extern "C" {
+#include "random.h"
+}
+
 extern "C" void tick_func(void *arg)
 {
 	arena* the_arena = (arena*)arg;
@@ -59,6 +63,89 @@ extern "C" void tick_func(void *arg)
             double time_end = time_precise_ms();
             if(time_end - time_start >= the_arena->tick_ms)break;
         }
+    }
+
+    if(the_arena->use_garden) {
+        // use the remaining time budget for garden simulation
+        ensure_garden_exists(the_arena);
+        garden_t* garden = (garden_t*)the_arena->garden;
+        /*
+         * Garden algorithm description:
+         * - Tick all creatures in the garden if they are legal and not stale (reached max ticks)
+         * - If there is an illegal creature, or at least 2 creatures are stale, kill the worst creature and
+         *   replace it with a mutant from a random other creature
+         * - Adjust the ticks budget
+         */
+        // tick all creatures
+        size_t illegal_creature_index = SIZE_MAX;
+        size_t num_stale = 0;
+        for (size_t j = 0; j < garden->creatures.size(); ++j) {
+            creature_t& creature = garden->creatures[j];
+            if(creature.tick == 0) {
+                // check if it is legal
+                // we don't remember this, so we may check it redundantly
+                mark_overlaps_data(creature.design_ptr, creature.world_ptr);
+                if(!is_design_legal(creature.design_ptr)) {
+                    illegal_creature_index = j;
+                }
+            }
+            for(size_t i = 0; j != illegal_creature_index &&
+                i < garden->ticks_per_creature && creature.tick < GARDEN_MAX_TICKS; ++i) {
+                step(creature.world_ptr);
+                creature.tick++;
+                creature.best_score = std::min(creature.best_score, goal_heuristic(creature.design_ptr));
+                if(creature.trails.accepting()) {
+                    // submit a frame to the trail
+                    creature.trails.submit_frame(creature.design_ptr);
+                }
+            }
+            num_stale += (creature.tick >= GARDEN_MAX_TICKS);
+        }
+        // kill the worst creature if needed
+        if(illegal_creature_index != SIZE_MAX || num_stale >= 2) {
+            // find worst creature index, or just use the illegal creature if it exists
+            size_t worst_index = 0;
+            if(illegal_creature_index != SIZE_MAX) {
+                worst_index = illegal_creature_index;
+            }else{
+                // find the worst creature by score
+                for(size_t i = 0; i < garden->creatures.size(); ++i) {
+                    if(garden->creatures[i].best_score > garden->creatures[worst_index].best_score) {
+                        worst_index = i;
+                    }
+                }
+            }
+            // debug: do nothing
+            if(false) {
+                // reset it to a blank struct
+                garden->creatures[worst_index].destroy();
+                garden->creatures[worst_index] = creature_t();
+                // choose a new parent creature randomly
+                size_t parent_index = worst_index;
+                while(parent_index == worst_index) {
+                    parent_index = random_u64() % garden->creatures.size();
+                }
+                // make a working copy of the parent creature's design
+                design* new_design = clean_copy_design(garden->creatures[parent_index].design_ptr);
+                // mutate the design
+                // TODO: implement mutation
+                // initialize the new creature from the working copy
+                garden->creatures[worst_index].init_copy_design(new_design);
+                // free the working copy
+                free_design(new_design);
+            }
+        }
+        // update ticks budget estimate based on if we are early or late
+        long long int tt = garden->ticks_per_creature;
+        double time_end = time_precise_ms();
+        if(time_end - time_start >= the_arena->tick_ms) {
+            // we finished late, we are over budget
+            tt = std::max(1LL, tt - 1 - tt / 10);
+        } else {
+            // we finished early, we are under budget
+            tt += 1 + tt / 100;
+        }
+        garden->ticks_per_creature = tt;
     }
 }
 
@@ -151,12 +238,14 @@ void garden_t::clear() {
 
 void ensure_garden_exists(arena* arena) {
     if (!arena->garden) {
-        arena->garden = _new<garden_t>();
+        reset_garden(arena);
     }
 }
 
 void reset_garden(arena* arena_ptr) {
-    ensure_garden_exists(arena_ptr);
+    if (!arena_ptr->garden) {
+        arena_ptr->garden = _new<garden_t>();
+    }
     garden_t* garden = (garden_t*)arena_ptr->garden;
     garden->clear();
     for(int i = 0; i < GARDEN_MAX_CREATURES; ++i) {
