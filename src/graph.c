@@ -726,10 +726,15 @@ static void free_block_list(struct block_list *list)
 	}
 }
 
-void free_design(struct design *design)
+void free_design_data_only(struct design *design)
 {
 	free_joint_list(&design->joints);
 	free_block_list(&design->level_blocks);
 	free_block_list(&design->player_blocks);
+}
+
+void free_design(struct design *design)
+{
+	free_design_data_only(design);
 	free(design);
 }

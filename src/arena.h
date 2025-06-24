@@ -19,6 +19,9 @@
 #define GARDEN_ACTION_RESET 3
 #define GARDEN_ACTION_TAKE_BEST 4
 
+#define GARDEN_MAX_CREATURES 4
+#define GARDEN_MAX_TICKS 10000
+
 struct view {
 	float x;
 	float y;

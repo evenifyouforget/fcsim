@@ -125,3 +125,71 @@ extern "C" double goal_heuristic(struct design *design) {
     }
     return score;
 }
+
+void creature_t::init_copy_design(design* src_design_ptr) {
+    design_ptr = clean_copy_design(src_design_ptr);
+    world_ptr = gen_world(design_ptr);
+}
+
+void creature_t::destroy() {
+    if(world_ptr) {
+        free_world(world_ptr, design_ptr);
+    }
+    world_ptr = nullptr;
+    if(design_ptr) {
+        free_design(design_ptr);
+    }
+    design_ptr = nullptr;
+}
+
+void garden_t::clear() {
+    for (creature_t& creature : creatures) {
+        creature.destroy();
+    }
+    creatures.clear();
+}
+
+void ensure_garden_exists(arena* arena) {
+    if (!arena->garden) {
+        arena->garden = _new<garden_t>();
+    }
+}
+
+void reset_garden(arena* arena_ptr) {
+    ensure_garden_exists(arena_ptr);
+    garden_t* garden = (garden_t*)arena_ptr->garden;
+    garden->clear();
+    for(int i = 0; i < GARDEN_MAX_CREATURES; ++i) {
+        creature_t new_creature;
+        new_creature.init_copy_design(&arena_ptr->design);
+        garden->creatures.push_back(new_creature);
+    }
+}
+
+void take_best_design_from_garden(arena* arena_ptr) {
+    ensure_garden_exists(arena_ptr);
+    garden_t* garden = (garden_t*)arena_ptr->garden;
+    if (garden->creatures.size() == 0) {
+        return; // nothing to take
+    }
+    // find the creature with the best (lowest) score
+    creature_t* best_creature = &garden->creatures[0];
+    for (creature_t& creature : garden->creatures) {
+        if (creature.best_score < best_creature->best_score) {
+            best_creature = &creature;
+        }
+    }
+    // free the old design and world
+    if(arena_ptr->world) {
+        free_world(arena_ptr->world, &arena_ptr->design);
+        arena_ptr->world = nullptr;
+    }
+    free_design_data_only(&arena_ptr->design);
+    // need to make a temporary copy, because clean_copy_design gives us a pointer to a new design
+    design* temp_design = clean_copy_design(best_creature->design_ptr);
+    arena_ptr->design = *temp_design;
+    // clean up our temporary design
+    free_design(temp_design);
+    // regenerate the world
+    arena_ptr->world = gen_world(&arena_ptr->design);
+}
