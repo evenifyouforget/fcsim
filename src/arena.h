@@ -107,10 +107,16 @@ struct arena {
 	b2World *preview_world;
 	void *preview_trail; // real type: multi_trail_t*
 
+	// autotweaker is called "garden" since we maintain a "garden" of designs and mutate them
+	// keeping the highest fitness (lowest error score) designs, in hopes of reaching a solution
+	bool use_garden; // note: disabling garden will not delete the garden, just stops iterating
+	void* garden; // actual type: garden_t*
+
 	// ui button templates
 	void* ui_buttons; // actual type: ui_button_collection*
 	bool ui_toolbar_opened;
 	bool ui_speedbar_opened;
+	bool ui_garden_opened;
 };
 
 bool arena_compile_shaders(void);

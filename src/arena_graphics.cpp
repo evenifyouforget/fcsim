@@ -626,6 +626,12 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
     if(button.id == ui_button_id{5, 0}) {
         arena->preview_gp_trajectory ^= 1; // toggle
     }
+    if(button.id == ui_button_id{6, 0}) {
+        arena->ui_garden_opened = true;
+    }
+    if(button.id == ui_button_id{7, 1}) {
+        arena->ui_garden_opened = false;
+    }
 }
 
 void regenerate_ui_buttons(arena* arena) {
@@ -838,6 +844,26 @@ void regenerate_ui_buttons(arena* arena) {
         button.texts.push_back(ui_button_text{arena->preview_gp_trajectory?"ON":"OFF", 1, 0, -10});
         all_buttons->buttons.push_back(button);
     }
+
+    top_bar_x_offset += !arena->ui_speedbar_opened?40:599;
+
+    {
+        ui_button_single button{{6, 0}, top_bar_x_offset + 75, vh, 30, 30};
+        button.enabled = !arena->ui_garden_opened;
+        button.texts.push_back(ui_button_text{"v", 2});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{7, 0}, top_bar_x_offset + 120 + 55 * 4.5f, vh, 60 + 55 * 9 + 8, 128};
+        button.enabled = arena->ui_garden_opened;
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{7, 1}, top_bar_x_offset + 75, vh, 30, 128, 2};
+        button.enabled = arena->ui_garden_opened;
+        button.texts.push_back(ui_button_text{"^", 2, 0, -30});
+        all_buttons->buttons.push_back(button);
+    }
 }
 
 // Draw text, and return the x where the text ends
@@ -969,6 +995,8 @@ extern "C" void block_graphics_init(struct arena *ar)
     ar->ui_buttons = _new<ui_button_collection>();
     regenerate_ui_buttons(ar);
     ar->ui_toolbar_opened = false;
+    ar->ui_speedbar_opened = false;
+    ar->ui_garden_opened = false;
     ar->single_ticks_remaining = -1;
     ar->autostop_on_solve = false;
 }
