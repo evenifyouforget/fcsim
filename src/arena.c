@@ -753,6 +753,19 @@ void delete_block(struct arena *arena, struct block *block)
 	design->modcount++;
 }
 
+// Returns true if all player blocks are legal (not overlapping and inside build area)
+bool is_design_legal(struct design *design)
+{
+    struct block *block;
+    // Check all player blocks for overlap or being outside build area
+    for (block = design->player_blocks.head; block; block = block->next) {
+        if (block->overlap) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void action_pan(struct arena *arena, int x, int y)
 {
 	float dx_world;
@@ -1164,39 +1177,29 @@ void block_dfs(struct arena *arena, struct block *block, bool value, bool all);
 
 void mouse_up_move(struct arena *arena)
 {
-	struct block_head *block_head;
-	bool overlap = false;
+    if (arena->move_orig_joint)
+        joint_dfs(arena, arena->move_orig_joint, false, true);
+    else
+        block_dfs(arena, arena->move_orig_block, false, true);
 
-	if (arena->move_orig_joint)
-		joint_dfs(arena, arena->move_orig_joint, false, true);
-	else
-		block_dfs(arena, arena->move_orig_block, false, true);
+    arena->move_orig_joint = NULL;
+    arena->move_orig_block = NULL;
 
-	arena->move_orig_joint = NULL;
-	arena->move_orig_block = NULL;
+    // Use new is_design_legal function
+    if (!is_design_legal(&arena->design))
+        update_move(arena, 0.0, 0.0);
 
-	for (block_head = arena->blocks_moving; block_head;
-	     block_head = block_head->next) {
-		if (block_head->block->overlap) {
-			overlap = true;
-			break;
-		}
-	}
-
-	if (overlap)
-		update_move(arena, 0.0, 0.0);
-
-	arena->root_joints_moving = NULL;
-	arena->root_blocks_moving = NULL;
-	arena->blocks_moving = NULL;
+    arena->root_joints_moving = NULL;
+    arena->root_blocks_moving = NULL;
+    arena->blocks_moving = NULL;
 }
 
 void mouse_up_new_block(struct arena *arena)
 {
-	if (arena->new_block->overlap) {
-		delete_block(arena, arena->new_block);
-		arena->hover_joint = NULL;
-	}
+    if (!is_design_legal(&arena->design)) {
+        delete_block(arena, arena->new_block);
+        arena->hover_joint = NULL;
+    }
 }
 
 void arena_mouse_button_up_event(struct arena *arena, int button)
