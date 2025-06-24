@@ -630,37 +630,42 @@ void get_block_bb(struct block *block, struct area *area)
 void gen_block(b2World *world, struct block *block);
 void b2World_CleanBodyList(b2World *world);
 
+void mark_overlaps_data(struct design *design, b2World *world)
+{
+    b2Contact *contact;
+    struct block *block;
+
+    b2ContactManager_CleanContactList(&world->m_contactManager);
+    b2World_CleanBodyList(world);
+    b2ContactManager_Collide(&world->m_contactManager);
+
+    for (block = design->player_blocks.head; block; block = block->next) {
+        block->overlap = false;
+        if (!block_inside_area(block, &design->build_area))
+            block->overlap = true;
+    }
+
+    for (contact = world->m_contactList; contact; contact = contact->m_next) {
+        if (contact->m_manifoldCount > 0) {
+            block = (struct block *)contact->m_shape1->m_userData;
+            block->overlap = true;
+            block = (struct block *)contact->m_shape2->m_userData;
+            block->overlap = true;
+        }
+    }
+
+    for (block = design->player_blocks.head; block; block = block->next) {
+        if (!block->visited)
+            block->overlap = false;
+    }
+
+    for (block = design->level_blocks.head; block; block = block->next)
+        block->overlap = false;
+}
+
 void mark_overlaps(struct arena *arena)
 {
-	b2Contact *contact;
-	struct block *block;
-
-	b2ContactManager_CleanContactList(&arena->world->m_contactManager);
-	b2World_CleanBodyList(arena->world);
-	b2ContactManager_Collide(&arena->world->m_contactManager);
-
-	for (block = arena->design.player_blocks.head; block; block = block->next) {
-		block->overlap = false;
-		if (!block_inside_area(block, &arena->design.build_area))
-			block->overlap = true;
-	}
-
-	for (contact = arena->world->m_contactList; contact; contact = contact->m_next) {
-		if (contact->m_manifoldCount > 0) {
-			block = (struct block *)contact->m_shape1->m_userData;
-			block->overlap = true;
-			block = (struct block *)contact->m_shape2->m_userData;
-			block->overlap = true;
-		}
-	}
-
-	for (block = arena->design.player_blocks.head; block; block = block->next) {
-		if (!block->visited && block != arena->new_block)
-			block->overlap = false;
-	}
-
-	for (block = arena->design.level_blocks.head; block; block = block->next)
-		block->overlap = false;
+    mark_overlaps_data(&arena->design, arena->world);
 }
 
 void delete_rod_joints(struct design *design, struct rod *rod)
