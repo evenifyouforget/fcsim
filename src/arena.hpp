@@ -47,4 +47,6 @@ void reset_garden(arena*);
 // overwrite the current main design with the best scoring design from the garden
 void take_best_design_from_garden(arena*);
 
+void arena_reset_operations(arena*);
+
 #endif // ARENA_HPP

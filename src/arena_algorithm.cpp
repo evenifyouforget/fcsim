@@ -223,7 +223,7 @@ extern "C" double goal_heuristic(struct design *design) {
 
 void creature_t::init_copy_design(design* src_design_ptr) {
     design_ptr = clean_copy_design(src_design_ptr);
-    world_ptr = gen_world(design_ptr);
+    //world_ptr = gen_world(design_ptr);
 }
 
 void creature_t::destroy() {
@@ -256,10 +256,10 @@ void reset_garden(arena* arena_ptr) {
     }
     garden_t* garden = (garden_t*)arena_ptr->garden;
     garden->clear();
-    for(int i = 0; i < GARDEN_MAX_CREATURES; ++i) {
-        creature_t new_creature;
-        new_creature.init_copy_design(arena_ptr->design);
-        garden->creatures.push_back(new_creature);
+    // fill with new creatures
+    for(size_t i = 0; i < GARDEN_MAX_CREATURES; ++i) {
+        garden->creatures.emplace_back();
+        garden->creatures[i].init_copy_design(arena_ptr->design);
     }
 }
 
@@ -281,11 +281,14 @@ void take_best_design_from_garden(arena* arena_ptr) {
         free_world(arena_ptr->world, arena_ptr->design);
         arena_ptr->world = nullptr;
     }
-    free_design_data_only(arena_ptr->design);
+    free_design(arena_ptr->design);
+    arena_ptr->design = nullptr;
     // copy the best design into the arena's design
     arena_ptr->design = clean_copy_design(best_creature->design_ptr);
     // regenerate the world
     arena_ptr->world = gen_world(arena_ptr->design);
+    // reset operation data
+    arena_reset_operations(arena_ptr);
 }
 
 extern "C" void arena_init(struct arena *arena, float w, float h, char *xml, int len)
@@ -302,18 +305,7 @@ extern "C" void arena_init(struct arena *arena, float w, float h, char *xml, int
 	arena->cursor_x = 0;
 	arena->cursor_y = 0;
 
-	arena->shift = false;
-	arena->ctrl = false;
-
-	arena->tool = TOOL_MOVE;
-	arena->tool_hidden = TOOL_MOVE;
-	arena->state = STATE_NORMAL;
-	arena->hover_joint = NULL;
-	arena->hover_block = NULL;
-
-	arena->root_joints_moving = NULL;
-	arena->root_blocks_moving = NULL;
-	arena->blocks_moving = NULL;
+    arena_reset_operations(arena);
 
 	xml_parse(xml, len, &level);
 	convert_xml(&level, arena->design);
@@ -338,4 +330,19 @@ extern "C" void arena_init(struct arena *arena, float w, float h, char *xml, int
 	arena->preview_world = NULL;
 
 	change_speed_preset(arena, 2);
+}
+
+void arena_reset_operations(arena* arena) {
+	arena->shift = false;
+	arena->ctrl = false;
+
+	arena->tool = TOOL_MOVE;
+	arena->tool_hidden = TOOL_MOVE;
+	arena->state = STATE_NORMAL;
+	arena->hover_joint = NULL;
+	arena->hover_block = NULL;
+
+	arena->root_joints_moving = NULL;
+	arena->root_blocks_moving = NULL;
+	arena->blocks_moving = NULL;
 }
