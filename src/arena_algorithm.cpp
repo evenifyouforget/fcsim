@@ -104,6 +104,12 @@ extern "C" void tick_func(void *arg)
         size_t illegal_creature_index = SIZE_MAX;
         size_t num_stale = 0;
         for (size_t j = 0; j < garden->creatures.size(); ++j) {
+            num_stale += (garden->creatures[j].tick >= GARDEN_MAX_TICKS);
+        }
+        size_t ticks_budget_per_creature = std::max<size_t>(1, garden->total_ticks_budget
+            / std::max<size_t>(1, garden->creatures.size() - num_stale));
+        num_stale = 0;
+        for (size_t j = 0; j < garden->creatures.size(); ++j) {
             creature_t& creature = garden->creatures[j];
             if(creature.tick == 0) {
                 // check if it is legal
@@ -114,7 +120,7 @@ extern "C" void tick_func(void *arg)
                 }
             }
             for(size_t i = 0; j != illegal_creature_index &&
-                i < garden->ticks_per_creature && creature.tick < GARDEN_MAX_TICKS; ++i) {
+                i < ticks_budget_per_creature && creature.tick < GARDEN_MAX_TICKS; ++i) {
                 step(creature.world_ptr);
                 creature.tick++;
                 creature.best_score = std::min(creature.best_score, goal_heuristic(creature.design_ptr));
@@ -123,7 +129,7 @@ extern "C" void tick_func(void *arg)
                     creature.trails.submit_frame(creature.design_ptr);
                 }
             }
-            num_stale += (creature.tick >= GARDEN_MAX_TICKS);
+            num_stale += (garden->creatures[j].tick >= GARDEN_MAX_TICKS);
         }
         // kill the worst creature if needed
         if(illegal_creature_index != SIZE_MAX || num_stale >= 2) {
@@ -152,10 +158,9 @@ extern "C" void tick_func(void *arg)
             garden_reproduce(garden, garden->creatures.size()-1, 0);
         }
         // update ticks budget estimate based on if we are early or late
-        /*
-        long long int tt = garden->ticks_per_creature;
+        long long int tt = garden->total_ticks_budget;
         double time_end = time_precise_ms();
-        if(num_stale == garden->creatures.size() && time_end - time_start >= the_arena->tick_ms) {
+        if(num_stale == garden->creatures.size() && time_end - time_start >= the_arena->tick_ms * GARDEN_TIME_FACTOR) {
             // we finished late, we are over budget
             // or all designs are finished (stale)
             tt = std::max(1LL, tt - 1 - tt / 10);
@@ -163,8 +168,7 @@ extern "C" void tick_func(void *arg)
             // we finished early, we are under budget
             tt += 1 + tt / 100;
         }
-        garden->ticks_per_creature = tt;
-        */
+        garden->total_ticks_budget = tt;
     }
 }
 
