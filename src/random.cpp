@@ -38,8 +38,10 @@ uint64_t prng_t::next(void) {
 	return result;
 }
 
-prng_t _global_prng;
+prng_t _global_prng{0x39c367a6}; // default seed
 
 extern "C" uint64_t random_u64() {
     return _global_prng.next();
 }
+
+
