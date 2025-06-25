@@ -236,7 +236,7 @@ extern "C" double goal_heuristic(struct design *design) {
     for (block* block_ptr = design->player_blocks.head; block_ptr != nullptr; block_ptr = block_ptr->next) {
         if (block_ptr->goal) {
             if (!block_inside_area(block_ptr, &design->goal_area)) {
-                score -= NOT_IN_GOAL_PENALTY;
+                score += NOT_IN_GOAL_PENALTY;
                 struct area bb;
                 get_block_bb(block_ptr, &bb);
                 double dx = bb.x - design->goal_area.x;
