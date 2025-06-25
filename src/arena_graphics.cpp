@@ -949,18 +949,20 @@ void draw_tick_counter(struct arena *arena)
     x = draw_text_default(arena, !tps_is_prediction?"TPS average":"TPS predicted", x, 10, 1);
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
     x = draw_text_default(arena, std::to_string(arena->state), x, 10);
-    x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-    if(!arena->garden) {
-        x = draw_text_default(arena, "No garden", x, 10, 1);
-    } else {
+    if(arena->garden) {
         garden_t* garden = (garden_t*)arena->garden;
-        x = draw_text_default(arena, std::to_string(garden->creatures[0].tick), x, 10, 1);
+        x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+        x = draw_text_default(arena, "Runs:", x, 10);
+        x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
         for(size_t i = 0; i < garden->creatures.size(); ++i) {
             x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
             if(garden->creatures[i].trails.trails.size() > 0) {
-                x = draw_text_default(arena, std::to_string(garden->creatures[i].trails.trails[0].datapoints.size()), x, 10, 1);
+                x = std::max(
+                    draw_text_default(arena, std::to_string(garden->creatures[i].best_score) + " error", x, 10, 1),
+                    draw_text_default(arena, std::to_string(garden->creatures[i].tick) + " tick", x, 20, 1)
+                    );
             } else {
-                x = draw_text_default(arena, "-", x, 10, 1);
+                x = draw_text_default(arena, "-", x, 10);
             }
         }
     }

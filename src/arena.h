@@ -26,6 +26,8 @@
 
 #define MAX_RENDER_TEXT_LENGTH 1000
 
+#define INFINITY (1.0 / 0.0)
+
 struct view {
 	float x;
 	float y;

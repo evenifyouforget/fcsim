@@ -27,7 +27,7 @@ struct creature_t {
     design* design_ptr = nullptr;
     b2World* world_ptr = nullptr;
     int tick = 0;
-    double best_score = 1e300;
+    double best_score = INFINITY; // lower is better
     // since we treat it as a data struct, we need to manually initialize or destroy it
     void init_copy_design(design*);
     void destroy();

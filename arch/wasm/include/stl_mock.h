@@ -155,6 +155,19 @@ struct string {
 };
 
 string to_string(int64_t);
+string to_string(uint64_t);
+
+string to_string(int32_t);
+string to_string(int16_t);
+string to_string(int8_t);
+
+string to_string(uint32_t);
+string to_string(uint16_t);
+string to_string(uint8_t);
+
+string to_string(double);
+
+string to_string(float);
 
 template <typename A, typename B> struct pair {
     A first;
@@ -320,5 +333,9 @@ public:
 };
 
 }
+
+// additional functions that have to be outside the std namespace
+
+std::string operator+(const std::string& lhs, const std::string& rhs);
 
 #endif
