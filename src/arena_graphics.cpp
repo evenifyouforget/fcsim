@@ -955,9 +955,13 @@ void draw_tick_counter(struct arena *arena)
     } else {
         garden_t* garden = (garden_t*)arena->garden;
         x = draw_text_default(arena, std::to_string(garden->creatures[0].tick), x, 10, 1);
-        if(garden->creatures[0].trails.trails.size() > 0) {
+        for(size_t i = 0; i < garden->creatures.size(); ++i) {
             x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-            x = draw_text_default(arena, std::to_string(garden->creatures[0].trails.trails[0].datapoints.size()), x, 10, 1);
+            if(garden->creatures[i].trails.trails.size() > 0) {
+                x = draw_text_default(arena, std::to_string(garden->creatures[i].trails.trails[0].datapoints.size()), x, 10, 1);
+            } else {
+                x = draw_text_default(arena, "-", x, 10, 1);
+            }
         }
     }
 }

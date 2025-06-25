@@ -22,7 +22,31 @@ void garden_reproduce(garden_t* garden, size_t parent_index, size_t child_index)
     // make a working copy of the parent creature's design
     design* new_design = clean_copy_design(garden->creatures[parent_index].design_ptr);
     // mutate the design
-    // TODO: implement mutation
+    /*
+    for(block* b = new_design->player_blocks.head; b; b = b->next) {
+        // simplest behaviour: each piece has a random chance of being wiggled, and only wiggle rods
+        if(b->type_id != FCSIM_ROD && b->type_id != FCSIM_SOLID_ROD) {
+            continue;
+        }
+        const double offset = random_uniform() * 2 - 1;
+        if(random_uniform() < 0.02) {
+            // wiggle x
+            b->shape.box.x += offset * 0;
+        }
+        if(random_uniform() < 0.02) {
+            // wiggle y
+            b->shape.box.y += offset * 0;
+        }
+        if(random_uniform() < 0.02) {
+            // wiggle length
+            b->shape.box.w += offset * 0;
+        }
+        if(random_uniform() < 0.02) {
+            // wiggle angle
+            b->shape.box.angle += offset * 0;
+        }
+    }
+    */
     // initialize the new creature from the working copy
     garden->creatures[child_index].init_copy_design(new_design);
     // free the working copy
@@ -96,7 +120,7 @@ extern "C" void tick_func(void *arg)
         /*
          * Garden algorithm description:
          * - Tick all creatures in the garden if they are legal and not stale (reached max ticks)
-         * - If there is an illegal creature, or at least 2 creatures are stale, kill the worst creature and
+         * - If there is an illegal creature, or at least 2 creatures are stale, kill the worst stale creature and
          *   replace it with a mutant from a random other creature
          * - Adjust the ticks budget
          */
@@ -109,6 +133,7 @@ extern "C" void tick_func(void *arg)
         size_t ticks_budget_per_creature = std::max<size_t>(1, garden->total_ticks_budget
             / std::max<size_t>(1, garden->creatures.size() - num_stale));
         num_stale = 0;
+        size_t stale_index = SIZE_MAX;
         for (size_t j = 0; j < garden->creatures.size(); ++j) {
             creature_t& creature = garden->creatures[j];
             if(creature.tick == 0) {
@@ -129,18 +154,23 @@ extern "C" void tick_func(void *arg)
                     creature.trails.submit_frame(creature.design_ptr);
                 }
             }
-            num_stale += (garden->creatures[j].tick >= GARDEN_MAX_TICKS);
+            const bool is_stale = (creature.tick >= GARDEN_MAX_TICKS);
+            num_stale += is_stale;
+            if(is_stale) {
+                stale_index = j;
+            }
         }
         // kill the worst creature if needed
         if(illegal_creature_index != SIZE_MAX || num_stale >= 2) {
             // find worst creature index, or just use the illegal creature if it exists
-            size_t worst_index = 0;
+            size_t worst_index = stale_index;
             if(illegal_creature_index != SIZE_MAX) {
                 worst_index = illegal_creature_index;
             }else{
-                // find the worst creature by score
+                // find the worst creature by score, but only stale ones
                 for(size_t i = 0; i < garden->creatures.size(); ++i) {
-                    if(garden->creatures[i].best_score > garden->creatures[worst_index].best_score) {
+                    if(garden->creatures[i].tick >= GARDEN_MAX_TICKS
+                        && garden->creatures[i].best_score > garden->creatures[worst_index].best_score) {
                         worst_index = i;
                     }
                 }
@@ -151,11 +181,6 @@ extern "C" void tick_func(void *arg)
                 parent_index = random_u64() % garden->creatures.size();
             }
             garden_reproduce(garden, parent_index, worst_index);
-            // for test purposes, breed all of them
-            for(size_t i = 1; i < garden->creatures.size(); ++i) {
-                garden_reproduce(garden, i-1, i);
-            }
-            garden_reproduce(garden, garden->creatures.size()-1, 0);
         }
         // update ticks budget estimate based on if we are early or late
         long long int tt = garden->total_ticks_budget;

@@ -38,10 +38,16 @@ uint64_t prng_t::next(void) {
 	return result;
 }
 
+double prng_t::next_uniform() {
+    return static_cast<double>(next()) / 18446744073709551616.0;
+}
+
 prng_t _global_prng{0x39c367a6}; // default seed
 
 extern "C" uint64_t random_u64() {
     return _global_prng.next();
 }
 
-
+extern "C" double random_uniform() {
+    return _global_prng.next_uniform();
+}

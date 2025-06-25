@@ -10,6 +10,7 @@ inline uint64_t rotl(const uint64_t x, int k) {
 struct prng_t {
     uint64_t s[4];
     uint64_t next();
+    double next_uniform();
 };
 
 #endif // RANDOM_HPP
