@@ -25,12 +25,12 @@ template <typename T> void append_vector(std::vector<T>& a, std::vector<T>& b) {
 }
 
 struct block_graphics_layer {
-    std::vector<uint16_t> indices;
+    std::vector<uint32_t> indices;
     std::vector<float> coords;
     std::vector<float> colors;
-    uint16_t push_vertex(float x, float y, float r, float g, float b);
-    uint16_t push_vertex(float x, float y, color col);
-    void push_triangle(uint16_t v1, uint16_t v2, uint16_t v3);
+    uint32_t push_vertex(float x, float y, float r, float g, float b);
+    uint32_t push_vertex(float x, float y, color col);
+    void push_triangle(uint32_t v1, uint32_t v2, uint32_t v3);
 };
 
 struct fps_tracker_t {
@@ -53,7 +53,7 @@ struct block_graphics {
     // working values
     std::vector<block_graphics_layer> layers;
     // final values
-    std::vector<uint16_t> _indices;
+    std::vector<uint32_t> _indices;
     std::vector<float> _coords;
     std::vector<float> _colors;
 	GLuint _index_buffer;
@@ -67,8 +67,8 @@ struct block_graphics {
     // methods
     void clear();
     void ensure_layer(int z_offset);
-    uint16_t push_vertex(float x, float y, color col, int z_offset);
-    void push_triangle(uint16_t v1, uint16_t v2, uint16_t v3, int z_offset);
+    uint32_t push_vertex(float x, float y, color col, int z_offset);
+    void push_triangle(uint32_t v1, uint32_t v2, uint32_t v3, int z_offset);
     void push_all_layers();
 };
 
@@ -124,8 +124,8 @@ color alpha_over(const color& below, const color& above) {
     };
 }
 
-uint16_t block_graphics_layer::push_vertex(float x, float y, float r, float g, float b) {
-    uint16_t offset = coords.size() / 2;
+uint32_t block_graphics_layer::push_vertex(float x, float y, float r, float g, float b) {
+    uint32_t offset = coords.size() / 2;
     coords.push_back(x);
     coords.push_back(y);
     colors.push_back(r);
@@ -134,7 +134,7 @@ uint16_t block_graphics_layer::push_vertex(float x, float y, float r, float g, f
     return offset;
 }
 
-uint16_t block_graphics_layer::push_vertex(float x, float y, color col) {
+uint32_t block_graphics_layer::push_vertex(float x, float y, color col) {
     return push_vertex(x, y, col.r, col.g, col.b);
 }
 
@@ -144,18 +144,18 @@ void block_graphics::ensure_layer(int z_offset) {
     }
 }
 
-uint16_t block_graphics::push_vertex(float x, float y, color col, int z_offset) {
+uint32_t block_graphics::push_vertex(float x, float y, color col, int z_offset) {
     ensure_layer(z_offset);
     return layers[z_offset].push_vertex(x, y, col);
 }
 
-void block_graphics_layer::push_triangle(uint16_t v1, uint16_t v2, uint16_t v3) {
+void block_graphics_layer::push_triangle(uint32_t v1, uint32_t v2, uint32_t v3) {
     indices.push_back(v1);
     indices.push_back(v2);
     indices.push_back(v3);
 }
 
-void block_graphics::push_triangle(uint16_t v1, uint16_t v2, uint16_t v3, int z_offset) {
+void block_graphics::push_triangle(uint32_t v1, uint32_t v2, uint32_t v3, int z_offset) {
     ensure_layer(z_offset);
     return layers[z_offset].push_triangle(v1, v2, v3);
 }
@@ -165,7 +165,7 @@ void block_graphics::push_all_layers() {
     _coords.clear();
     _colors.clear();
     for(auto it = layers.begin(); it != layers.end(); ++it) {
-        uint16_t offset = _coords.size() / 2;
+        uint32_t offset = _coords.size() / 2;
         for(auto jt = it->indices.begin(); jt != it->indices.end(); ++jt) {
             _indices.push_back(offset + *jt);
         }
@@ -300,10 +300,10 @@ static void block_graphics_add_rect_single(struct block_graphics *graphics,
 	float hc = h * cosa_half;
 	float hs = h * sina_half;
 
-    uint16_t v1 = graphics->push_vertex(shell.x + wc - hs, shell.y + ws + hc, col, z_offset);
-    uint16_t v2 = graphics->push_vertex(shell.x - wc - hs, shell.y - ws + hc, col, z_offset);
-    uint16_t v3 = graphics->push_vertex(shell.x - wc + hs, shell.y - ws - hc, col, z_offset);
-    uint16_t v4 = graphics->push_vertex(shell.x + wc + hs, shell.y + ws - hc, col, z_offset);
+    uint32_t v1 = graphics->push_vertex(shell.x + wc - hs, shell.y + ws + hc, col, z_offset);
+    uint32_t v2 = graphics->push_vertex(shell.x - wc - hs, shell.y - ws + hc, col, z_offset);
+    uint32_t v3 = graphics->push_vertex(shell.x - wc + hs, shell.y - ws - hc, col, z_offset);
+    uint32_t v4 = graphics->push_vertex(shell.x + wc + hs, shell.y + ws - hc, col, z_offset);
 
     graphics->push_triangle(v1, v2, v3, z_offset);
     graphics->push_triangle(v1, v4, v3, z_offset);
@@ -364,10 +364,10 @@ void block_graphics_add_line(block_graphics* graphics, b2Vec2 start, b2Vec2 end,
     const double dx3 = dx2 - dy2;
     const double dy3 = dx2 + dy2;
 
-    uint16_t v1 = graphics->push_vertex(end.x   + dx3, end.y   + dy3, col, z_offset);
-    uint16_t v2 = graphics->push_vertex(end.x   + dy3, end.y   - dx3, col, z_offset);
-    uint16_t v3 = graphics->push_vertex(start.x - dx3, start.y - dy3, col, z_offset);
-    uint16_t v4 = graphics->push_vertex(start.x - dy3, start.y + dx3, col, z_offset);
+    uint32_t v1 = graphics->push_vertex(end.x   + dx3, end.y   + dy3, col, z_offset);
+    uint32_t v2 = graphics->push_vertex(end.x   + dy3, end.y   - dx3, col, z_offset);
+    uint32_t v3 = graphics->push_vertex(start.x - dx3, start.y - dy3, col, z_offset);
+    uint32_t v4 = graphics->push_vertex(start.x - dy3, start.y + dx3, col, z_offset);
 
     graphics->push_triangle(v1, v2, v3, z_offset);
     graphics->push_triangle(v1, v4, v3, z_offset);
@@ -377,7 +377,7 @@ static void block_graphics_add_circ_single(struct block_graphics *graphics,
 				    struct shell shell, color col, int z_offset)
 {
     const int circle_segments = 24;
-    uint16_t v_last;
+    uint32_t v_last;
 
 	float a;
 	int i;
@@ -420,7 +420,7 @@ void block_graphics_add_joint(block_graphics* graphics, joint joint, color overl
     color col = alpha_over(get_color_by_type(FCSIM_JOINT, 1), overlay);
 
     const int circle_segments = 24;
-    uint16_t v_last;
+    uint32_t v_last;
 
 	float a;
 	int i;
@@ -474,7 +474,7 @@ void block_graphics_push_and_bind(block_graphics* graphics) {
     graphics->push_all_layers();
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, graphics->_index_buffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, graphics->_indices.size() * sizeof(uint16_t), &(graphics->_indices[0]),
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, graphics->_indices.size() * sizeof(uint32_t), &(graphics->_indices[0]),
 		     GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, graphics->_coord_buffer);
@@ -534,7 +534,7 @@ void block_graphics_draw(struct block_graphics *graphics, struct view *view, boo
 	glBindBuffer(GL_ARRAY_BUFFER, graphics->_color_buffer);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glDrawElements(GL_TRIANGLES, graphics->_triangle_cnt * 3, GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, graphics->_triangle_cnt * 3, GL_UNSIGNED_INT, 0);
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
@@ -890,7 +890,7 @@ void draw_tick_counter(struct arena *arena)
 }
 
 void draw_ui(arena* arena) {
-    block_graphics* graphics = (block_graphics*)arena->block_graphics_v2b;
+    block_graphics* graphics = (block_graphics*)arena->block_graphics_v2;
     ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
     graphics->clear();
 
