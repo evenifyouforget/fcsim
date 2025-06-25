@@ -13,6 +13,22 @@ extern "C" {
 #include "text.h"
 }
 
+// replace a creature with a new one in place, mutated from a certain parent
+void garden_reproduce(garden_t* garden, size_t parent_index, size_t child_index)
+{
+    // reset it to a blank struct
+    garden->creatures[child_index].destroy();
+    garden->creatures[child_index] = creature_t();
+    // make a working copy of the parent creature's design
+    design* new_design = clean_copy_design(garden->creatures[parent_index].design_ptr);
+    // mutate the design
+    // TODO: implement mutation
+    // initialize the new creature from the working copy
+    garden->creatures[child_index].init_copy_design(new_design);
+    // free the working copy
+    free_design(new_design);
+}
+
 extern "C" void tick_func(void *arg)
 {
 	arena* the_arena = (arena*)arg;
@@ -123,37 +139,32 @@ extern "C" void tick_func(void *arg)
                     }
                 }
             }
-            // debug: do nothing
-            if(false) {
-                // reset it to a blank struct
-                garden->creatures[worst_index].destroy();
-                garden->creatures[worst_index] = creature_t();
-                // choose a new parent creature randomly
-                size_t parent_index = worst_index;
-                while(parent_index == worst_index) {
-                    parent_index = random_u64() % garden->creatures.size();
-                }
-                // make a working copy of the parent creature's design
-                design* new_design = clean_copy_design(garden->creatures[parent_index].design_ptr);
-                // mutate the design
-                // TODO: implement mutation
-                // initialize the new creature from the working copy
-                garden->creatures[worst_index].init_copy_design(new_design);
-                // free the working copy
-                free_design(new_design);
+            // choose a new parent creature randomly
+            size_t parent_index = worst_index;
+            while(parent_index == worst_index) {
+                parent_index = random_u64() % garden->creatures.size();
             }
+            garden_reproduce(garden, parent_index, worst_index);
+            // for test purposes, breed all of them
+            for(size_t i = 1; i < garden->creatures.size(); ++i) {
+                garden_reproduce(garden, i-1, i);
+            }
+            garden_reproduce(garden, garden->creatures.size()-1, 0);
         }
         // update ticks budget estimate based on if we are early or late
+        /*
         long long int tt = garden->ticks_per_creature;
         double time_end = time_precise_ms();
-        if(time_end - time_start >= the_arena->tick_ms) {
+        if(num_stale == garden->creatures.size() && time_end - time_start >= the_arena->tick_ms) {
             // we finished late, we are over budget
+            // or all designs are finished (stale)
             tt = std::max(1LL, tt - 1 - tt / 10);
         } else {
             // we finished early, we are under budget
             tt += 1 + tt / 100;
         }
         garden->ticks_per_creature = tt;
+        */
     }
 }
 
