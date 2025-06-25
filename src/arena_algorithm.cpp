@@ -234,7 +234,7 @@ extern "C" double goal_heuristic(struct design *design) {
 
 void creature_t::init_copy_design(design* src_design_ptr) {
     design_ptr = clean_copy_design(src_design_ptr);
-    //world_ptr = gen_world(design_ptr);
+    world_ptr = gen_world(design_ptr);
 }
 
 void creature_t::destroy() {
