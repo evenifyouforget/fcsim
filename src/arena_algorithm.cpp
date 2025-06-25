@@ -22,31 +22,19 @@ void garden_reproduce(garden_t* garden, size_t parent_index, size_t child_index)
     // make a working copy of the parent creature's design
     design* new_design = clean_copy_design(garden->creatures[parent_index].design_ptr);
     // mutate the design
-    /*
     for(block* b = new_design->player_blocks.head; b; b = b->next) {
         // simplest behaviour: each piece has a random chance of being wiggled, and only wiggle rods
         if(b->type_id != FCSIM_ROD && b->type_id != FCSIM_SOLID_ROD) {
             continue;
         }
         const double offset = random_uniform() * 2 - 1;
-        if(random_uniform() < 0.02) {
-            // wiggle x
-            b->shape.box.x += offset * 0;
+        if(random_uniform() < 0.03) {
+            b->shape.rod.from->x += offset * 1e-2;
         }
-        if(random_uniform() < 0.02) {
-            // wiggle y
-            b->shape.box.y += offset * 0;
-        }
-        if(random_uniform() < 0.02) {
-            // wiggle length
-            b->shape.box.w += offset * 0;
-        }
-        if(random_uniform() < 0.02) {
-            // wiggle angle
-            b->shape.box.angle += offset * 0;
+        if(random_uniform() < 0.03) {
+            b->shape.rod.from->y += offset * 1e-2;
         }
     }
-    */
     // initialize the new creature from the working copy
     garden->creatures[child_index].init_copy_design(new_design);
     // free the working copy
@@ -120,7 +108,7 @@ extern "C" void tick_func(void *arg)
         /*
          * Garden algorithm description:
          * - Tick all creatures in the garden if they are legal and not stale (reached max ticks)
-         * - If there is an illegal creature, or at least 2 creatures are stale, kill the worst stale creature and
+         * - If there is an illegal creature, or at least N creatures are stale, kill the worst stale creature and
          *   replace it with a mutant from a random other creature
          * - Adjust the ticks budget
          */
@@ -161,7 +149,7 @@ extern "C" void tick_func(void *arg)
             }
         }
         // kill the worst creature if needed
-        if(illegal_creature_index != SIZE_MAX || num_stale >= 2) {
+        if(illegal_creature_index != SIZE_MAX || num_stale >= GARDEN_TRIGGER_STALE_CREATURES) {
             // find worst creature index, or just use the illegal creature if it exists
             size_t worst_index = stale_index;
             if(illegal_creature_index != SIZE_MAX) {
@@ -243,18 +231,17 @@ extern "C" bool goal_blocks_inside_goal_area(design* design)
 }
 
 extern "C" double goal_heuristic(struct design *design) {
-    const double IN_GOAL_BONUS = 1e8;
+    const double NOT_IN_GOAL_PENALTY = 1e8;
     double score = 0;
     for (block* block_ptr = design->player_blocks.head; block_ptr != nullptr; block_ptr = block_ptr->next) {
         if (block_ptr->goal) {
-            if (block_inside_area(block_ptr, &design->goal_area)) {
-                score -= IN_GOAL_BONUS;
-            } else {
-                	struct area bb;
-	                get_block_bb(block_ptr, &bb);
-                    double dx = bb.x - design->goal_area.x;
-                    double dy = bb.y - design->goal_area.y;
-                    score += dx * dx + dy * dy; // distance squared
+            if (!block_inside_area(block_ptr, &design->goal_area)) {
+                score -= NOT_IN_GOAL_PENALTY;
+                struct area bb;
+                get_block_bb(block_ptr, &bb);
+                double dx = bb.x - design->goal_area.x;
+                double dy = bb.y - design->goal_area.y;
+                score += dx * dx + dy * dy; // distance squared
             }
         }
     }
