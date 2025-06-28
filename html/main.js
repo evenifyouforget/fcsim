@@ -54,6 +54,7 @@ close_button.addEventListener("click", close);
 
 let canvas = document.getElementById("canvas");
 let gl = canvas.getContext("webgl");
+gl.getExtension("OES_element_index_uint");
 
 let heap_counter = 0;
 let heap = {};
