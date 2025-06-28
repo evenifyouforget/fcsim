@@ -79,19 +79,21 @@ fpatan_defines = [
     ]
 
 werror_ccflags = [
+    # preemptively catch some other common errors
+    "-Werror=uninitialized",
+    "-Werror=return-type",
+    "-Werror=sign-compare",
+    "-Werror=format",
+    "-Werror=strict-aliasing",
+    "-Werror=unused-variable",
+    ]
+werror_cflags = [
     # actually caught an error originally in loop-contest
     "-Werror=incompatible-pointer-types",
     # preemptively catch some other common errors
-    "-Werror=uninitialized",
-    "-Werror=maybe-uninitialized",
-    "-Werror=return-type",
     "-Werror=implicit-function-declaration",
-    "-Werror=sign-compare",
-    "-Werror=format",
     "-Werror=int-conversion",
     "-Werror=pointer-sign",
-    "-Werror=strict-aliasing",
-    "-Werror=unused-variable",
     ]
 common_ccflags = werror_ccflags
 linux_ccflags = [
@@ -123,7 +125,8 @@ base_env = Environment(
             '/usr/bin',
             '/usr/lib/llvm-10/bin',
             ]
-        }
+        },
+    CFLAGS = werror_cflags
     )
 
 linux_env = base_env.Clone(

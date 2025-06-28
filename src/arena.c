@@ -618,6 +618,7 @@ static void get_rect_bb(struct shell *shell, struct area *area)
 	area->y = shell->y;
 	area->w = fabs(wc) + fabs(hs);
 	area->h = fabs(ws) + fabs(hc);
+	area->expand = 0;
 }
 
 static void get_circ_bb(struct shell *shell, struct area *area)
@@ -626,6 +627,7 @@ static void get_circ_bb(struct shell *shell, struct area *area)
 	area->y = shell->y;
 	area->w = shell->circ.radius * 2;
 	area->h = shell->circ.radius * 2;
+	area->expand = 0;
 }
 
 static void get_block_bb(struct block *block, struct area *area)
@@ -651,10 +653,13 @@ static int block_inside_area(struct block *block, struct area *area)
 
 	get_block_bb(block, &bb);
 
-	return bb.x - bb.w / 2 >= area->x - area->w / 2
-	    && bb.x + bb.w / 2 <= area->x + area->w / 2
-	    && bb.y - bb.h / 2 >= area->y - area->h / 2
-	    && bb.y + bb.h / 2 <= area->y + area->h / 2;
+	const double modified_w = area->w + area->expand;
+	const double modified_h = area->h + area->expand;
+
+	return bb.x - bb.w / 2 >= area->x - modified_w / 2
+	    && bb.x + bb.w / 2 <= area->x + modified_w / 2
+	    && bb.y - bb.h / 2 >= area->y - modified_h / 2
+	    && bb.y + bb.h / 2 <= area->y + modified_h / 2;
 }
 
 void gen_block(b2World *world, struct block *block);
@@ -1495,8 +1500,8 @@ void mouse_down_wheel(struct arena *arena, float x, float y)
 
 bool inside_area(struct area *area, double x, double y)
 {
-	double w_half = area->w / 2;
-	double h_half = area->h / 2;
+	double w_half = (area->w + area->expand) / 2;
+	double h_half = (area->h + area->expand) / 2;
 
 	return x > area->x - w_half
 	    && x < area->x + w_half
