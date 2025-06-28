@@ -10,6 +10,37 @@ function self_url_full() {
 	return location.protocol + '//' + location.host + location.pathname;
 }
 
+function chainElement(tags, content) {
+    if (!tags || tags.length === 0) {
+        if (typeof content === "string") {
+            return document.createTextNode(content);
+        }
+        return content || document.createDocumentFragment();
+    }
+    let root = document.createElement(tags[0]);
+    let current = root;
+    for (let i = 1; i < tags.length; ++i) {
+        let child = document.createElement(tags[i]);
+        current.appendChild(child);
+        current = child;
+    }
+    if (content !== undefined && content !== null) {
+        if (typeof content === "string" || typeof content === "number") {
+            current.appendChild(document.createTextNode(content));
+        } else {
+            current.appendChild(content);
+        }
+    }
+    return root;
+}
+
+function linkElement(url, text) {
+	const el = document.createElement("a");
+    el.href = url;
+    el.textContent = text === undefined ? url : text;
+	return el;
+}
+
 let play_button  = document.getElementById("play");
 let save_button  = document.getElementById("save");
 let save_menu    = document.getElementById("save_menu");
@@ -485,7 +516,20 @@ let level_id = params.get('levelId');
 
 // homepage behaviour: default brown
 if(!design_id && !level_id) {
-	design_id = '12706185';
+    design_id = '12706185';
+
+    // show usage
+    const notification = document.getElementById("notification");
+    if (notification) {
+        const helpDiv = document.createElement("div");
+
+        helpDiv.appendChild(chainElement(["p"], "To load levels or designs, use ?levelId or ?designId"));
+		helpDiv.appendChild(chainElement(["p", "b"], "Examples"));
+		helpDiv.appendChild(chainElement(["p"], linkElement(self_url_full() + "?levelId=646726")));
+		helpDiv.appendChild(chainElement(["p"], linkElement(self_url_full() + "?designId=12483401")));
+
+        notification.appendChild(helpDiv);
+    }
 }
 
 let response_promise = fetch(FC_URL + "/retrieveLevel.php", {
