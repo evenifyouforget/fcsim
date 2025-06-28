@@ -4,6 +4,8 @@ fcsim is the modern client for Fantastic Contraption.
 
 # Build
 
+Currently, you can only build on Linux.
+
 ## Requirements
 
 First install the system requirements:
@@ -12,7 +14,7 @@ First install the system requirements:
 sh install_requirements.sh
 ```
 
-This uses `apt` to install everything listed in `requirements.system`.
+This uses `apt` to install everything listed in `requirements.system`, assuming you have `apt` available on your distro (we tested on Linux Mint).
 
 ## Actual build
 
