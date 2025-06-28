@@ -1,5 +1,6 @@
 #ifdef __wasm__
 #include "stdint.h"
+#include "stdlib.h"
 #include "stl_mock.h"
 #else
 #include <algorithm>
@@ -887,6 +888,13 @@ void draw_tick_counter(struct arena *arena)
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
     x = draw_text_default(arena, tps_value >= 1e9?"Infinity":std::to_string((int64_t)rint(tps_value)), x, 10);
     x = draw_text_default(arena, !tps_is_prediction?"TPS average":"TPS predicted", x, 10, 1);
+
+#ifdef __wasm__
+    // memory stats for web only
+    x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+    x = draw_text_default(arena, std::to_string(total_memory_used_bytes() / 1000000), x, 10);
+    x = draw_text_default(arena, "MB", x, 10, 1);
+#endif
 }
 
 void draw_ui(arena* arena) {
