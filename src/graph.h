@@ -181,6 +181,7 @@ void remove_block(struct block_list *list, struct block *block);
 struct area {
 	double x, y;
 	double w, h;
+	double expand; // added to both w and h, but only for geometry checks
 };
 
 struct design {
