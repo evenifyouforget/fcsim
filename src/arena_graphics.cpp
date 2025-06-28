@@ -952,7 +952,7 @@ void draw_tick_counter(struct arena *arena)
 #ifdef __wasm__
     // memory stats for web only
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-    x = draw_text_default(arena, std::to_string(total_memory_used_bytes() / 1000000), x, 10);
+    x = draw_text_default(arena, std::to_string((uint64_t)total_memory_used_bytes() / 1000000), x, 10);
     x = draw_text_default(arena, "MB", x, 10, 1);
 #endif
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
@@ -1020,6 +1020,32 @@ void preview_trail_draw(arena* arena) {
             b2Vec2 current = the_trail.datapoints[datapoint_index];
             block_graphics_add_line(graphics, last, current, LINE_RADIUS, get_color_by_type(FCSIM_GOAL_CIRCLE, 0), 4);
             last = current;
+        }
+    }
+}
+
+void garden_trail_draw(arena* arena) {
+    const double LINE_RADIUS = 2;
+
+    if(!arena->garden) {
+        return;
+    }
+    block_graphics* graphics = (block_graphics*)arena->block_graphics_v2;
+
+    garden_t* garden = (garden_t*)arena->garden;
+    for(size_t i = 0; i < garden->creatures.size(); ++i) {
+        const creature_t& creature = garden->creatures[i];
+        for(size_t j = 0; j < creature.trails.trails.size(); ++j) {
+            const trail_t& the_trail = creature.trails.trails[j];
+            if(the_trail.datapoints.size() < 2) {
+                continue;
+            }
+            b2Vec2 last = the_trail.datapoints[0];
+            for(size_t datapoint_index = 1; datapoint_index < the_trail.datapoints.size(); ++datapoint_index) {
+                b2Vec2 current = the_trail.datapoints[datapoint_index];
+                block_graphics_add_line(graphics, last, current, LINE_RADIUS, get_color_by_type(FCSIM_GOAL_CIRCLE, 0), 4);
+                last = current;
+            }
         }
     }
 }
