@@ -548,6 +548,7 @@ void get_rect_bb(struct shell *shell, struct area *area)
 	area->y = shell->y;
 	area->w = fabs(wc) + fabs(hs);
 	area->h = fabs(ws) + fabs(hc);
+	area->expand = 0;
 }
 
 void get_circ_bb(struct shell *shell, struct area *area)
@@ -556,6 +557,7 @@ void get_circ_bb(struct shell *shell, struct area *area)
 	area->y = shell->y;
 	area->w = shell->circ.radius * 2;
 	area->h = shell->circ.radius * 2;
+	area->expand = 0;
 }
 
 void get_block_bb(struct block *block, struct area *area)
@@ -832,6 +834,8 @@ void update_body(struct arena *arena, struct block *block)
 {
 	b2World_DestroyBody(arena->world, block->body);
 	gen_block(arena->world, block);
+
+	arena->design.modcount++;
 }
 
 void move_joint(struct arena *arena, struct joint *joint, double x, double y)
@@ -1419,8 +1423,8 @@ void mouse_down_wheel(struct arena *arena, float x, float y)
 
 bool inside_area(struct area *area, double x, double y)
 {
-	double w_half = area->w / 2;
-	double h_half = area->h / 2;
+	double w_half = (area->w + area->expand) / 2;
+	double h_half = (area->h + area->expand) / 2;
 
 	return x > area->x - w_half
 	    && x < area->x + w_half
