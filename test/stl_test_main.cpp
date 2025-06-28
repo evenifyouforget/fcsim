@@ -2,6 +2,12 @@
 #include <cassert>
 
 int main() {
+    // test new default value
+    {
+        int default_value;
+        _new<int>(&default_value);
+        assert(default_value == 0);
+    }
     // test vector construct destruct
     {
         std::vector<int> vec;
@@ -127,6 +133,40 @@ int main() {
         }
         assert(vec[i][0] == 0);
     }
+    // test vector resize size (both up and down)
+    {
+        std::vector<int> vec;
+        for(int i = 0; i < 100; ++i) {
+            vec.resize(i);
+            assert(vec.size() == (size_t)i);
+        }
+        for(int i = 100; i >= 0; --i) {
+            vec.resize(i);
+            assert(vec.size() == (size_t)i);
+        }
+    }
+    // test vector resize keeps data
+    {
+        std::vector<int> vec;
+        for(int i = 1; i < 100; ++i) {
+            vec.resize(i);
+            assert(vec.size() == (size_t)i);
+            vec[i-1] = i - 1;
+            for(int j = 0; j < i; ++j) {
+                assert(vec[j] == j);
+            }
+        }
+    }
+    // test vector resize default elements
+    {
+        int default_value;
+        _new<int>(&default_value);
+        std::vector<int> vec;
+        vec.resize(10);
+        for(int i = 0; i < 10; ++i) {
+            assert(vec[i] == default_value);
+        }
+    }
     // test string assign by string literal
     {
         std::string str;
@@ -165,6 +205,86 @@ int main() {
         for(int i = -9; i < 0; ++i) {
             str = std::to_string(i);
             assert(str.size() == 2);
+        }
+    }
+    // unordered_map: empty map, count
+    {
+        std::unordered_map<int, int> map;
+        assert(map.count(1) == 0);
+    }
+    // unordered_map: insert and count
+    {
+        std::unordered_map<int, int> map;
+        map.insert(std::make_pair(1, 42));
+        assert(map.count(1) == 1);
+        assert(map.count(2) == 0);
+    }
+    // unordered_map: at returns correct value
+    {
+        std::unordered_map<int, int> map;
+        map.insert(std::make_pair(1, 42));
+        assert(map.at(1) == 42);
+    }
+    // unordered_map: insert does not overwrite existing value
+    {
+        std::unordered_map<int, int> map;
+        map.insert(std::make_pair(1, 42));
+        map.insert(std::make_pair(1, 99));
+        assert(map.at(1) == 42);
+    }
+    // unordered_map: at returns reference, assignment works
+    {
+        std::unordered_map<int, int> map;
+        map.insert(std::make_pair(1, 42));
+        map.at(1) = 100;
+        assert(map.at(1) == 100);
+    }
+    // unordered_map: larger data (trivial)
+    {
+        std::unordered_map<int, int> map;
+        for(int i = 0; i < 100; ++i) {
+            int k = i;
+            int v = i * 2;
+            map.insert(std::make_pair(k, v));
+        }
+        for(int i = 0; i < 100; ++i) {
+            int k = i;
+            int v = i * 2;
+            assert(map.at(k) == v);
+        }
+    }
+    // unordered_map: larger data (non-trivial, evenly distributed)
+    {
+        std::unordered_map<int, int> map;
+        int k = 1;
+        int v = 1;
+        for(int i = 0; i < 100; ++i) {
+            k = k * 5 % 107;
+            v = v * 3 % 113;
+            map.insert(std::make_pair(k, v));
+        }
+        k = 1;
+        v = 1;
+        for(int i = 0; i < 100; ++i) {
+            k = k * 5 % 107;
+            v = v * 3 % 113;
+            assert(map.at(k) == v);
+        }
+    }
+    // unordered_map: larger data (non-trivial, unevenly distributed)
+    {
+        std::unordered_map<int, int> map;
+        for(int i = 0; i < 250; ++i) {
+            int k = i * i * i * i;
+            int v = i * 2;
+            map.insert(std::make_pair(k, v));
+        }
+        for(int i = 0; i < 250; ++i) {
+            int k = i * i * i * i;
+            int v = i * 2;
+            assert(map.at(k) == v);
+            assert(map.count(k) == 1);
+            assert(map.count(k + 2) == 0); // impossible gap
         }
     }
 }

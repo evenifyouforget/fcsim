@@ -91,6 +91,23 @@ function make_cstring(data)
 	return make_string(data, size);
 }
 
+function debugRealClockSpeed(delayMs) {
+	// Run a dummy function on a clock to see if the browser is ticking on an accurate clock
+	const targetNumTicks = 50;
+	const data = [undefined, -1, undefined]; // self handle, counter, first tick time
+	data[0] = setInterval(function(){
+		data[1] += 1;
+		if(data[1] === 0) {
+			data[2] = performance.now();
+		} else if(data[1] >= targetNumTicks && data[0]) {
+			clearInterval(data[0]);
+			const realDelayMs = (performance.now() - data[2]) / data[1];
+			const realTPS = 1000 / realDelayMs;
+			console.log("Real clock: " + realDelayMs.toString() + " ms (" + realTPS.toString() + " Hz) (" + data[1].toString() + " ticks sampled)");
+		}
+	}, delayMs);
+}
+
 let gl_env = {
 	glActiveTexture(texture) {
 		gl.activeTexture(texture);
@@ -242,6 +259,8 @@ let gl_env = {
 	},
 
 	set_interval(func, delay, arg) {
+		console.log("Set clock to " + delay.toString() + " ms (expected " + (1000/delay).toString() + " Hz)");
+		debugRealClockSpeed(delay);
 		return setInterval(inst.exports.call, delay, func, arg);
 	},
 

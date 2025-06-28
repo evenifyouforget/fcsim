@@ -11,11 +11,11 @@
 #include "stl_compat.h"
 #include "interval.h"
 extern "C" {
-#include "arena.h"
 #include "gl.h"
 #include "graph.h"
 #include <box2d/b2Body.h>
 }
+#include "arena.hpp"
 #include "math.h"
 
 template <typename T> void append_vector(std::vector<T>& a, std::vector<T>& b) {
@@ -206,6 +206,7 @@ double fps_tracker_t::get_tps(size_t interval) {
 
 void fps_tracker_t::clear() {
     records_ms.clear();
+    records_tick.clear();
     samples = 0;
 }
 
@@ -348,6 +349,28 @@ static void block_graphics_add_area(struct block_graphics *graphics,
     area_shell.y = area.y;
     area_shell.angle = 0;
     block_graphics_add_rect(graphics, area_shell, type_id, 0, color{0,0,0,0});
+}
+
+void block_graphics_add_line(block_graphics* graphics, b2Vec2 start, b2Vec2 end, double radius, color col, int z_offset) {
+    const double dx1 = end.x - start.x;
+    const double dy1 = end.y - start.y;
+
+    const double dist = sqrt(dx1 * dx1 + dy1 * dy1); // hypot not available
+    const double mul = radius / std::max(1e-10, dist);
+
+    const double dx2 = dx1 * mul;
+    const double dy2 = dy1 * mul;
+
+    const double dx3 = dx2 - dy2;
+    const double dy3 = dx2 + dy2;
+
+    uint16_t v1 = graphics->push_vertex(end.x   + dx3, end.y   + dy3, col, z_offset);
+    uint16_t v2 = graphics->push_vertex(end.x   + dy3, end.y   - dx3, col, z_offset);
+    uint16_t v3 = graphics->push_vertex(start.x - dx3, start.y - dy3, col, z_offset);
+    uint16_t v4 = graphics->push_vertex(start.x - dy3, start.y + dx3, col, z_offset);
+
+    graphics->push_triangle(v1, v2, v3, z_offset);
+    graphics->push_triangle(v1, v4, v3, z_offset);
 }
 
 static void block_graphics_add_circ_single(struct block_graphics *graphics,
@@ -600,13 +623,16 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
     if(button.id == ui_button_id{4, 11}) {
         change_speed_factor(arena, NO_CHANGE, (_fcsim_base_fps_mod + 1) % BASE_FPS_TABLE_SIZE);
     }
+    if(button.id == ui_button_id{5, 0}) {
+        arena->preview_gp_trajectory ^= 1; // toggle
+    }
 }
 
 void regenerate_ui_buttons(arena* arena) {
     ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
     all_buttons->buttons.clear();
 
-    //float vw = arena->view.width;
+    float vw = arena->view.width;
     float vh = arena->view.height;
 
     {
@@ -806,6 +832,12 @@ void regenerate_ui_buttons(arena* arena) {
         button.texts.push_back(ui_button_text{"base TPS", 1, 0, -15});
         all_buttons->buttons.push_back(button);
     }
+    {
+        ui_button_single button{{5, 0}, vw - 30, vh - 30, 70, 50, 2};
+        button.texts.push_back(ui_button_text{"Preview", 1, 0, 10});
+        button.texts.push_back(ui_button_text{arena->preview_gp_trajectory?"ON":"OFF", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
 }
 
 // Draw text, and return the x where the text ends
@@ -885,6 +917,26 @@ void draw_ui(arena* arena) {
     }
 }
 
+void preview_trail_draw(arena* arena) {
+    const double LINE_RADIUS = 2;
+
+    block_graphics* graphics = (block_graphics*)arena->block_graphics_v2;
+
+    multi_trail_t* all_trails = (multi_trail_t*)arena->preview_trail;
+    for(size_t trail_index = 0; trail_index < all_trails->trails.size(); ++trail_index) {
+        trail_t& the_trail = all_trails->trails[trail_index];
+        if(the_trail.datapoints.size() < 2) {
+            continue;
+        }
+        b2Vec2 last = the_trail.datapoints[0];
+        for(size_t datapoint_index = 1; datapoint_index < the_trail.datapoints.size(); ++datapoint_index) {
+            b2Vec2 current = the_trail.datapoints[datapoint_index];
+            block_graphics_add_line(graphics, last, current, LINE_RADIUS, get_color_by_type(FCSIM_GOAL_CIRCLE, 0), 4);
+            last = current;
+        }
+    }
+}
+
 void arena_draw(struct arena *arena)
 {
 	color sky_color = get_color_by_type(FCSIM_SKY, 1);
@@ -892,6 +944,9 @@ void arena_draw(struct arena *arena)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	block_graphics_reset(arena, &arena->design);
+    if(arena->preview_gp_trajectory && arena->preview_trail) {
+        preview_trail_draw(arena);
+    }
 	block_graphics_draw((block_graphics*)arena->block_graphics_v2, &arena->view);
 
     regenerate_ui_buttons(arena);
