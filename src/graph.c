@@ -654,8 +654,9 @@ void set_area(struct area *area, struct xml_zone *xml_zone, double expand)
 {
 	area->x = xml_zone->position.x;
 	area->y = xml_zone->position.y;
-	area->w = xml_zone->width + expand;
-	area->h = xml_zone->height + expand;
+	area->w = xml_zone->width;
+	area->h = xml_zone->height;
+	area->expand = expand;
 }
 
 void convert_xml(struct xml_level *xml_level, struct design *design)
@@ -731,4 +732,5 @@ void free_design(struct design *design)
 	free_joint_list(&design->joints);
 	free_block_list(&design->level_blocks);
 	free_block_list(&design->player_blocks);
+	free(design);
 }

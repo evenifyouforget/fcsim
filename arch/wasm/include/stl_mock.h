@@ -120,6 +120,21 @@ struct vector {
         }
         return *this;
     }
+    void resize(size_t new_size) {
+        if (new_size < _size) {
+            // Destroy elements past new_size
+            for (size_t i = new_size; i < _size; ++i) {
+                _storage[i].~T();
+            }
+            _size = new_size;
+        } else if (new_size > _size) {
+            _ensure_capacity(new_size);
+            for (size_t i = _size; i < new_size; ++i) {
+                _new<T>(_storage + i);
+            }
+            _size = new_size;
+        }
+    }
 };
 
 // <string>
@@ -140,6 +155,169 @@ struct string {
 };
 
 string to_string(int64_t);
+
+template <typename A, typename B> struct pair {
+    A first;
+    B second;
+};
+
+template <typename A, typename B> pair<A, B> make_pair(A first, B second) {
+    return {first, second};
+};
+
+// <unordered_map> mock
+
+enum class EntryState {
+    EMPTY,
+    OCCUPIED,
+    DELETED
+};
+
+// BasicHasher: Deviation from std::unordered_map which uses std::hash.
+// User must provide specializations for custom types if default cast is not suitable.
+template <typename K>
+struct BasicHasher {
+    size_t operator()(const K& key) const {
+        return static_cast<size_t>(key);
+    }
+};
+
+template <>
+struct BasicHasher<void*> {
+    size_t operator()(const void* key) const {
+        return reinterpret_cast<size_t>(key);
+    }
+};
+
+template <typename K, typename V, typename Hasher = BasicHasher<K>>
+struct unordered_map {
+private:
+    struct Entry {
+        K key;
+        V value;
+        EntryState state;
+
+        Entry() : state(EntryState::EMPTY) {}
+        Entry(const K& k, const V& v) : key(k), value(v), state(EntryState::OCCUPIED) {}
+    };
+
+    vector<Entry> buckets;
+    size_t num_elements;
+    size_t num_buckets;
+    const float max_load_factor = 0.75f;
+
+    size_t _find_slot(const K& key) const {
+        if (num_elements == 0) {
+            return num_buckets;
+        }
+
+        Hasher hasher;
+        size_t index = hasher(key) % num_buckets;
+        size_t start_index = index;
+
+        while (buckets[index].state != EntryState::EMPTY) {
+            if (buckets[index].state == EntryState::OCCUPIED && buckets[index].key == key) {
+                return index;
+            }
+            index = (index + 1) % num_buckets;
+            if (index == start_index) {
+                break;
+            }
+        }
+        return num_buckets;
+    }
+
+    size_t _find_insert_slot(const K& key) const {
+        Hasher hasher;
+        size_t index = hasher(key) % num_buckets;
+        size_t start_index = index;
+        size_t first_deleted_slot = num_buckets;
+
+        while (buckets[index].state != EntryState::EMPTY) {
+            if (buckets[index].state == EntryState::OCCUPIED) {
+                if (buckets[index].key == key) {
+                    return index;
+                }
+            } else { // EntryState::DELETED
+                if (first_deleted_slot == num_buckets) {
+                    first_deleted_slot = index;
+                }
+            }
+            index = (index + 1) % num_buckets;
+            if (index == start_index) {
+                return num_buckets;
+            }
+        }
+        return (first_deleted_slot != num_buckets) ? first_deleted_slot : index;
+    }
+
+    void _rehash(size_t new_bucket_count) {
+        vector<Entry> old_buckets = buckets;
+
+        buckets.clear();
+        buckets.resize(new_bucket_count);
+        for (size_t i = 0; i < new_bucket_count; ++i) {
+            buckets[i].state = EntryState::EMPTY;
+        }
+
+        num_buckets = new_bucket_count;
+        num_elements = 0;
+
+        for (size_t i = 0; i < old_buckets.size(); ++i) {
+            if (old_buckets[i].state == EntryState::OCCUPIED) {
+                pair<K,V> data_to_insert;
+                data_to_insert.first = old_buckets[i].key;
+                data_to_insert.second = old_buckets[i].value;
+                insert(data_to_insert);
+            }
+        }
+    }
+
+    void _check_and_rehash() {
+        if (num_buckets == 0 || static_cast<float>(num_elements + 1) / num_buckets > max_load_factor) {
+            size_t new_size = (num_buckets == 0) ? 16 : num_buckets * 2;
+            _rehash(new_size);
+        }
+    }
+
+public:
+    unordered_map() : num_elements(0), num_buckets(0) {
+        _check_and_rehash();
+    }
+
+    // Compliant with std::unordered_map::count.
+    size_t count(const K& key) const {
+        return (_find_slot(key) != num_buckets) ? 1 : 0;
+    }
+
+    // Compliant with std::unordered_map::insert return type.
+    pair<bool, V&> insert(const pair<K, V>& data) {
+        _check_and_rehash();
+
+        size_t slot_index = _find_insert_slot(data.first);
+
+        if (buckets[slot_index].state == EntryState::OCCUPIED && buckets[slot_index].key == data.first) {
+            return {false, buckets[slot_index].value};
+        } else {
+            buckets[slot_index].key = data.first;
+            buckets[slot_index].value = data.second;
+            buckets[slot_index].state = EntryState::OCCUPIED;
+            num_elements++;
+            return {true, buckets[slot_index].value};
+        }
+    }
+
+    // Deviation from std::unordered_map::at: Does not throw std::out_of_range.
+    // Returns a reference to a static dummy value if key is not found.
+    V& at(const K& key) {
+        size_t index = _find_slot(key);
+        if (index != num_buckets) {
+            return buckets[index].value;
+        }
+        static V dummy_value_for_not_found;
+        return dummy_value_for_not_found;
+    }
+};
 
 }
 

@@ -204,3 +204,8 @@ void free(void* p) {
   // add block back to free list
   _append_tail(r);
 }
+
+size_t total_memory_used_bytes() {
+  // each page is 64 KiB
+  return memory_size() << 16;
+}
