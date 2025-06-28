@@ -896,6 +896,8 @@ void update_body(struct arena *arena, struct block *block)
 {
 	b2World_DestroyBody(arena->world, block->body);
 	gen_block(arena->world, block);
+
+	arena->design.modcount++;
 }
 
 void move_joint(struct arena *arena, struct joint *joint, double x, double y)
