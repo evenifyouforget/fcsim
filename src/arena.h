@@ -102,6 +102,11 @@ struct arena {
 	int single_ticks_remaining; // -1 for normal playback, 0 to disable, positive for step n frames
 	bool autostop_on_solve;
 
+	bool preview_gp_trajectory;
+	struct design* preview_design;
+	b2World *preview_world;
+	void *preview_trail; // real type: multi_trail_t*
+
 	// ui button templates
 	void* ui_buttons; // actual type: ui_button_collection*
 	bool ui_toolbar_opened;
@@ -124,6 +129,9 @@ void arena_scroll_event(struct arena *arena, int delta);
 void arena_mouse_button_up_event(struct arena *arena, int button);
 void arena_mouse_button_down_event(struct arena *arena, int button);
 void arena_size_event(struct arena *arena, float w, float h);
+
+bool goal_blocks_inside_goal_area(struct design *design);
+void tick_func(void *arg);
 
 void start_stop(struct arena *arena);
 bool is_running(struct arena *arena);

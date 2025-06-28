@@ -191,6 +191,7 @@ struct design {
 	struct area build_area;
 	struct area goal_area;
 	int level_id;
+	int modcount; // increments whenever any change is made
 };
 
 enum shell_type {
@@ -229,5 +230,7 @@ void get_shell(struct shell *shell, struct shape *shape);
 int get_block_joints(struct block *block, struct joint **res);
 bool share_block(struct design *design, struct joint *j1, struct joint *j2);
 
+// deep copy, except all b2body are set to nullptr
+struct design* clean_copy_design(struct design*);
 
 #endif

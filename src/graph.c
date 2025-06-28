@@ -732,4 +732,5 @@ void free_design(struct design *design)
 	free_joint_list(&design->joints);
 	free_block_list(&design->level_blocks);
 	free_block_list(&design->player_blocks);
+	free(design);
 }

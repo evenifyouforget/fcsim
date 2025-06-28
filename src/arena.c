@@ -177,11 +177,15 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 		     arena->joint_coords, GL_STREAM_DRAW);
 	*/
 
-	arena->tick_ms = 17;
-	arena->tick_multiply = 1;
 	arena->tick = 0;
 	text_stream_create(&arena->tick_counter, MAX_RENDER_TEXT_LENGTH);
 	arena->has_won = false;
+
+	arena->preview_gp_trajectory = false;
+	arena->preview_design = NULL;
+	arena->preview_world = NULL;
+
+	change_speed_preset(arena, 2);
 }
 
 /* TODO: dedupe */
@@ -228,7 +232,7 @@ void arena_key_up_event(struct arena *arena, int key)
 
 static int block_inside_area(struct block *block, struct area *area);
 
-static bool goal_blocks_inside_goal_area(struct design *design)
+bool goal_blocks_inside_goal_area(struct design *design)
 {
 	struct block *block;
 	bool any = false;
@@ -244,34 +248,11 @@ static bool goal_blocks_inside_goal_area(struct design *design)
 	return any;
 }
 
-void tick_func(void *arg)
-{
-	struct arena *arena = arg;
-
-	double time_start = time_precise_ms();
-	for(int i = 0; arena->single_ticks_remaining != 0 && i < arena->tick_multiply; ++i) {
-		if(arena->single_ticks_remaining > 0)arena->single_ticks_remaining--;
-		step(arena->world);
-		arena->tick++;
-		if (!arena->has_won && goal_blocks_inside_goal_area(&arena->design)) {
-			arena->has_won = true;
-			arena->tick_solve = arena->tick;
-			if(arena->autostop_on_solve) {
-				arena->autostop_on_solve = false;
-				arena->single_ticks_remaining = 0;
-				break;
-			}
-		}
-		double time_end = time_precise_ms();
-		if(time_end - time_start >= arena->tick_ms)break;
-	}
-}
-
 void start(struct arena *arena)
 {
 	free_world(arena->world, &arena->design);
 	arena->world = gen_world(&arena->design);
-	arena->ival = set_interval(tick_func, arena->tick_ms, arena);
+	//arena->ival = set_interval(tick_func, arena->tick_ms, arena);
 	arena->hover_joint = NULL;
 	arena->tick = 0;
 	arena->has_won = false;
@@ -281,18 +262,15 @@ void stop(struct arena *arena)
 {
 	free_world(arena->world, &arena->design);
 	arena->world = gen_world(&arena->design);
-	clear_interval(arena->ival);
+	//clear_interval(arena->ival);
 }
 
 void change_speed(struct arena *arena, int ms, int multiply)
 {
 	arena->tick_ms = ms;
 	arena->tick_multiply = multiply;
-	if (arena->state == STATE_RUNNING ||
-	    arena->state == STATE_RUNNING_PAN) {
-		clear_interval(arena->ival);
-		arena->ival = set_interval(tick_func, ms, arena);
-	}
+	clear_interval(arena->ival);
+	arena->ival = set_interval(tick_func, ms, arena);
 }
 
 double _fcsim_speed_factor = 2;
@@ -776,6 +754,8 @@ void delete_block(struct arena *arena, struct block *block)
 	free(block);
 
 	mark_overlaps(arena);
+
+	design->modcount++;
 }
 
 void action_pan(struct arena *arena, int x, int y)
@@ -921,6 +901,8 @@ void update_body(struct arena *arena, struct block *block)
 {
 	b2World_DestroyBody(arena->world, block->body);
 	gen_block(arena->world, block);
+
+	arena->design.modcount++;
 }
 
 void move_joint(struct arena *arena, struct joint *joint, double x, double y)
@@ -973,6 +955,8 @@ void update_move(struct arena *arena, double dx, double dy)
 	}
 
 	mark_overlaps(arena);
+
+	arena->design.modcount++;
 }
 
 void action_move(struct arena *arena, int x, int y)
@@ -1307,6 +1291,8 @@ void block_dfs(struct arena *arena, struct block *block, bool value, bool all)
 			joint_dfs(arena, shape->wheel.spokes[i], value, all);
 		break;
 	}
+
+	arena->design.modcount++;
 }
 
 void joint_dfs(struct arena *arena, struct joint *joint, bool value, bool all)
@@ -1327,6 +1313,8 @@ void joint_dfs(struct arena *arena, struct joint *joint, bool value, bool all)
 
 	for (node = joint->att.head; node; node = node->next)
 		block_dfs(arena, node->block, value, all);
+
+	arena->design.modcount++;
 }
 
 void resolve_joint(struct arena *arena, struct joint *joint)
@@ -1421,6 +1409,8 @@ void mouse_down_rod(struct arena *arena, float x, float y)
 	arena->state = STATE_NEW_ROD;
 
 	mark_overlaps(arena);
+
+	design->modcount++;
 }
 
 void mouse_down_wheel(struct arena *arena, float x, float y)
@@ -1504,6 +1494,8 @@ void mouse_down_wheel(struct arena *arena, float x, float y)
 	arena->state = STATE_NEW_WHEEL;
 
 	mark_overlaps(arena);
+
+	design->modcount++;
 }
 
 bool inside_area(struct area *area, double x, double y)
