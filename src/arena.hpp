@@ -37,6 +37,7 @@ struct garden_t {
     std::vector<creature_t> creatures;
     // dynamically updating estimate of how many ticks we can fit in our time budget per frame
     size_t total_ticks_budget = 1;
+    size_t total_kills = 0;
     void clear();
 };
 

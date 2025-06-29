@@ -39,6 +39,8 @@ void garden_reproduce(garden_t* garden, size_t parent_index, size_t child_index)
     garden->creatures[child_index].init_copy_design(new_design);
     // free the working copy
     free_design(new_design);
+    // increment counter
+    garden->total_kills++;
 }
 
 extern "C" void tick_func(void *arg)

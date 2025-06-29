@@ -953,6 +953,7 @@ void draw_tick_counter(struct arena *arena)
         garden_t* garden = (garden_t*)arena->garden;
         x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
         x = draw_text_default(arena, "Runs:", x, 10);
+        x = draw_text_default(arena, std::to_string((uint64_t)garden->total_kills), x, 10);
         x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
         for(size_t i = 0; i < garden->creatures.size(); ++i) {
             x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
