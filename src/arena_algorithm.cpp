@@ -246,8 +246,13 @@ extern "C" double goal_heuristic(struct design *design) {
                 score += NOT_IN_GOAL_PENALTY;
                 struct area bb;
                 get_block_bb(block_ptr, &bb);
-                double dx = bb.x - design->goal_area.x;
-                double dy = bb.y - design->goal_area.y;
+                // how far would the block need to move to be in the goal area?
+                double gx = std::max(design->goal_area.x - design->goal_area.w / 2 + bb.w / 2,
+                            std::min(design->goal_area.x + design->goal_area.w / 2 - bb.w / 2, bb.x));
+                double gy = std::max(design->goal_area.y - design->goal_area.h / 2 + bb.h / 2,
+                            std::min(design->goal_area.y + design->goal_area.h / 2 - bb.h / 2, bb.y));
+                double dx = bb.x - gx;
+                double dy = bb.y - gy;
                 score += dx * dx + dy * dy; // distance squared
             }
         }
