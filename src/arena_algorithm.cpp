@@ -303,6 +303,7 @@ void reset_garden(arena* arena_ptr) {
 }
 
 void take_best_design_from_garden(arena* arena_ptr) {
+    return; // feature is broken, disable for safety
     ensure_garden_exists(arena_ptr);
     garden_t* garden = (garden_t*)arena_ptr->garden;
     if (garden->creatures.size() == 0) {
@@ -388,6 +389,7 @@ void arena_reset_operations(arena* arena) {
 
 extern "C" char *export_design_with_flags(struct arena *arena_ptr, char *user, char *name, char *desc, bool save_best) {
     if(save_best) {
+        arena_ptr->use_garden = false; // freeze for saving
         ensure_garden_exists(arena_ptr);
         garden_t* garden = (garden_t*)arena_ptr->garden;
         if (garden->creatures.size() != 0) {
