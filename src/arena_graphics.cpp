@@ -1001,7 +1001,7 @@ void draw_single_trail(block_graphics* graphics, const trail_t& the_trail, color
     if(the_trail.datapoints.size() < 2) {
         return;
     }
-    const double LINE_RADIUS = 2;
+    const double LINE_RADIUS = 0.25;
     b2Vec2 last = the_trail.datapoints[0];
     for(size_t datapoint_index = 1; datapoint_index < the_trail.datapoints.size(); ++datapoint_index) {
         b2Vec2 current = the_trail.datapoints[datapoint_index];
