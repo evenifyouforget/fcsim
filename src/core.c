@@ -65,9 +65,9 @@ void init(char *xml, int len)
 
 char *export_design(struct design *design, char *user, char *name, char *desc);
 
-char *export(char *user, char *name, char *desc)
+char *export(char *user, char *name, char *desc, bool save_best)
 {
-	return export_design(the_arena.design, user, name, desc);
+	return export_design_with_flags(&the_arena, user, name, desc, save_best);
 }
 
 void draw(void)

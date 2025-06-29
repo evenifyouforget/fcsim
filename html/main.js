@@ -435,7 +435,11 @@ function save_design(event)
 	let name = alloc_str(data.get("name"));
 	let desc = alloc_str(data.get("description"));
 
-	let xml = inst.exports.export(user, name, desc);
+	// Get the checkbox value
+    let save_best_checkbox = document.getElementById("save_best");
+    let save_best = save_best_checkbox && save_best_checkbox.checked;
+
+	let xml = inst.exports.export(user, name, desc, save_best);
 	let len = inst.exports.strlen(xml);
 
 	let xml_str = make_cstring(xml);

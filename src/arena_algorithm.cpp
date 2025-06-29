@@ -380,3 +380,21 @@ void arena_reset_operations(arena* arena) {
 	arena->root_blocks_moving = NULL;
 	arena->blocks_moving = NULL;
 }
+
+extern "C" char *export_design_with_flags(struct arena *arena_ptr, char *user, char *name, char *desc, bool save_best) {
+    if(save_best) {
+        ensure_garden_exists(arena_ptr);
+        garden_t* garden = (garden_t*)arena_ptr->garden;
+        if (garden->creatures.size() != 0) {
+            // find the creature with the best (lowest) score
+            creature_t* best_creature = &garden->creatures[0];
+            for (creature_t& creature : garden->creatures) {
+                if (creature.best_score < best_creature->best_score) {
+                    best_creature = &creature;
+                }
+            }
+            return export_design(best_creature->design_ptr, user, name, desc);
+        }
+    }
+    return export_design(arena_ptr->design, user, name, desc);
+}

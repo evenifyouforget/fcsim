@@ -190,4 +190,9 @@ extern int _fcsim_speed_preset;
 void change_speed_factor(struct arena *arena, double new_factor, int new_base_fps_mod);
 void change_speed_preset(struct arena *arena, int preset_index);
 
+char *export_design(struct design *design, char *user, char *name, char *desc);
+// option to take the best design from the garden, but will fallback to the main design
+// if the best design is not available
+char *export_design_with_flags(struct arena *arena, char *user, char *name, char *desc, bool save_best);
+
 #endif
