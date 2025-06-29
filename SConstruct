@@ -133,14 +133,16 @@ linux_env = base_env.Clone(
     CCFLAGS = common_ccflags + linux_ccflags,
     CPPPATH = common_include,
     # if using CCPDEFINES, need to match for fpatan variant
-    LIBS = libs
+    LIBS = libs,
+    PLATFORM = 'linux'
     )
 linux_env.VariantDir("build/linux", ".", False)
 
 test_env = base_env.Clone(
     CCFLAGS = common_ccflags + test_ccflags,
     CPPPATH = common_include + wasm_include,
-    CPPDEFINES = test_defines
+    CPPDEFINES = test_defines,
+    PLATFORM = 'linux'
     )
 test_env.VariantDir("build/test", ".", False)
 
@@ -154,6 +156,18 @@ wasm_env = base_env.Clone(
     )
 wasm_env.VariantDir("build/wasm", ".", False)
 
+windows_env = base_env.Clone(
+    CCFLAGS = common_ccflags + linux_ccflags,
+    CPPPATH = common_include,
+    CC='x86_64-w64-mingw32-gcc',
+    CXX='x86_64-w64-mingw32-g++',
+    LINK='x86_64-w64-mingw32-g++',
+    # if using CCPDEFINES, need to match for fpatan variant
+    LIBS = libs,
+    PLATFORM = 'win32'
+    )
+windows_env.VariantDir("build/linux", ".", False)
+
 # actual build
 def build_with_variant(env, variant_dir, source_files, *args, **kwargs):
     source_files = [variant_dir + filename for filename in source_files]
@@ -163,3 +177,5 @@ build_with_variant(linux_env, "build/linux/", linux_sources_all, target = 'fcsim
 build_with_variant(linux_env, "build/linux2/", linux_sources_all, target = 'fcsim-fpatan', CPPDEFINES = ['USE_FPATAN'])
 build_with_variant(test_env, "build/test/", test_sources_all, target = 'stl_test')
 build_with_variant(wasm_env, "build/wasm/", wasm_sources_all, target = 'html/fcsim.wasm')
+build_with_variant(windows_env, "build/windows/", linux_sources_all, target = 'fcsim.exe')
+build_with_variant(windows_env, "build/windows2/", linux_sources_all, target = 'fcsim-fpatan.exe', CPPDEFINES = ['USE_FPATAN'])
