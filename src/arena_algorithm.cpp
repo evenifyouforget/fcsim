@@ -22,17 +22,22 @@ void garden_reproduce(garden_t* garden, size_t parent_index, size_t child_index)
     // make a working copy of the parent creature's design
     design* new_design = clean_copy_design(garden->creatures[parent_index].design_ptr);
     // mutate the design
+    const double mutate_chance = 0.1 * random_uniform();
+    double variance = 1;
+    for(int i = (int)(random_u64() % 20); i >= 0; --i) {
+        variance *= random_uniform();
+    }
     for(block* b = new_design->player_blocks.head; b; b = b->next) {
         // simplest behaviour: each piece has a random chance of being wiggled, and only wiggle rods
         if(b->type_id != FCSIM_ROD && b->type_id != FCSIM_SOLID_ROD) {
             continue;
         }
         const double offset = random_uniform() * 2 - 1;
-        if(random_uniform() < 0.03) {
-            b->shape.rod.from->x += offset * 1e-2;
+        if(random_uniform() < mutate_chance) {
+            b->shape.rod.from->x += offset * variance;
         }
-        if(random_uniform() < 0.03) {
-            b->shape.rod.from->y += offset * 1e-2;
+        if(random_uniform() < mutate_chance) {
+            b->shape.rod.from->y += offset * variance;
         }
     }
     // initialize the new creature from the working copy
