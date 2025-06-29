@@ -731,8 +731,6 @@ void action_none(struct arena *arena, int x, int y)
 	arena->hover_block = NULL;
 }
 
-void move_joint(struct arena *arena, struct joint *joint, double x, double y);
-
 void update_wheel_joints2(struct wheel *wheel)
 {
 	double a[4] = {
@@ -795,7 +793,7 @@ void update_joints2(struct block *block)
 	}
 }
 
-void update_wheel_joints(struct arena *arena, struct wheel *wheel)
+void update_wheel_joints(b2World *world, struct wheel *wheel)
 {
 	double a[4] = {
 		0.0,
@@ -813,38 +811,41 @@ void update_wheel_joints(struct arena *arena, struct wheel *wheel)
 	for (i = 0; i < 4; i++) {
 		spoke_x = x + fp_cos(wheel->angle + a[i]) * wheel->radius;
 		spoke_y = y + fp_sin(wheel->angle + a[i]) * wheel->radius;
-		move_joint(arena, wheel->spokes[i], spoke_x, spoke_y);
+		move_joint(world, wheel->spokes[i], spoke_x, spoke_y);
 	}
 }
 
-void update_joints(struct arena *arena, struct block *block)
+void update_joints(b2World *world, struct block *block)
 {
 	struct shape *shape = &block->shape;
 
 	switch (shape->type) {
 	case SHAPE_WHEEL:
-		update_wheel_joints(arena, &shape->wheel);
+		update_wheel_joints(world, &shape->wheel);
 		break;
 	}
 }
 
-void update_body(struct arena *arena, struct block *block)
+void update_body(b2World *world, struct block *block)
 {
-	b2World_DestroyBody(arena->world, block->body);
-	gen_block(arena->world, block);
+	if(!world) {
+		return;
+	}
+    b2World_DestroyBody(world, block->body);
+    gen_block(world, block);
 }
 
-void move_joint(struct arena *arena, struct joint *joint, double x, double y)
+void move_joint(b2World *world, struct joint *joint, double x, double y)
 {
-	struct attach_node *node;
+    struct attach_node *node;
 
-	joint->x = x;
-	joint->y = y;
+    joint->x = x;
+    joint->y = y;
 
-	for (node = joint->att.head; node; node = node->next) {
-		update_joints(arena, node->block);
-		update_body(arena, node->block);
-	}
+    for (node = joint->att.head; node; node = node->next) {
+        update_joints(world, node->block);
+        update_body(world, node->block);
+    }
 }
 
 void move_root_block(struct block *block, double x, double y)
@@ -880,7 +881,7 @@ void update_move(struct arena *arena, double dx, double dy)
 
 	for (block_head = arena->blocks_moving; block_head;
 	     block_head = block_head->next) {
-		update_body(arena, block_head->block);
+		update_body(arena->world, block_head->block);
 	}
 
 	mark_overlaps(arena);
@@ -934,7 +935,7 @@ void attach_new_wheel(struct arena *arena, struct block *block, struct joint *jo
 	wheel->center_att = new_attach_node(block);
 	append_attach_node(&joint->att, wheel->center_att);
 
-	update_joints(arena, block);
+	update_joints(arena->world, block);
 }
 
 void detach_new_rod(struct design *design, struct block *block, double x, double y)
@@ -963,7 +964,7 @@ void detach_new_wheel(struct arena *arena, struct block *block, double x, double
 	wheel->center_att = new_attach_node(block);
 	append_attach_node(&wheel->center->att, wheel->center_att);
 
-	update_joints(arena, block);
+	update_joints(arena->world, block);
 }
 
 void adjust_new_rod(struct rod *rod)
@@ -1017,7 +1018,7 @@ void action_new_rod(struct arena *arena, int x, int y)
 		}
 	}
 
-	update_body(arena, arena->new_block);
+	update_body(arena->world, arena->new_block);
 	mark_overlaps(arena);
 
 	arena->hover_joint = joint_hit_test(arena, x_world, y_world);
@@ -1041,7 +1042,7 @@ void action_new_wheel(struct arena *arena, int x, int y)
 		if (joint) {
 			attach_new_wheel(arena, arena->new_block, joint);
 		} else {
-			move_joint(arena, wheel->center, x_world, y_world);
+			move_joint(arena->world, wheel->center, x_world, y_world);
 		}
 	} else {
 		if (!joint) {
@@ -1052,7 +1053,7 @@ void action_new_wheel(struct arena *arena, int x, int y)
 		}
 	}
 
-	update_body(arena, arena->new_block);
+	update_body(arena->world, arena->new_block);
 	mark_overlaps(arena);
 
 	arena->hover_joint = joint_hit_test(arena, x_world, y_world);

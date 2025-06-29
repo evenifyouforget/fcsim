@@ -33,11 +33,15 @@ void garden_reproduce(garden_t* garden, size_t parent_index, size_t child_index)
             continue;
         }
         const double offset = random_uniform() * 2 - 1;
+        double dx = 0, dy = 0;
         if(random_uniform() < mutate_chance) {
-            b->shape.rod.from->x += offset * variance;
+            dx = offset * variance;
         }
         if(random_uniform() < mutate_chance) {
-            b->shape.rod.from->y += offset * variance;
+            dy = offset * variance;
+        }
+        if(dx != 0 || dy != 0) {
+            move_joint(nullptr, b->shape.rod.from, b->shape.rod.from->x + dx, b->shape.rod.from->y + dy);
         }
     }
     // initialize the new creature from the working copy

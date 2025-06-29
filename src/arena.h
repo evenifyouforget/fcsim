@@ -151,6 +151,7 @@ void arena_mouse_button_down_event(struct arena *arena, int button);
 void arena_size_event(struct arena *arena, float w, float h);
 
 // utilities for modifying designs
+void move_joint(b2World *world, struct joint *joint, double x, double y);
 void mouse_up_move(struct arena *arena);
 void mouse_up_new_block(struct arena *arena);
 bool is_design_legal(struct design *design);
