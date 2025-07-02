@@ -963,6 +963,10 @@ void update_move(struct arena *arena, double dx, double dy)
 
 void action_move(struct arena *arena, int x, int y)
 {
+	if(arena->lock_if_preview_solves && arena->preview_has_won) {
+		return;
+	}
+
 	float x_world;
 	float y_world;
 	float dx;
@@ -1061,6 +1065,10 @@ void adjust_new_rod(struct rod *rod)
 
 void action_new_rod(struct arena *arena, int x, int y)
 {
+	if(arena->lock_if_preview_solves && arena->preview_has_won) {
+		return;
+	}
+
 	struct rod *rod = &arena->new_block->shape.rod;
 	float x_world;
 	float y_world;
@@ -1098,6 +1106,10 @@ void action_new_rod(struct arena *arena, int x, int y)
 
 void action_new_wheel(struct arena *arena, int x, int y)
 {
+	if(arena->lock_if_preview_solves && arena->preview_has_won) {
+		return;
+	}
+
 	struct wheel *wheel = &arena->new_block->shape.wheel;
 	float x_world;
 	float y_world;
