@@ -627,6 +627,9 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
     if(button.id == ui_button_id{5, 0}) {
         arena->preview_gp_trajectory ^= 1; // toggle
     }
+    if(button.id == ui_button_id{9, 0}) {
+        arena->lock_if_preview_solves ^= 1; // toggle
+    }
 }
 
 void regenerate_ui_buttons(arena* arena) {
@@ -837,6 +840,12 @@ void regenerate_ui_buttons(arena* arena) {
         ui_button_single button{{5, 0}, vw - 30, vh - 30, 70, 50, 2};
         button.texts.push_back(ui_button_text{"Preview", 1, 0, 10});
         button.texts.push_back(ui_button_text{arena->preview_gp_trajectory?"ON":"OFF", 1, 0, -10});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{9, 0}, vw - 30, vh - 55 - 20 * 0.5f, 70, 20, 2};
+        button.texts.push_back(ui_button_text{"Lock if solve", 1});
+        button.highlighted = arena->lock_if_preview_solves;
         all_buttons->buttons.push_back(button);
     }
 }
