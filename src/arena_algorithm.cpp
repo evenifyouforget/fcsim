@@ -53,11 +53,12 @@ extern "C" void tick_func(void *arg)
             // clear trails
             all_trails->trails.clear();
         }
+        bool is_preview_design_legal = is_design_legal(the_arena->preview_design);
         // tick until time budget is exhausted
         while(all_trails->accepting()) {
             all_trails->submit_frame(the_arena->preview_design);
             step(the_arena->preview_world);
-            if(goal_blocks_inside_goal_area(the_arena->preview_design)) {
+            if(is_preview_design_legal && goal_blocks_inside_goal_area(the_arena->preview_design)) {
                 the_arena->preview_has_won = true;
             }
             double time_end = time_precise_ms();

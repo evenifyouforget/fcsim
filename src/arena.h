@@ -132,6 +132,8 @@ void arena_mouse_button_up_event(struct arena *arena, int button);
 void arena_mouse_button_down_event(struct arena *arena, int button);
 void arena_size_event(struct arena *arena, float w, float h);
 
+bool is_design_legal(struct design *design);
+
 bool goal_blocks_inside_goal_area(struct design *design);
 void tick_func(void *arg);
 
