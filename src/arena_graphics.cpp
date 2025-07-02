@@ -843,8 +843,9 @@ void regenerate_ui_buttons(arena* arena) {
         all_buttons->buttons.push_back(button);
     }
     {
-        ui_button_single button{{9, 0}, vw - 30, vh - 55 - 20 * 0.5f, 70, 20, 2};
-        button.texts.push_back(ui_button_text{"Lock if solve", 1});
+        ui_button_single button{{9, 0}, vw - 30, vh - 55 - 30 * 0.5f, 70, 30, 2};
+        button.texts.push_back(ui_button_text{"Lock", 1, 0, 5});
+        button.texts.push_back(ui_button_text{"if solve", 1, 0, -5});
         button.highlighted = arena->lock_if_preview_solves;
         all_buttons->buttons.push_back(button);
     }
