@@ -760,6 +760,19 @@ void delete_block(struct arena *arena, struct block *block)
 	design->modcount++;
 }
 
+// Returns true if all player blocks are legal (not overlapping and inside build area)
+bool is_design_legal(struct design *design)
+{
+    struct block *block;
+    // Check all player blocks for overlap or being outside build area
+    for (block = design->player_blocks.head; block; block = block->next) {
+        if (block->overlap) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void action_pan(struct arena *arena, int x, int y)
 {
 	float dx_world;
