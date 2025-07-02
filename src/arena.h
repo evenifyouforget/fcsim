@@ -106,6 +106,8 @@ struct arena {
 	struct design* preview_design;
 	b2World *preview_world;
 	void *preview_trail; // real type: multi_trail_t*
+	bool preview_has_won;
+	bool lock_if_preview_solves;
 
 	// ui button templates
 	void* ui_buttons; // actual type: ui_button_collection*
