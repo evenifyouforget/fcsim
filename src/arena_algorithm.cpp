@@ -38,6 +38,7 @@ extern "C" void tick_func(void *arg)
         if(the_arena->preview_design == nullptr || the_arena->preview_design->modcount != the_arena->design.modcount) {
             // refresh preview design
             // manually clear old data
+            the_arena->preview_has_won = false;
             if(the_arena->preview_world) {
                 free_world(the_arena->preview_world, the_arena->preview_design);
             }
@@ -56,6 +57,9 @@ extern "C" void tick_func(void *arg)
         while(all_trails->accepting()) {
             all_trails->submit_frame(the_arena->preview_design);
             step(the_arena->preview_world);
+            if(goal_blocks_inside_goal_area(the_arena->preview_design)) {
+                the_arena->preview_has_won = true;
+            }
             double time_end = time_precise_ms();
             if(time_end - time_start >= the_arena->tick_ms)break;
         }
