@@ -515,9 +515,9 @@ let module_promise = WebAssembly.instantiateStreaming(
 let design_id = params.get('designId');
 let level_id = params.get('levelId');
 
-// homepage behaviour: default brown
+// homepage behaviour: orbit by kezza
 if(!design_id && !level_id) {
-    design_id = '12706185';
+    level_id = '682042';
 
     // show usage
     const notification = document.getElementById("notification");
