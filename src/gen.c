@@ -224,7 +224,7 @@ b2World *gen_world(struct design *design)
 	struct joint *joint;
 
 	gravity.x = 0;
-	gravity.y = 300;
+	gravity.y = 0;
 	aabb.minVertex.x = -2000;
 	aabb.minVertex.y = -1450;
 	aabb.maxVertex.x = 2000;
