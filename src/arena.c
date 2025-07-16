@@ -239,6 +239,14 @@ bool goal_blocks_inside_goal_area(struct design *design)
 	struct block *block;
 	bool any = false;
 
+	// freeze design pieces that enter the goal area (but not permanently)
+	for (block = design->player_blocks.head; block; block = block->next) {
+		if (!block->goal) {
+			if (block_inside_area(block, &design->goal_area))
+				block->body->m_flags |= b2Body_e_sleepFlag;
+		}
+	}
+
 	for (block = design->player_blocks.head; block; block = block->next) {
 		if (block->goal) {
 			any = true;
