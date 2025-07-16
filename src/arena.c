@@ -241,6 +241,16 @@ bool goal_blocks_inside_goal_area(struct design *design)
 
 	for (block = design->player_blocks.head; block; block = block->next) {
 		if (block->goal) {
+			if(block_inside_area(block, &design->goal_area)) {
+				const double multiplier = 1.1;
+				block->body->m_linearVelocity.x *= multiplier;
+				block->body->m_linearVelocity.y *= multiplier;
+			}
+		}
+	}
+
+	for (block = design->player_blocks.head; block; block = block->next) {
+		if (block->goal) {
 			any = true;
 			if (!block_inside_area(block, &design->goal_area))
 				return false;
