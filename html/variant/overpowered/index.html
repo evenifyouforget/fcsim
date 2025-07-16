@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title> fcsim </title>
+<meta charset="utf-8">
+<style>
+body {
+	margin: 0;
+}
+canvas {
+	display: block;
+	width: 100vw;
+	height: 100vh;
+}
+#tools {
+	position: fixed;
+	top: 10px;
+	left: 50%;
+	transform: translate(-50%, 0);
+	background: white;
+	padding: 10px;
+}
+.tool {
+	border: none;
+	padding: 10px;
+	color: white;
+}
+.tool:disabled {
+	background-color: lightgray !important;
+}
+#play {
+	background-color: limegreen;
+}
+#save {
+	background-color: deepskyblue;
+}
+#login {
+	position: fixed;
+	bottom: 10px;
+	right: 10px;
+}
+#save_menu {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	display: none;
+	background: white;
+	padding: 10px;
+}
+#save_form {
+	display: inline;
+}
+#link {
+	display: none;
+}
+</style>
+</head>
+<body>
+<div id="tools">
+	<button class="tool" id="play"> Play </button>
+	<button class="tool" id="save"> Save </button>
+	<span id="notification"></span>
+</div>
+<a id="login"> Log in </a>
+<div id="save_menu">
+	<form id="save_form">
+		<label for="name"> Name: </label>
+		<br>
+		<input name="name" maxlength="15">
+		<br>
+		<label for="description"> Description: </label>
+		<br>
+		<textarea name="description" maxlength="50"></textarea>
+		<br>
+		<br>
+		<input type="submit" value="Send">
+	</form>
+	<button class="close" id="close"> Close </button>
+	<p id="link"></p>
+</div>
+<canvas id="canvas"></canvas>
+<script src="main.js"></script>
+</body>
+</html>
