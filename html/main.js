@@ -515,15 +515,16 @@ let module_promise = WebAssembly.instantiateStreaming(
 let design_id = params.get('designId');
 let level_id = params.get('levelId');
 
-// homepage behaviour: default brown
+// homepage behaviour: 100x wheels demo
 if(!design_id && !level_id) {
-    design_id = '12706185';
+    design_id = '12709324';
 
     // show usage
     const notification = document.getElementById("notification");
     if (notification) {
         const helpDiv = document.createElement("div");
 
+        helpDiv.appendChild(chainElement(["p"], "overpowered variant - Wheels are 100x as strong. Is this what you imagined?"));
         helpDiv.appendChild(chainElement(["p"], "To load levels or designs, use ?levelId or ?designId"));
 		helpDiv.appendChild(chainElement(["p", "b"], "Examples"));
 		helpDiv.appendChild(chainElement(["p"], linkElement(self_url_full() + "?levelId=646726")));
