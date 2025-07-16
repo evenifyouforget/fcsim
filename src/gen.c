@@ -176,7 +176,7 @@ static void gen_joint(b2World *world, b2Body *b1, b2Body *b2, double x, double y
 	joint_def.anchorPoint.y = y;
 	joint_def.m_jointDef.collideConnected = true;
 	if (spin != 0) {
-		joint_def.motorTorque = 50000000;
+		joint_def.motorTorque = 5000000000;
 		joint_def.motorSpeed = spin;
 		joint_def.enableMotor = true;
 	}
