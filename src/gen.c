@@ -217,6 +217,8 @@ static void gen_joint_stack(b2World *world, struct joint *joint)
 
 b2World *gen_world(struct design *design)
 {
+	design->has_leaped = 0;
+
 	b2World *world = malloc(sizeof(*world));
 	b2Vec2 gravity;
 	b2AABB aabb;
