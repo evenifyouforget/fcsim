@@ -515,15 +515,16 @@ let module_promise = WebAssembly.instantiateStreaming(
 let design_id = params.get('designId');
 let level_id = params.get('levelId');
 
-// homepage behaviour: default brown
+// homepage behaviour: launcher level
 if(!design_id && !level_id) {
-    design_id = '12706185';
+    design_id = '12709328';
 
     // show usage
     const notification = document.getElementById("notification");
     if (notification) {
         const helpDiv = document.createElement("div");
 
+        helpDiv.appendChild(chainElement(["p"], "accelerator variant - Goal pieces get faster while in the goal area"));
         helpDiv.appendChild(chainElement(["p"], "To load levels or designs, use ?levelId or ?designId"));
 		helpDiv.appendChild(chainElement(["p", "b"], "Examples"));
 		helpDiv.appendChild(chainElement(["p"], linkElement(self_url_full() + "?levelId=646726")));
