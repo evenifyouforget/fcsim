@@ -261,14 +261,4 @@ void free_world(b2World *world, struct design *design)
 void step(struct b2World *world)
 {
 	b2World_Step(world, 1.0 / 30.0, 10);
-
-	b2Joint *joint = b2World_GetJointList(world);
-	while (joint) {
-		b2Joint *next = joint->m_next;
-		b2Vec2 a1 = joint->GetAnchor1(joint);
-		b2Vec2 a2 = joint->GetAnchor2(joint);
-		if (fabs(a1.x - a2.x) + fabs(a1.y - a2.y) > 50.0)
-			b2World_DestroyJoint(world, joint);
-		joint = next;
-	}
 }
