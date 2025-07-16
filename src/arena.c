@@ -239,6 +239,30 @@ bool goal_blocks_inside_goal_area(struct design *design)
 	struct block *block;
 	bool any = false;
 
+	if (!design->has_leaped) {
+		bool leap = false;
+		for (block = design->player_blocks.head; block; block = block->next) {
+			if (block->goal) {
+				if (block_inside_area(block, &design->goal_area))
+					leap = true;
+			}
+		}
+		if (leap) {
+			design->has_leaped = true;
+			const double leap_dx = design->goal_area.x - design->build_area.x;
+			const double leap_dy = design->goal_area.y - design->build_area.y;
+			for (block = design->player_blocks.head; block; block = block->next) {
+				if (!block->goal) {
+					// teleport
+					block->body->m_position.x += leap_dx;
+					block->body->m_position.y += leap_dy;
+					// unsleep
+					block->body->m_flags &= ~b2Body_e_sleepFlag;
+				}
+			}
+		}
+	}
+
 	for (block = design->player_blocks.head; block; block = block->next) {
 		if (block->goal) {
 			any = true;
