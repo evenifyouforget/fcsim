@@ -1,6 +1,7 @@
 *.o
 *.d
 *.xml
+run_single_design
 fcsim*
 html/fcsim.wasm
 stl_test
