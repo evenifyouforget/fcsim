@@ -46,6 +46,9 @@ linux_sources = [
     "src/timing.cpp",
     "src/fpmath/fpatan.s",
     ]
+run_single_design_sources = [
+    "src/run_single_design.cpp",
+    ]
 wasm_sources = [
     "src/arch/wasm/math.c",
     "src/arch/wasm/malloc.c",
@@ -54,6 +57,7 @@ wasm_sources = [
     ]
 
 linux_sources_all = common_sources + linux_sources
+run_single_design_sources_all = common_sources + run_single_design_sources
 test_sources_all = stl_mock_sources + test_sources
 wasm_sources_all = common_sources + stl_mock_sources + wasm_sources
 
@@ -61,6 +65,9 @@ wasm_sources_all = common_sources + stl_mock_sources + wasm_sources
 libs = [
     "X11",
     "GL",
+    "pthread",
+    ]
+run_single_design_libs = [
     "pthread",
     ]
 
@@ -137,6 +144,13 @@ linux_env = base_env.Clone(
     )
 linux_env.VariantDir("build/linux", ".", False)
 
+run_single_design_env = base_env.Clone(
+    CCFLAGS = common_ccflags + linux_ccflags,
+    CPPPATH = common_include,
+    LIBS = run_single_design_libs
+    )
+run_single_design_env.VariantDir("build/run_single_design", ".", False)
+
 test_env = base_env.Clone(
     CCFLAGS = common_ccflags + test_ccflags,
     CPPPATH = common_include + wasm_include,
@@ -161,5 +175,6 @@ def build_with_variant(env, variant_dir, source_files, *args, **kwargs):
     env.Program(*args, source = source_files, **kwargs)
 build_with_variant(linux_env, "build/linux/", linux_sources_all, target = 'fcsim')
 build_with_variant(linux_env, "build/linux2/", linux_sources_all, target = 'fcsim-fpatan', CPPDEFINES = ['USE_FPATAN'])
+build_with_variant(run_single_design_env, "build/run_single_design/", run_single_design_sources_all, target = 'run_single_design')
 build_with_variant(test_env, "build/test/", test_sources_all, target = 'stl_test')
 build_with_variant(wasm_env, "build/wasm/", wasm_sources_all, target = 'html/fcsim.wasm')
