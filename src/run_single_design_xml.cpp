@@ -27,9 +27,9 @@ int main(int argc, char* argv[]) {
     arena_init(arena_ptr, 800, 800, xml, content.length());
 
     // Run to solve or end
+    arena_ptr->state = STATE_RUNNING;
     while((int64_t)arena_ptr->tick != max_ticks && !arena_ptr->has_won) {
         arena_ptr->single_ticks_remaining = 1;
-        arena_ptr->state = STATE_RUNNING;
         tick_func(arena_ptr);
     }
 
