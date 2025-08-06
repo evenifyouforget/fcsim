@@ -92,7 +92,7 @@ static bool init_sim_from_input(int max_ticks) {
         }
         
         block->type = map_piece_type(type_id);
-        block->id = id + 1;
+        block->id = id;
         block->position.x = x;
         block->position.y = y;
         
