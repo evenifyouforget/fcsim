@@ -46,19 +46,6 @@ static int map_piece_type(int ftlib_type) {
         default: return 2; // Default to dynamic rect
     }
 }
-
-double read_double_janky() {
-    std::string str;
-    double result;
-    if(false) {
-        std::cin >> result;
-        return result;
-    }
-    std::cin >> str;
-    fp_strtod(str.c_str(), str.length(), &result);
-    return result;
-}
-
 static bool init_sim_from_input(int max_ticks) {
     // Read ftlib format from stdin
     int num_blocks;
@@ -79,11 +66,7 @@ static bool init_sim_from_input(int max_ticks) {
         int joint1, joint2;
 
         std::cin >> type_id >> id;
-        x = read_double_janky();
-        y = read_double_janky();
-        w = read_double_janky();
-        h = read_double_janky();
-        angle = read_double_janky();
+        std::cin >> x >> y >> w >> h >> angle;
         std::cin >> joint1 >> joint2;
         
         struct xml_block* block = (struct xml_block*)calloc(1, sizeof(struct xml_block));
