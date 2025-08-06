@@ -2,6 +2,8 @@
 #include "stddef.h"
 #else
 #include <cstddef>
+#include <iostream>
+#include <iomanip>
 #endif
 #include "arena.hpp"
 #include "stl_compat.h"
@@ -14,6 +16,18 @@ extern "C" void tick_func(void *arg)
 	double time_start = time_precise_ms();
 	for(int i = 0; is_running(the_arena) && the_arena->single_ticks_remaining != 0 && i < the_arena->tick_multiply; ++i) {
 		if(the_arena->single_ticks_remaining > 0)the_arena->single_ticks_remaining--;
+        #ifdef CLI
+        // log all blocks just before step
+        std::cerr << std::setprecision(17);
+        std::cerr << "Tick " << the_arena->tick << std::endl;
+        for(block* block_ptr = the_arena->design.player_blocks.head; block_ptr; block_ptr = block_ptr->next) {
+            b2Body* body_ptr = block_ptr->body;
+            std::cerr << "- ID = " << block_ptr->id << ", Type = " << (int)block_ptr->type_id << ", Pos = (" << body_ptr->m_position.x
+            << ", " << body_ptr->m_position.y << "), Vel = (" << body_ptr->m_linearVelocity.x << ", "
+            << body_ptr->m_linearVelocity.y << "), Ang = " << body_ptr->m_rotation << ", AngVel = " << body_ptr->m_angularVelocity
+            << std::endl;
+        }
+        #endif
 		step(the_arena->world);
 		the_arena->tick++;
 		if (!the_arena->has_won && goal_blocks_inside_goal_area(&the_arena->design)) {
