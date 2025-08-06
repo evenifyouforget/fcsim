@@ -88,6 +88,9 @@ test_defines = [
 fpatan_defines = [
     "USE_FPATAN",
     ]
+run_single_defines = [
+    "CLI",
+    ]
 
 werror_ccflags = [
     # preemptively catch some other common errors
@@ -151,6 +154,7 @@ linux_env.VariantDir("build/linux", ".", False)
 run_single_design_env = base_env.Clone(
     CCFLAGS = common_ccflags + linux_ccflags,
     CPPPATH = common_include,
+    CPPDEFINES = run_single_defines,
     LIBS = run_single_design_libs
     )
 run_single_design_env.VariantDir("build/run_single_design", ".", False)

@@ -168,7 +168,9 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 
 	arena->world = gen_world(&arena->design);
 
+#ifndef CLI
 	block_graphics_init(arena);
+#endif
 
 	/*
 	glGenBuffers(1, &arena->joint_coord_buffer);
@@ -178,7 +180,9 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 	*/
 
 	arena->tick = 0;
+#ifndef CLI
 	text_stream_create(&arena->tick_counter, MAX_RENDER_TEXT_LENGTH);
+#endif
 	arena->has_won = false;
 
 	arena->preview_gp_trajectory = false;

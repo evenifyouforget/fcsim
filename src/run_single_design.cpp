@@ -79,7 +79,7 @@ static bool init_sim_from_input(struct simple_sim_state* sim, int max_ticks) {
         }
         
         block->type = map_piece_type(type_id);
-        block->id = i;  // Use array index as XML ID instead of ftlib id
+        block->id = id;
         block->position.x = x;
         block->position.y = y;
         
@@ -97,12 +97,6 @@ static bool init_sim_from_input(struct simple_sim_state* sim, int max_ticks) {
         block->goal_block = (type_id == 4 || type_id == 5); // GP pieces are goal blocks
         block->joints = NULL;
         block->next = NULL;
-        
-        // Debug output
-        if (type_id == 4 || type_id == 5) {
-            fprintf(stderr, "DEBUG: Created goal piece - ftlib_type=%d, xml_type=%d, goal_block=%d\n", 
-                    type_id, block->type, block->goal_block);
-        }
         
         // Add joints if they exist
         if (joint1 != -1 || joint2 != -1) {
@@ -170,8 +164,6 @@ static bool init_sim_from_input(struct simple_sim_state* sim, int max_ticks) {
                 break;
             default: break;
         }
-        fprintf(stderr, "DEBUG: Level block %d - fcsim_type_id=%d, pos=(%.1f,%.1f), size=(%.1fx%.1f)\n", 
-                level_count, block->type_id, x, y, w, h);
     }
     for (block = sim->design.player_blocks.head; block; block = block->next) {
         player_count++;
@@ -193,13 +185,6 @@ static bool init_sim_from_input(struct simple_sim_state* sim, int max_ticks) {
                 h = block->shape.rod.width;
                 break;
             default: break;
-        }
-        if (block->goal) {
-            fprintf(stderr, "DEBUG: Player block %d - GOAL BLOCK with fcsim_type_id=%d, pos=(%.1f,%.1f), size=(%.1fx%.1f)\n", 
-                    player_count, block->type_id, x, y, w, h);
-        } else {
-            fprintf(stderr, "DEBUG: Player block %d - fcsim_type_id=%d, pos=(%.1f,%.1f), size=(%.1fx%.1f)\n", 
-                    player_count, block->type_id, x, y, w, h);
         }
     }
     
@@ -224,14 +209,6 @@ static bool init_sim_from_input(struct simple_sim_state* sim, int max_ticks) {
         }
     }
     
-    if (goal_block && goal_block->body) {
-        double gx = goal_block->body->m_position.x;
-        double gy = goal_block->body->m_position.y;
-        fprintf(stderr, "DEBUG: Tick 0 BEFORE physics - goal_pos=(%.1f,%.1f)\n", gx, gy);
-    } else {
-        fprintf(stderr, "DEBUG: Tick 0 - no goal block body found yet\n");
-    }
-    
     return true;
 }
 
@@ -251,26 +228,10 @@ static void step_sim(struct simple_sim_state* sim) {
                     break;
                 }
             }
-            
-            if (goal_block && goal_block->body) {
-                double gx = goal_block->body->m_position.x;
-                double gy = goal_block->body->m_position.y;
-                double goal_area_x = sim->design.goal_area.x;
-                double goal_area_y = sim->design.goal_area.y;
-                double goal_area_w = sim->design.goal_area.w;
-                double goal_area_h = sim->design.goal_area.h;
-                
-                fprintf(stderr, "DEBUG: Tick %lld, goal_achieved=%d, goal_pos=(%.1f,%.1f), goal_area=(%.1f,%.1f,%.1fx%.1f)\n", 
-                        (long long)sim->tick, goal_achieved, gx, gy, goal_area_x, goal_area_y, goal_area_w, goal_area_h);
-            } else {
-                fprintf(stderr, "DEBUG: Tick %lld, goal_achieved=%d, no goal block body found\n", 
-                        (long long)sim->tick, goal_achieved);
-            }
         }
         if (goal_achieved) {
             sim->has_won = true;
             sim->tick_solve = sim->tick;
-            fprintf(stderr, "DEBUG: GOAL ACHIEVED at tick %lld!\n", (long long)sim->tick);
         }
     }
 }
@@ -286,14 +247,12 @@ int main() {
     // Read max_ticks from stdin (first parameter)
     int max_ticks;
     if (scanf("%d", &max_ticks) != 1) {
-        fprintf(stderr, "Failed to read max_ticks\n");
         return 1;
     }
     
     // Initialize simulation from ftlib format input
     struct simple_sim_state sim;
     if (!init_sim_from_input(&sim, max_ticks)) {
-        fprintf(stderr, "Failed to parse input or initialize simulation\n");
         return 1;
     }
     
