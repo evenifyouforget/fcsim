@@ -39,7 +39,8 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-// stubs
+// stubs - functions that are called somewhere and therefore require linking
+// but don't have any effect on this CLI use case
 
 extern "C" {
 
