@@ -79,7 +79,7 @@ static bool init_sim_from_input(struct simple_sim_state* sim, int max_ticks) {
         }
         
         block->type = map_piece_type(type_id);
-        block->id = id;
+        block->id = i;  // Use array index as XML ID instead of ftlib id
         block->position.x = x;
         block->position.y = y;
         
