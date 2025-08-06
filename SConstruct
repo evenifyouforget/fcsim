@@ -49,6 +49,9 @@ linux_sources = [
 run_single_design_sources = [
     "src/run_single_design.cpp",
     ]
+run_single_design_xml_sources = [
+    "src/run_single_design_xml.cpp",
+    ]
 wasm_sources = [
     "src/arch/wasm/math.c",
     "src/arch/wasm/malloc.c",
@@ -58,6 +61,7 @@ wasm_sources = [
 
 linux_sources_all = common_sources + linux_sources
 run_single_design_sources_all = common_sources + run_single_design_sources
+run_single_design_xml_sources_all = common_sources + run_single_design_xml_sources
 test_sources_all = stl_mock_sources + test_sources
 wasm_sources_all = common_sources + stl_mock_sources + wasm_sources
 
@@ -176,5 +180,6 @@ def build_with_variant(env, variant_dir, source_files, *args, **kwargs):
 build_with_variant(linux_env, "build/linux/", linux_sources_all, target = 'fcsim')
 build_with_variant(linux_env, "build/linux2/", linux_sources_all, target = 'fcsim-fpatan', CPPDEFINES = ['USE_FPATAN'])
 build_with_variant(run_single_design_env, "build/run_single_design/", run_single_design_sources_all, target = 'run_single_design')
+build_with_variant(run_single_design_env, "build/run_single_design_xml/", run_single_design_xml_sources_all, target = 'run_single_design_xml')
 build_with_variant(test_env, "build/test/", test_sources_all, target = 'stl_test')
 build_with_variant(wasm_env, "build/wasm/", wasm_sources_all, target = 'html/fcsim.wasm')
