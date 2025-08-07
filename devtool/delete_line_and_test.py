@@ -191,7 +191,7 @@ class MutationTester:
 
         # Read and store the original content of the file.
         self.original_content = self.file_path.read_text().splitlines(keepends=True)
-        self.last_known_good_content = List[str](self.original_content)
+        self.last_known_good_content = list(self.original_content) # Changed List[str](...) to list(...)
 
         self.initial_baseline_failures = self._get_baseline_failures()
         self.current_target_failures = self.initial_baseline_failures 
@@ -211,11 +211,11 @@ class MutationTester:
                 
                 # Create a mutable list representing the file's state within this pass.
                 # This list will be updated as lines are successfully deleted.
-                current_file_state_for_pass = List[str](current_lines_at_pass_start)
+                current_file_state_for_pass = list(current_lines_at_pass_start) # Changed List[str](...) to list(...)
 
                 # Create a list of lines to attempt deleting, in random order.
                 # This ensures each line is considered once per pass, but the order is random.
-                lines_to_attempt_deletion_in_random_order = List[str](current_lines_at_pass_start)
+                lines_to_attempt_deletion_in_random_order = list(current_lines_at_pass_start) # Changed List[str](...) to list(...)
                 random.shuffle(lines_to_attempt_deletion_in_random_order)
                 
                 total_lines_in_pass = len(lines_to_attempt_deletion_in_random_order)
@@ -251,7 +251,7 @@ class MutationTester:
                         logging.info(f"IMPROVEMENT DETECTED! Failures decreased from {self.current_target_failures} to {current_test_run_result.failures}.")
                         logging.info("Keeping this improved version and exiting the loop.")
                         self.total_successful_deletions += 1
-                        self.last_known_good_content = List[str](test_deletion_lines)
+                        self.last_known_good_content = list(test_deletion_lines) # Changed List[str](...) to list(...)
                         self.file_path.write_text("".join(self.last_known_good_content))
                         self.exit_reason = "Improvement detected (failure rate decreased)."
                         return
@@ -265,7 +265,7 @@ class MutationTester:
                         # Update the mutable state for this pass.
                         current_file_state_for_pass = test_deletion_lines
                         # Update the last known good content (persists across passes)
-                        self.last_known_good_content = List[str](current_file_state_for_pass)
+                        self.last_known_good_content = list(current_file_state_for_pass) # Changed List[str](...) to list(...)
                     else:
                         regression_details = current_test_run_result.error_message if not current_test_run_result.is_successful else \
                                              f"{current_test_run_result.failures} failures (baseline: {self.current_target_failures})"
@@ -278,7 +278,7 @@ class MutationTester:
                     if self.edit_counter > 0 and self.edit_counter % RECHECK_INTERVAL == 0:
                         logging.info(f"--- Performing periodic baseline re-check (every {RECHECK_INTERVAL} successful edits) ---")
                         
-                        state_before_recheck = List[str](self.file_path.read_text().splitlines(keepends=True))
+                        state_before_recheck = list(self.file_path.read_text().splitlines(keepends=True)) # Changed List[str](...) to list(...)
                         self.file_path.write_text("".join(self.original_content))
                         
                         recheck_result = self._run_test_command(self.test_command, self.test_cwd)
