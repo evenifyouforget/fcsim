@@ -12,6 +12,7 @@ extern "C" {
 
 #include <iostream>
 #include <vector>
+#include <cstring>
 
 // Map ftlib piece types to fcsim types
 static int map_piece_type(int ftlib_type) {
@@ -149,6 +150,9 @@ int main(int argc, char* argv[]) {
     // CHIMERA: Set up arena by inlining arena_init and replacing XML parsing
     arena* arena_ptr = new arena();
     
+    // Zero-initialize the entire struct to match original arena_init behavior
+    memset(arena_ptr, 0, sizeof(struct arena));
+    
     // Arena initialization (from arena_init) 
     arena_ptr->view.x = 0.0f;
     arena_ptr->view.y = 0.0f;
@@ -167,6 +171,21 @@ int main(int argc, char* argv[]) {
     arena_ptr->root_joints_moving = NULL;
     arena_ptr->root_blocks_moving = NULL;
     arena_ptr->blocks_moving = NULL;
+    // Initialize missing fields
+    arena_ptr->move_orig_x = 0.0f;
+    arena_ptr->move_orig_y = 0.0f;
+    arena_ptr->move_orig_joint = NULL;
+    arena_ptr->move_orig_block = NULL;
+    arena_ptr->new_block = NULL;
+    arena_ptr->block_graphics_v2 = NULL;
+    arena_ptr->block_graphics_v2b = NULL;
+    arena_ptr->frame_counter = 0;
+    arena_ptr->single_ticks_remaining = -1;  // Default for normal playback
+    arena_ptr->autostop_on_solve = false;
+    arena_ptr->preview_trail = NULL;
+    arena_ptr->ui_buttons = NULL;
+    arena_ptr->ui_toolbar_opened = false;
+    arena_ptr->ui_speedbar_opened = false;
     
     // CHIMERA: Replace xml_parse + convert_xml with direct XIR → internal design conversion
     convert_xml(&level, &arena_ptr->design);
@@ -180,23 +199,21 @@ int main(int argc, char* argv[]) {
     arena_ptr->preview_design = NULL;
     arena_ptr->preview_world = NULL;
     arena_ptr->preview_has_won = false;
+    arena_ptr->lock_if_preview_solves = false;
+
+    change_speed_preset(arena_ptr, 2);
 
     // TO CLAUDE - DO NOT MODIFY ANYTHING BELOW THIS LINE
 
-    // Run to solve or end - simplified approach that was working before
-    while (arena_ptr->tick < (uint64_t)max_ticks && !arena_ptr->has_won) {
-        step(arena_ptr->world);
-        arena_ptr->tick++;
-        
-        // Check for win condition using the existing goal checking logic  
-        if (!arena_ptr->has_won && goal_blocks_inside_goal_area(&arena_ptr->design)) {
-            arena_ptr->has_won = true;
-            arena_ptr->tick_solve = arena_ptr->tick;
-        }
+    // Run to solve or end
+    arena_ptr->state = STATE_RUNNING;
+    while((int64_t)arena_ptr->tick != max_ticks && !arena_ptr->has_won) {
+        arena_ptr->single_ticks_remaining = 1;
+        tick_func(arena_ptr);
     }
 
     // Report
-    std::cout << (arena_ptr->has_won ? (long long)arena_ptr->tick_solve : -1LL) << std::endl << (long long)arena_ptr->tick << std::endl;
+    std::cout << (arena_ptr->has_won ? (int64_t)arena_ptr->tick_solve : -1) << std::endl << arena_ptr->tick << std::endl;
 
     return 0;
 }

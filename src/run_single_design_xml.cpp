@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Report
-    std::cout << (arena_ptr->has_won ? arena_ptr->tick_solve : -1) << std::endl << arena_ptr->tick << std::endl;
+    std::cout << (arena_ptr->has_won ? (int64_t)arena_ptr->tick_solve : -1) << std::endl << arena_ptr->tick << std::endl;
 
     return 0;
 }
