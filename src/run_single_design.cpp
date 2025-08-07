@@ -282,32 +282,152 @@ static void cleanup_sim(struct simple_sim_state* sim) {
     }
 }
 
-int main() {
-    // Read max_ticks from stdin (first parameter)
-    int max_ticks;
-    if (scanf("%d", &max_ticks) != 1) {
-        fprintf(stderr, "Failed to read max_ticks\n");
+
+int main(int argc, char* argv[]) {
+    // CHIMERA: Copy the simulation logic from run_single_design_xml.cpp exactly
+    // Read max_ticks from command line argument (matching XML version interface)
+    int64_t max_ticks = 1000; // Default value
+    if (argc > 1) {
+        max_ticks = atoi(argv[1]);
+    }
+
+    // Read max_ticks from stdin (first parameter) for ftlib compatibility
+    int stdin_max_ticks;
+    if (scanf("%d", &stdin_max_ticks) != 1) {
+        fprintf(stderr, "Failed to read max_ticks from stdin\n");
+        return 1;
+    }
+    max_ticks = stdin_max_ticks; // Use stdin value if provided
+    
+    // Initialize ftlib format parsing but convert to XML for arena_init
+    struct xml_level level = {0};
+    
+    // Read blocks and create linked list (keep existing ftlib parsing logic)
+    int num_blocks;
+    if (scanf("%d", &num_blocks) != 1) {
         return 1;
     }
     
-    // Initialize simulation from ftlib format input
+    struct xml_block* prev_level_block = NULL;
+    struct xml_block* prev_player_block = NULL;
+    
+    for (int i = 0; i < num_blocks; i++) {
+        int type_id, id;
+        double x, y, w, h, angle;
+        int joint1, joint2;
+        
+        if (scanf("%d %d %lf %lf %lf %lf %lf %d %d", 
+                  &type_id, &id, &x, &y, &w, &h, &angle, &joint1, &joint2) != 9) {
+            return 1;
+        }
+        
+        struct xml_block* block = (struct xml_block*)calloc(1, sizeof(struct xml_block));
+        if (!block) {
+            return 1;
+        }
+        
+        block->type = map_piece_type(type_id);
+        block->id = id;
+        block->position.x = x;
+        block->position.y = y;
+        
+        if (type_id == 1 || type_id == 3) {
+            block->width = w / 2.0;
+            block->height = h / 2.0;
+        } else {
+            block->width = w;
+            block->height = h;
+        }
+        
+        block->rotation = angle;
+        block->goal_block = (type_id == 4 || type_id == 5);
+        block->joints = NULL;
+        block->next = NULL;
+        
+        if (joint1 != -1 || joint2 != -1) {
+            if (joint1 != -1) {
+                struct xml_joint* joint = (struct xml_joint*)calloc(1, sizeof(struct xml_joint));
+                joint->id = joint1;
+                joint->next = block->joints;
+                block->joints = joint;
+            }
+            if (joint2 != -1) {
+                struct xml_joint* joint = (struct xml_joint*)calloc(1, sizeof(struct xml_joint));
+                joint->id = joint2;
+                joint->next = block->joints;
+                block->joints = joint;
+            }
+        }
+        
+        if (type_id <= 3) {
+            if (!level.level_blocks) {
+                level.level_blocks = block;
+            } else {
+                prev_level_block->next = block;
+            }
+            prev_level_block = block;
+        } else {
+            if (!level.player_blocks) {
+                level.player_blocks = block;
+            } else {
+                prev_player_block->next = block;
+            }
+            prev_player_block = block;
+        }
+    }
+    
+    // Read build area and goal area
+    if (scanf("%lf %lf %lf %lf", &level.start.position.x, &level.start.position.y, 
+              &level.start.width, &level.start.height) != 4) {
+        return 1;
+    }
+    
+    if (scanf("%lf %lf %lf %lf", &level.end.position.x, &level.end.position.y,
+              &level.end.width, &level.end.height) != 4) {
+        return 1;
+    }
+
+    // CHIMERA: Use existing conversion to internal design (keeping upper half logic)
     struct simple_sim_state sim;
-    if (!init_sim_from_input(&sim, max_ticks)) {
-        fprintf(stderr, "Failed to parse input or initialize simulation\n");
+    convert_xml(&level, &sim.design);
+    xml_free(&level);
+    
+    // Generate physics world
+    sim.world = gen_world(&sim.design);
+    if (!sim.world) {
         return 1;
     }
     
-    // Run simulation
+    sim.tick = 0;
+    sim.has_won = false;
+    sim.tick_solve = 0;
+
+    // CHIMERA: Use the exact same simulation loop logic as run_single_design_xml.cpp
+    // But instead of arena, use our simple_sim_state and step logic
     while (sim.tick < (uint64_t)max_ticks && !sim.has_won) {
-        step_sim(&sim);
+        step(sim.world);
+        sim.tick++;
+        
+        // Check for win condition using the existing goal checking logic  
+        if (!sim.has_won && goal_blocks_inside_goal_area(&sim.design)) {
+            sim.has_won = true;
+            sim.tick_solve = sim.tick;
+        }
     }
-    
-    // Output results in the same format as ftlib's run_single_design
-    // solve_tick (or -1 if not solved), end_tick
-    printf("%lld\n%lld\n", sim.has_won ? (long long)sim.tick_solve : -1LL, (long long)sim.tick);
-    
-    // Cleanup
-    cleanup_sim(&sim);
-    
+
+    // CHIMERA: Output in exact same format as run_single_design_xml.cpp
+    std::cout << (sim.has_won ? (long long)sim.tick_solve : -1LL) << std::endl << (long long)sim.tick << std::endl;
+
     return 0;
+}
+
+// CHIMERA: Copy stubs from run_single_design_xml.cpp for compatibility
+extern "C" {
+
+int set_interval(void (*func)(void *arg), int delay, void *arg) {return 0;}
+
+void clear_interval(int id) {}
+
+double time_precise_ms() {return 0;}
+
 }
