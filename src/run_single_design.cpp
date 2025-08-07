@@ -79,7 +79,7 @@ static bool init_sim_from_input(struct simple_sim_state* sim, int max_ticks) {
         }
         
         block->type = map_piece_type(type_id);
-        block->id = id;  // Use ftlib id for joint references
+        block->id = id;  // Use ftlib id for joint references (CRITICAL FIX)
         block->position.x = x;
         block->position.y = y;
         
@@ -97,6 +97,12 @@ static bool init_sim_from_input(struct simple_sim_state* sim, int max_ticks) {
         block->goal_block = (type_id == 4 || type_id == 5); // GP pieces are goal blocks
         block->joints = NULL;
         block->next = NULL;
+        
+        // Debug output
+        if (type_id == 4 || type_id == 5) {
+            fprintf(stderr, "DEBUG: Created goal piece - ftlib_type=%d, xml_type=%d, goal_block=%d\n", 
+                    type_id, block->type, block->goal_block);
+        }
         
         // Add joints if they exist
         if (joint1 != -1 || joint2 != -1) {
@@ -147,6 +153,56 @@ static bool init_sim_from_input(struct simple_sim_state* sim, int max_ticks) {
     // Convert to internal representation using existing code
     convert_xml(&level, &sim->design);
     
+    // Debug: Check what blocks we have after conversion
+    struct block* block;
+    int level_count = 0, player_count = 0;
+    for (block = sim->design.level_blocks.head; block; block = block->next) {
+        level_count++;
+        double x = 0, y = 0, w = 0, h = 0;
+        switch (block->shape.type) {
+            case SHAPE_RECT:
+                x = block->shape.rect.x; y = block->shape.rect.y;
+                w = block->shape.rect.w; h = block->shape.rect.h;
+                break;
+            case SHAPE_CIRC:
+                x = block->shape.circ.x; y = block->shape.circ.y;
+                w = h = block->shape.circ.radius * 2;
+                break;
+            default: break;
+        }
+        fprintf(stderr, "DEBUG: Level block %d - fcsim_type_id=%d, pos=(%.1f,%.1f), size=(%.1fx%.1f)\n", 
+                level_count, block->type_id, x, y, w, h);
+    }
+    for (block = sim->design.player_blocks.head; block; block = block->next) {
+        player_count++;
+        double x = 0, y = 0, w = 0, h = 0;
+        switch (block->shape.type) {
+            case SHAPE_BOX:
+                x = block->shape.box.x; y = block->shape.box.y;
+                w = block->shape.box.w; h = block->shape.box.h;
+                break;
+            case SHAPE_WHEEL:
+                x = block->shape.wheel.center->x; y = block->shape.wheel.center->y;
+                w = h = block->shape.wheel.radius * 2;
+                break;
+            case SHAPE_ROD:
+                x = (block->shape.rod.from->x + block->shape.rod.to->x) / 2;
+                y = (block->shape.rod.from->y + block->shape.rod.to->y) / 2;
+                w = sqrt(pow(block->shape.rod.to->x - block->shape.rod.from->x, 2) + 
+                        pow(block->shape.rod.to->y - block->shape.rod.from->y, 2));
+                h = block->shape.rod.width;
+                break;
+            default: break;
+        }
+        if (block->goal) {
+            fprintf(stderr, "DEBUG: Player block %d - GOAL BLOCK with fcsim_type_id=%d, pos=(%.1f,%.1f), size=(%.1fx%.1f)\n", 
+                    player_count, block->type_id, x, y, w, h);
+        } else {
+            fprintf(stderr, "DEBUG: Player block %d - fcsim_type_id=%d, pos=(%.1f,%.1f), size=(%.1fx%.1f)\n", 
+                    player_count, block->type_id, x, y, w, h);
+        }
+    }
+    
     xml_free(&level);
     
     // Generate physics world
@@ -159,6 +215,23 @@ static bool init_sim_from_input(struct simple_sim_state* sim, int max_ticks) {
     sim->has_won = false;
     sim->tick_solve = 0;
     
+    // Debug initial setup before any physics steps
+    struct block* goal_block = NULL;
+    for (struct block* block = sim->design.player_blocks.head; block; block = block->next) {
+        if (block->goal) {
+            goal_block = block;
+            break;
+        }
+    }
+    
+    if (goal_block && goal_block->body) {
+        double gx = goal_block->body->m_position.x;
+        double gy = goal_block->body->m_position.y;
+        fprintf(stderr, "DEBUG: Tick 0 BEFORE physics - goal_pos=(%.1f,%.1f)\n", gx, gy);
+    } else {
+        fprintf(stderr, "DEBUG: Tick 0 - no goal block body found yet\n");
+    }
+    
     return true;
 }
 
@@ -169,9 +242,35 @@ static void step_sim(struct simple_sim_state* sim) {
     // Check for win condition
     if (!sim->has_won) {
         bool goal_achieved = goal_blocks_inside_goal_area(&sim->design);
+        if (sim->tick == 0 || sim->tick == 1 || sim->tick % 100 == 0) { // Debug tick 0, 1, then every 100 ticks
+            // Find goal block and check its position
+            struct block* goal_block = NULL;
+            for (struct block* block = sim->design.player_blocks.head; block; block = block->next) {
+                if (block->goal) {
+                    goal_block = block;
+                    break;
+                }
+            }
+            
+            if (goal_block && goal_block->body) {
+                double gx = goal_block->body->m_position.x;
+                double gy = goal_block->body->m_position.y;
+                double goal_area_x = sim->design.goal_area.x;
+                double goal_area_y = sim->design.goal_area.y;
+                double goal_area_w = sim->design.goal_area.w;
+                double goal_area_h = sim->design.goal_area.h;
+                
+                fprintf(stderr, "DEBUG: Tick %lld, goal_achieved=%d, goal_pos=(%.1f,%.1f), goal_area=(%.1f,%.1f,%.1fx%.1f)\n", 
+                        (long long)sim->tick, goal_achieved, gx, gy, goal_area_x, goal_area_y, goal_area_w, goal_area_h);
+            } else {
+                fprintf(stderr, "DEBUG: Tick %lld, goal_achieved=%d, no goal block body found\n", 
+                        (long long)sim->tick, goal_achieved);
+            }
+        }
         if (goal_achieved) {
             sim->has_won = true;
             sim->tick_solve = sim->tick;
+            fprintf(stderr, "DEBUG: GOAL ACHIEVED at tick %lld!\n", (long long)sim->tick);
         }
     }
 }
@@ -187,12 +286,14 @@ int main() {
     // Read max_ticks from stdin (first parameter)
     int max_ticks;
     if (scanf("%d", &max_ticks) != 1) {
+        fprintf(stderr, "Failed to read max_ticks\n");
         return 1;
     }
     
     // Initialize simulation from ftlib format input
     struct simple_sim_state sim;
     if (!init_sim_from_input(&sim, max_ticks)) {
+        fprintf(stderr, "Failed to parse input or initialize simulation\n");
         return 1;
     }
     
@@ -209,17 +310,4 @@ int main() {
     cleanup_sim(&sim);
     
     return 0;
-}
-
-// stubs - functions that are called somewhere and therefore require linking
-// but don't have any effect on this CLI use case
-
-extern "C" {
-
-int set_interval(void (*func)(void *arg), int delay, void *arg) {return 0;}
-
-void clear_interval(int id) {}
-
-double time_precise_ms() {return 0;}
-
 }
