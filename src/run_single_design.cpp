@@ -102,7 +102,6 @@ int main(int argc, char* argv[]) {
             if (joint1 != -1) {
                 struct xml_joint* joint = (struct xml_joint*)calloc(1, sizeof(struct xml_joint));
                 joint->id = joint1;
-                joint->next = block->joints;
                 block->joints = joint;
             }
             if (joint2 != -1) {
@@ -149,53 +148,34 @@ int main(int argc, char* argv[]) {
     
     // Arena initialization (from arena_init) 
     arena_ptr->view.x = 0.0f;
-    arena_ptr->view.y = 0.0f;
-    arena_ptr->view.width = 800;
     arena_ptr->view.height = 800;
     arena_ptr->view.scale = 1.0f;
     arena_ptr->cursor_x = 0;
-    arena_ptr->cursor_y = 0;
-    arena_ptr->shift = false;
     arena_ptr->ctrl = false;
     arena_ptr->tool = TOOL_MOVE;
     arena_ptr->tool_hidden = TOOL_MOVE;
     arena_ptr->state = STATE_NORMAL;
     arena_ptr->hover_joint = NULL;
     arena_ptr->hover_block = NULL;
-    arena_ptr->root_joints_moving = NULL;
     arena_ptr->root_blocks_moving = NULL;
     arena_ptr->blocks_moving = NULL;
-    // Initialize missing fields
-    arena_ptr->move_orig_x = 0.0f;
-    arena_ptr->move_orig_y = 0.0f;
-    arena_ptr->move_orig_joint = NULL;
     arena_ptr->move_orig_block = NULL;
-    arena_ptr->new_block = NULL;
-    arena_ptr->block_graphics_v2 = NULL;
-    arena_ptr->block_graphics_v2b = NULL;
-    arena_ptr->frame_counter = 0;
     arena_ptr->single_ticks_remaining = -1;  // Default for normal playback
     arena_ptr->autostop_on_solve = false;
     arena_ptr->preview_trail = NULL;
     arena_ptr->ui_buttons = NULL;
-    arena_ptr->ui_toolbar_opened = false;
-    arena_ptr->ui_speedbar_opened = false;
     
-    // CHIMERA: Replace xml_parse + convert_xml with direct XIR → internal design conversion
     convert_xml(&level, &arena_ptr->design);
     xml_free(&level);
     
     // Continue arena initialization (from arena_init)
     arena_ptr->world = gen_world(&arena_ptr->design);
     arena_ptr->tick = 0;
-    arena_ptr->has_won = false;
     arena_ptr->preview_gp_trajectory = false;
     arena_ptr->preview_design = NULL;
     arena_ptr->preview_world = NULL;
     arena_ptr->preview_has_won = false;
-    arena_ptr->lock_if_preview_solves = false;
 
-    change_speed_preset(arena_ptr, 2);
 
     // TO CLAUDE - DO NOT MODIFY ANYTHING BELOW THIS LINE
 
