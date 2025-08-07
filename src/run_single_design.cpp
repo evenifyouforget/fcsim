@@ -1,5 +1,4 @@
 extern "C" {
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -53,8 +52,8 @@ int main(int argc, char* argv[]) {
 
     // Read max_ticks from stdin (first parameter) for ftlib compatibility
     int stdin_max_ticks;
-    if (scanf("%d", &stdin_max_ticks) != 1) {
-        fprintf(stderr, "Failed to read max_ticks from stdin\n");
+    if (!(std::cin >> stdin_max_ticks)) {
+        std::cerr << "Failed to read max_ticks from stdin" << std::endl;
         return 1;
     }
     max_ticks = stdin_max_ticks; // Use stdin value if provided
@@ -64,7 +63,7 @@ int main(int argc, char* argv[]) {
     
     // Read blocks and create linked list
     int num_blocks;
-    if (scanf("%d", &num_blocks) != 1) {
+    if (!(std::cin >> num_blocks)) {
         return 1;
     }
     
@@ -76,8 +75,7 @@ int main(int argc, char* argv[]) {
         double x, y, w, h, angle;
         int joint1, joint2;
         
-        if (scanf("%d %d %lf %lf %lf %lf %lf %d %d", 
-                  &type_id, &id, &x, &y, &w, &h, &angle, &joint1, &joint2) != 9) {
+        if (!(std::cin >> type_id >> id >> x >> y >> w >> h >> angle >> joint1 >> joint2)) {
             return 1;
         }
         
@@ -137,13 +135,13 @@ int main(int argc, char* argv[]) {
     }
     
     // Read build area and goal area
-    if (scanf("%lf %lf %lf %lf", &level.start.position.x, &level.start.position.y, 
-              &level.start.width, &level.start.height) != 4) {
+    if (!(std::cin >> level.start.position.x >> level.start.position.y >> 
+          level.start.width >> level.start.height)) {
         return 1;
     }
     
-    if (scanf("%lf %lf %lf %lf", &level.end.position.x, &level.end.position.y,
-              &level.end.width, &level.end.height) != 4) {
+    if (!(std::cin >> level.end.position.x >> level.end.position.y >>
+          level.end.width >> level.end.height)) {
         return 1;
     }
 
