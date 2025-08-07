@@ -1,15 +1,12 @@
 extern "C" {
 #include <stdlib.h>
-#include <math.h>
 #include "xml.h"
-#include "graph.h"
 #include "arena.h"
 }
 
 #include "box2d/b2Body.h"
 
 #include <iostream>
-#include <vector>
 #include <cstring>
 
 // Map ftlib piece types to fcsim types
