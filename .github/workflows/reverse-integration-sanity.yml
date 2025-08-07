@@ -1,4 +1,4 @@
-name: fcsim-ftlib Reverse Integration Test
+name: fcsim-ftlib Preview Integration Test
 
 on:
   pull_request:
@@ -26,22 +26,30 @@ jobs:
         with:
           python-version: '3.9' # Using Python 3.9, adjust if ftlib requires a different version
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y scons clang libx11-dev libgl-dev lld valgrind
+
       - name: Install ftlib dependencies
         run: |
           # Install pytest and any other dependencies ftlib might need
           # If ftlib has a requirements.txt, uncomment the line below:
           # pip install -r ftlib_repo/requirements.txt
-          pip install pytest bc # 'bc' is needed for floating-point arithmetic in shell scripts
+          pip install bc pytest pytest-json-report pytest-xdist # 'bc' is needed for floating-point arithmetic in shell scripts
         working-directory: ./ftlib_repo # Run pip install from ftlib's directory
 
       - name: Delete fcsim submodule and symlink local fcsim
         run: |
           echo "Removing existing fcsim submodule in ftlib..."
-          rm -rf fcsim_repo/fcsim # Ensure no local fcsim submodule exists in the fcsim_repo itself
-          rm -rf ftlib_repo/fcsim # Remove the fcsim submodule from ftlib_repo
+          # Remove the fcsim submodule from ftlib_repo.
+          # Since working-directory is ftlib_repo, 'fcsim' refers to ftlib_repo/fcsim.
+          rm -rf fcsim
           echo "Creating symlink from fcsim_repo to ftlib_repo/fcsim..."
-          # Create a symbolic link from the cloned fcsim_repo to where the submodule would be in ftlib
-          ln -s "$(pwd)/../fcsim_repo" ftlib_repo/fcsim
+          # Create a symbolic link.
+          # Source: ../fcsim_repo (resolves to /home/runner/work/fcsim/fcsim/fcsim_repo from ftlib_repo)
+          # Target: fcsim (resolves to /home/runner/work/fcsim/fcsim/ftlib_repo/fcsim)
+          ln -s ../fcsim_repo fcsim
           echo "Symlink created."
         working-directory: ./ftlib_repo # Perform these actions relative to ftlib_repo
 
