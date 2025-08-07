@@ -13,11 +13,13 @@ extern "C" {
 #include <iostream>
 #include <vector>
 
-extern "C" {
-int fp_strtod(const char *str, int len, double *res);
-}
-
-arena* arena_ptr;
+struct simple_sim_state {
+    struct design design;
+    b2World* world;
+    uint64_t tick;
+    bool has_won;
+    uint64_t tick_solve;
+};
 
 // Map ftlib piece types to fcsim types
 static int map_piece_type(int ftlib_type) {
@@ -46,7 +48,8 @@ static int map_piece_type(int ftlib_type) {
         default: return 2; // Default to dynamic rect
     }
 }
-static bool init_sim_from_input(int max_ticks) {
+
+static bool init_sim_from_input(struct simple_sim_state* sim, int max_ticks) {
     // Read ftlib format from stdin
     int num_blocks;
     if (scanf("%d", &num_blocks) != 1) {
@@ -64,10 +67,11 @@ static bool init_sim_from_input(int max_ticks) {
         int type_id, id;
         double x, y, w, h, angle;
         int joint1, joint2;
-
-        std::cin >> type_id >> id;
-        std::cin >> x >> y >> w >> h >> angle;
-        std::cin >> joint1 >> joint2;
+        
+        if (scanf("%d %d %lf %lf %lf %lf %lf %d %d", 
+                  &type_id, &id, &x, &y, &w, &h, &angle, &joint1, &joint2) != 9) {
+            return false;
+        }
         
         struct xml_block* block = (struct xml_block*)calloc(1, sizeof(struct xml_block));
         if (!block) {
@@ -75,7 +79,7 @@ static bool init_sim_from_input(int max_ticks) {
         }
         
         block->type = map_piece_type(type_id);
-        block->id = id;
+        block->id = id;  // Use ftlib id for joint references
         block->position.x = x;
         block->position.y = y;
         
@@ -141,21 +145,42 @@ static bool init_sim_from_input(int max_ticks) {
     }
     
     // Convert to internal representation using existing code
-    convert_xml(&level, &arena_ptr->design);
+    convert_xml(&level, &sim->design);
     
     xml_free(&level);
     
     // Generate physics world
-    arena_ptr->world = gen_world(&arena_ptr->design);
-    if (!arena_ptr->world) {
+    sim->world = gen_world(&sim->design);
+    if (!sim->world) {
         return false;
     }
     
-    arena_ptr->tick = 0;
-    arena_ptr->has_won = false;
-    arena_ptr->tick_solve = 0;
+    sim->tick = 0;
+    sim->has_won = false;
+    sim->tick_solve = 0;
     
     return true;
+}
+
+static void step_sim(struct simple_sim_state* sim) {
+    step(sim->world);
+    sim->tick++;
+    
+    // Check for win condition
+    if (!sim->has_won) {
+        bool goal_achieved = goal_blocks_inside_goal_area(&sim->design);
+        if (goal_achieved) {
+            sim->has_won = true;
+            sim->tick_solve = sim->tick;
+        }
+    }
+}
+
+static void cleanup_sim(struct simple_sim_state* sim) {
+    if (sim->world) {
+        // Box2D world cleanup is handled internally
+        sim->world = NULL;
+    }
 }
 
 int main() {
@@ -166,21 +191,22 @@ int main() {
     }
     
     // Initialize simulation from ftlib format input
-    arena_ptr = new arena();
-    if (!init_sim_from_input(max_ticks)) {
+    struct simple_sim_state sim;
+    if (!init_sim_from_input(&sim, max_ticks)) {
         return 1;
     }
     
-    // Run to solve or end
-    arena_ptr->state = STATE_RUNNING;
-    change_speed_preset(arena_ptr, 2);
-    while((int64_t)arena_ptr->tick != max_ticks && !arena_ptr->has_won) {
-        arena_ptr->single_ticks_remaining = 1;
-        tick_func(arena_ptr);
+    // Run simulation
+    while (sim.tick < (uint64_t)max_ticks && !sim.has_won) {
+        step_sim(&sim);
     }
-
-    // Report
-    std::cout << (arena_ptr->has_won ? arena_ptr->tick_solve : -1) << std::endl << arena_ptr->tick << std::endl;
+    
+    // Output results in the same format as ftlib's run_single_design
+    // solve_tick (or -1 if not solved), end_tick
+    printf("%lld\n%lld\n", sim.has_won ? (long long)sim.tick_solve : -1LL, (long long)sim.tick);
+    
+    // Cleanup
+    cleanup_sim(&sim);
     
     return 0;
 }
