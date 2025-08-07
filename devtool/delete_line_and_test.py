@@ -22,259 +22,331 @@ import sys
 import time
 from pathlib import Path
 import logging
+from dataclasses import dataclass
+from typing import List, Optional, Union # Corrected imports for Python 3.8 compatibility
+import random # Added for randomizing line order
 
 # Configure logging to show information about the process.
 # This helps in tracking progress, successful/failed deletions, and any issues.
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def run_command(command: list[str], cwd: Path | None = None) -> tuple[int, str]:
+# Define the interval for re-checking the original baseline
+RECHECK_INTERVAL = 10
+
+# Define unique exit codes for specific error conditions
+EXIT_CODE_SUCCESS = 0
+EXIT_CODE_INVALID_ARGS = 1
+EXIT_CODE_FILE_NOT_FOUND = 2
+EXIT_CODE_CWD_NOT_FOUND = 3
+EXIT_CODE_COMMAND_NOT_FOUND = 4
+EXIT_CODE_UNEXPECTED_COMMAND_ERROR = 5
+EXIT_CODE_BASELINE_ISSUE = 6
+
+
+@dataclass
+class TestRunResult:
     """
-    Runs a shell command and returns the number of failed tests and the full output.
-    This function assumes the test command will produce output that can be parsed
-    to determine the number of test failures, specifically looking for pytest-like summaries.
+    Represents the outcome of a test command execution.
 
-    Args:
-        command: A list of strings representing the command and its arguments.
-        cwd: The current working directory to execute the command in. If None,
-             the current working directory of the script will be used.
-
-    Returns:
-        A tuple containing:
-        - The number of failed tests (an integer). This will be sys.maxsize if
-          pytest fails to run or collects no tests, indicating a regression.
-        - The combined standard output and standard error of the command (a string).
+    Attributes:
+        failures: The number of failed tests.
+        output: The full stdout and stderr from the command.
+        is_successful: True if the test command ran without issues (e.g., pytest
+                       collected and ran tests), False otherwise (e.g., pytest error,
+                       no tests collected).
+        error_message: An optional message detailing why the test run was not successful.
     """
-    try:
-        logging.info(f"Running command: {' '.join(command)} in directory: {cwd if cwd else 'current'}")
-        result = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            check=False, # Do not raise an exception for non-zero exit codes
-            cwd=cwd
-        )
-        output = result.stdout + result.stderr
-        
-        failures = 0
-        
-        # 1. Check for specific test failures count reported by pytest
-        # This regex looks for phrases like "X failed" in the pytest summary line.
-        match_failures = re.search(r"===.*?(\d+)\s+failed.*?(?:,|$)", output)
-        if match_failures:
-            failures = int(match_failures.group(1))
+    failures: int
+    output: str
+    is_successful: bool
+    error_message: Optional[str] = None # Use Optional for Python 3.8
 
-        # 2. Check for no tests collected or no tests ran (pytest specific messages)
-        no_tests_collected_match = re.search(r"collected 0 items", output)
-        no_tests_ran_match = re.search(r"no tests ran", output)
-        
-        # 3. Determine if it's a regression due to non-test-failure reasons
-        # If the command exited with a non-zero status code AND our regex for 'failed' tests
-        # didn't find any (meaning it's an error like a syntax issue or collection error),
-        # OR if pytest explicitly reported no tests were collected/ran, then it's a regression.
-        if (result.returncode != 0 and failures == 0) or no_tests_collected_match or no_tests_ran_match:
-            if no_tests_collected_match or no_tests_ran_match:
-                logging.warning("No tests were collected or ran. This is considered a regression.")
-            else:
-                logging.warning(f"Command exited with non-zero status ({result.returncode}) but no 'failed' tests reported. This is considered a regression (e.g., pytest error, syntax error).")
+class MutationTester:
+    """
+    A class to perform crude mutation testing by iteratively deleting lines
+    from a target file and running a test command.
+    """
+    def __init__(self, file_path: Path, test_cwd: Path, test_command: List[str]):
+        """
+        Initializes the MutationTester with file paths and test command.
+
+        Args:
+            file_path: The path to the source code file to be mutated.
+            test_cwd: The current working directory where the test command will be executed.
+            test_command: The exact command for the test suite.
+        """
+        self.file_path = file_path
+        self.test_cwd = test_cwd
+        self.test_command = test_command
+
+        self.original_content: List[str] = []
+        self.last_known_good_content: List[str] = []
+        self.initial_baseline_failures: int = 0
+        self.current_target_failures: int = 0
+
+        self.total_successful_deletions: int = 0
+        self.pass_count: int = 0
+        self.edit_counter: int = 0 # Counter for successful deletions since last baseline re-check
+
+        self.script_start_time: float = 0.0
+        self.total_command_runs: int = 0
+        self.total_command_execution_time: float = 0.0
+        self.exit_reason: str = "Completed all possible safe deletions."
+
+    def _run_test_command(self, command: List[str], cwd: Optional[Path] = None) -> TestRunResult:
+        """
+        Runs a shell command and returns a TestRunResult object.
+        Updates global counters for time statistics.
+        """
+        command_start_time = time.time()
+        try:
+            logging.info(f"Running command: {' '.join(command)} in directory: {cwd if cwd else 'current'}")
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                check=False,
+                cwd=cwd
+            )
+            output = result.stdout + result.stderr
             
-            # Set failures to a very large number to ensure it's always considered a regression
-            # when compared to any valid baseline_failures count.
-            failures = sys.maxsize 
+            failures = 0
+            is_successful = True
+            error_message = None
+
+            match_failures = re.search(r"===.*?(\d+)\s+failed.*?(?:,|$)", output)
+            if match_failures:
+                failures = int(match_failures.group(1))
+
+            no_tests_collected_match = re.search(r"collected 0 items", output)
+            no_tests_ran_match = re.search(r"no tests ran", output)
+            
+            if (result.returncode != 0 and failures == 0) or no_tests_collected_match or no_tests_ran_match:
+                is_successful = False
+                if no_tests_collected_match or no_tests_ran_match:
+                    error_message = "No tests were collected or ran."
+                    logging.warning(f"{error_message} This is considered a regression.")
+                else:
+                    error_message = f"Command exited with non-zero status ({result.returncode}) but no 'failed' tests reported (e.g., pytest error, syntax error)."
+                    logging.warning(f"{error_message} This is considered a regression.")
+                
+            command_end_time = time.time()
+            command_duration = command_end_time - command_start_time
+            self.total_command_runs += 1
+            self.total_command_execution_time += command_duration
+
+            logging.debug(f"Command output:\n{output}")
+            logging.info(f"Command finished. Failures detected: {failures}, Successful Run: {is_successful}, Duration: {command_duration:.2f}s")
+            return TestRunResult(failures=failures, output=output, is_successful=is_successful, error_message=error_message)
+        except FileNotFoundError:
+            error_msg = f"Error: Command '{command[0]}' not found. Make sure it's in your PATH."
+            logging.error(error_msg)
+            sys.exit(EXIT_CODE_COMMAND_NOT_FOUND)
+        except Exception as e:
+            error_msg = f"An unexpected error occurred while running command: {e}"
+            logging.error(error_msg)
+            sys.exit(EXIT_CODE_UNEXPECTED_COMMAND_ERROR)
+
+    def _get_baseline_failures(self) -> int:
+        """
+        Runs the test command once to establish a baseline for the number of failures.
+        """
+        logging.info("Establishing baseline test failures...")
+        baseline_result = self._run_test_command(self.test_command, self.test_cwd)
         
-        logging.debug(f"Command output:\n{output}")
-        logging.info(f"Command finished. Failures detected: {failures}")
-        return failures, output
-    except FileNotFoundError:
-        logging.error(f"Error: Command '{command[0]}' not found. Make sure it's in your PATH.")
-        sys.exit(1)
-    except Exception as e:
-        logging.error(f"An unexpected error occurred while running command: {e}")
-        sys.exit(1)
+        if not baseline_result.is_successful:
+            logging.error(f"Baseline test run indicates an issue: {baseline_result.error_message}. Please fix your test setup before running the mutation tester.")
+            sys.exit(EXIT_CODE_BASELINE_ISSUE)
 
-def get_baseline_failures(test_command: list[str], cwd: Path | None) -> int:
-    """
-    Runs the test command once to establish a baseline for the number of failures.
-    This baseline is used to detect regressions after line deletions.
+        logging.info(f"Baseline failures: {baseline_result.failures}")
+        return baseline_result.failures
 
-    Args:
-        test_command: A list of strings representing the test command.
-        cwd: The current working directory for the test command.
+    def _restore_file(self, content: List[str], reason: str = ""):
+        """Restores the target file content."""
+        if reason:
+            logging.info(f"Restoring file to last known good state due to {reason}...")
+        self.file_path.write_text("".join(content))
+        logging.info("File restored to last known good state.")
 
-    Returns:
-        The number of failures from the initial test run.
-    """
-    logging.info("Establishing baseline test failures...")
-    failures, _ = run_command(test_command, cwd)
-    
-    # If the baseline run itself indicates a regression (e.g., no tests run initially),
-    # then the script cannot proceed meaningfully.
-    if failures == sys.maxsize:
-        logging.error("Baseline test run indicates a regression (e.g., pytest failed or no tests ran). Please fix your test setup before running the mutation tester.")
-        sys.exit(1)
+    def _generate_report(self):
+        """Generates the final report."""
+        script_end_time = time.time()
+        total_script_duration = script_end_time - self.script_start_time
+        avg_time_per_run_final = self.total_command_execution_time / self.total_command_runs if self.total_command_runs > 0 else 0
 
-    logging.info(f"Baseline failures: {failures}")
-    return failures
+        logging.info("\n--- Final Report ---")
+        logging.info(f"Total passes completed: {self.pass_count}")
+        logging.info(f"Total lines successfully deleted: {self.total_successful_deletions}")
+        logging.info(f"Total script duration: {total_script_duration:.2f} seconds")
+        logging.info(f"Total test runs performed: {self.total_command_runs}")
+        logging.info(f"Average time per test run: {avg_time_per_run_final:.2f} seconds")
+        logging.info(f"Exit Reason: {self.exit_reason}")
+        logging.info(f"File '{self.file_path}' has been left with all successful deletions up to the last known good state or an improved state.")
 
-def main():
-    """
-    Main function to orchestrate the line deletion and testing process.
-    It takes a file path, a CWD for the test command, and the test command
-    as arguments, then iteratively deletes lines, runs tests, and reverts
-    if regressions are found.
-    """
-    # Check for correct command-line arguments.
-    # Expects: script.py <file_path> <cwd_for_test_command> <test_command> [args...]
+    def run_mutation_process(self):
+        """
+        Orchestrates the line deletion and testing process.
+        """
+        self.script_start_time = time.time()
+
+        # Read and store the original content of the file.
+        self.original_content = self.file_path.read_text().splitlines(keepends=True)
+        self.last_known_good_content = List[str](self.original_content)
+
+        self.initial_baseline_failures = self._get_baseline_failures()
+        self.current_target_failures = self.initial_baseline_failures 
+
+        try:
+            while True:
+                self.pass_count += 1
+                logging.info(f"\n--- Starting Pass {self.pass_count} ---")
+                pass_start_time = time.time()
+                
+                current_lines_at_pass_start = self.file_path.read_text().splitlines(keepends=True)
+                if not current_lines_at_pass_start:
+                    logging.info("File is empty. No more lines to process.")
+                    break
+
+                successful_deletions_this_pass = 0
+                
+                # Create a mutable list representing the file's state within this pass.
+                # This list will be updated as lines are successfully deleted.
+                current_file_state_for_pass = List[str](current_lines_at_pass_start)
+
+                # Create a list of lines to attempt deleting, in random order.
+                # This ensures each line is considered once per pass, but the order is random.
+                lines_to_attempt_deletion_in_random_order = List[str](current_lines_at_pass_start)
+                random.shuffle(lines_to_attempt_deletion_in_random_order)
+                
+                total_lines_in_pass = len(lines_to_attempt_deletion_in_random_order)
+                lines_processed_in_pass_counter = 0 # Counter for progress within the current pass
+
+                # Iterate through the lines in the randomized order
+                for line_to_attempt_delete in lines_to_attempt_deletion_in_random_order:
+                    lines_processed_in_pass_counter += 1 # Increment for each line attempted
+                    
+                    # Find the current index of this line in the mutable file state.
+                    # It might not be found if it was already successfully deleted by a prior random attempt in this pass.
+                    try:
+                        index_in_current_state = current_file_state_for_pass.index(line_to_attempt_delete)
+                    except ValueError:
+                        # This line was already deleted in a previous successful attempt in this pass. Skip.
+                        logging.info(f"Skipping already deleted line ({lines_processed_in_pass_counter}/{total_lines_in_pass})")
+                        continue
+
+                    # Create a new list of lines with the current line removed.
+                    test_deletion_lines = current_file_state_for_pass[:index_in_current_state] + \
+                                          current_file_state_for_pass[index_in_current_state+1:]
+                    
+                    self.file_path.write_text("".join(test_deletion_lines))
+                    
+                    logging.info(f"Attempting to delete line ({lines_processed_in_pass_counter}/{total_lines_in_pass}) (originally: '{line_to_attempt_delete.strip()[:50]}...')")
+                    
+                    current_test_run_result = self._run_test_command(self.test_command, self.test_cwd)
+                    
+                    is_acceptable_change = current_test_run_result.is_successful and \
+                                           current_test_run_result.failures <= self.current_target_failures
+
+                    if current_test_run_result.is_successful and current_test_run_result.failures < self.current_target_failures:
+                        logging.info(f"IMPROVEMENT DETECTED! Failures decreased from {self.current_target_failures} to {current_test_run_result.failures}.")
+                        logging.info("Keeping this improved version and exiting the loop.")
+                        self.total_successful_deletions += 1
+                        self.last_known_good_content = List[str](test_deletion_lines)
+                        self.file_path.write_text("".join(self.last_known_good_content))
+                        self.exit_reason = "Improvement detected (failure rate decreased)."
+                        return
+                    
+                    elif is_acceptable_change:
+                        logging.info(f"SUCCESS: Line deleted. Failures: {current_test_run_result.failures} (baseline: {self.current_target_failures})")
+                        successful_deletions_this_pass += 1
+                        self.total_successful_deletions += 1
+                        self.edit_counter += 1
+                        
+                        # Update the mutable state for this pass.
+                        current_file_state_for_pass = test_deletion_lines
+                        # Update the last known good content (persists across passes)
+                        self.last_known_good_content = List[str](current_file_state_for_pass)
+                    else:
+                        regression_details = current_test_run_result.error_message if not current_test_run_result.is_successful else \
+                                             f"{current_test_run_result.failures} failures (baseline: {self.current_target_failures})"
+                        logging.warning(f"REGRESSION: Line caused an issue: {regression_details}. Reverting.")
+                        # Revert the file to the state *before* this specific failed deletion attempt.
+                        self.file_path.write_text("".join(current_file_state_for_pass)) 
+                        # No change to `current_file_state_for_pass` as this attempt failed.
+                    
+                    # --- Periodic Baseline Re-check ---
+                    if self.edit_counter > 0 and self.edit_counter % RECHECK_INTERVAL == 0:
+                        logging.info(f"--- Performing periodic baseline re-check (every {RECHECK_INTERVAL} successful edits) ---")
+                        
+                        state_before_recheck = List[str](self.file_path.read_text().splitlines(keepends=True))
+                        self.file_path.write_text("".join(self.original_content))
+                        
+                        recheck_result = self._run_test_command(self.test_command, self.test_cwd)
+                        
+                        if recheck_result.is_successful and recheck_result.failures <= self.initial_baseline_failures:
+                            logging.info(f"Periodic re-check PASSED! Original baseline ({self.initial_baseline_failures}) still met. Current failures: {recheck_result.failures}.")
+                            self.file_path.write_text("".join(state_before_recheck))
+                            self.edit_counter = 0 
+                        else:
+                            logging.error(f"Periodic re-check FAILED! Original baseline ({self.initial_baseline_failures}) not met. Current failures: {recheck_result.failures}. Issue: {recheck_result.error_message}")
+                            logging.error("This indicates a severe regression or issue with the test environment that even the original file cannot pass.")
+                            self._restore_file(self.last_known_good_content, "periodic re-check failure")
+                            self.edit_counter = 0
+                            # sys.exit(EXIT_CODE_BASELINE_RECHECK_FAILED) # Uncomment to force exit on critical baseline re-check failure
+                    
+                    time.sleep(0.1)
+
+                pass_end_time = time.time()
+                pass_duration = pass_end_time - pass_start_time
+                
+                elapsed_time = time.time() - self.script_start_time
+                avg_time_per_run = self.total_command_execution_time / self.total_command_runs if self.total_command_runs > 0 else 0
+
+                logging.info(f"--- Pass {self.pass_count} Summary: {successful_deletions_this_pass} lines successfully deleted. Duration: {pass_duration:.2f} seconds ---")
+                logging.info(f"--- Overall Stats: Elapsed Time: {elapsed_time:.2f}s | Total Runs: {self.total_command_runs} | Avg Time/Run: {avg_time_per_run:.2f}s ---")
+
+                if successful_deletions_this_pass == 0:
+                    logging.info("No lines could be safely deleted in this pass. Breaking the loop.")
+                    break
+
+        except KeyboardInterrupt:
+            logging.info("\nScript interrupted by user.")
+            self.exit_reason = "Script interrupted by user."
+            self._restore_file(self.last_known_good_content, "interruption")
+            sys.exit(EXIT_CODE_SUCCESS)
+        except Exception as e:
+            logging.error(f"An unhandled error occurred: {e}")
+            self.exit_reason = f"An unhandled error occurred: {e}"
+            self._restore_file(self.last_known_good_content, "an unhandled error")
+            sys.exit(EXIT_CODE_UNEXPECTED_COMMAND_ERROR)
+        finally:
+            self._generate_report()
+            # If the script reaches here without an explicit sys.exit() from an error, it means it completed successfully.
+            # sys.exit(EXIT_CODE_SUCCESS) # This is implicitly handled if no other sys.exit() is called.
+
+if __name__ == "__main__":
+    # Command-line argument parsing and initial validation
     if len(sys.argv) < 4:
-        # Display help message if not enough arguments are provided.
         print("Usage: python script.py <file_path> <cwd_for_test_command> <test_command> [args...]")
         print("\nArguments:")
         print("  <file_path>           The path to the source code file to be mutated.")
         print("  <cwd_for_test_command> The current working directory where the test command will be executed.")
         print("                        Use '.' for the current directory.")
         print("  <test_command> [args...] The exact command for your test suite (e.g., 'pytest test_my_module.py' or just 'pytest').")
-        sys.exit(1)
+        sys.exit(EXIT_CODE_INVALID_ARGS)
 
-    # Parse command-line arguments.
-    file_path = Path(sys.argv[1])
-    test_cwd = Path(sys.argv[2])
-    test_command = sys.argv[3:]
+    file_path_arg = Path(sys.argv[1])
+    test_cwd_arg = Path(sys.argv[2])
+    test_command_arg = sys.argv[3:]
 
-    # Validate that the target file exists.
-    if not file_path.is_file():
-        logging.error(f"Error: File not found at '{file_path}'")
-        sys.exit(1)
+    if not file_path_arg.is_file():
+        logging.error(f"Error: File not found at '{file_path_arg}'")
+        sys.exit(EXIT_CODE_FILE_NOT_FOUND)
     
-    # Validate that the test CWD exists and is a directory.
-    if not test_cwd.is_dir():
-        logging.error(f"Error: Current working directory for tests not found or is not a directory at '{test_cwd}'")
-        sys.exit(1)
+    if not test_cwd_arg.is_dir():
+        logging.error(f"Error: Current working directory for tests not found or is not a directory at '{test_cwd_arg}'")
+        sys.exit(EXIT_CODE_CWD_NOT_FOUND)
 
-
-    logging.info(f"Target file: {file_path}")
-    logging.info(f"Test command CWD: {test_cwd}")
-    logging.info(f"Test command: {' '.join(test_command)}")
-
-    # Record the start time of the entire script execution.
-    script_start_time = time.time()
-
-    # Read and store the original content of the file.
-    # This is used as the initial "last known good content" and for full restoration if baseline fails.
-    original_content = file_path.read_text().splitlines(keepends=True)
-    
-    # Initialize last_known_good_content with the original content.
-    # This will be updated whenever a line deletion is successfully kept.
-    last_known_good_content = list(original_content)
-
-    # Get the initial number of test failures to use as a comparison baseline.
-    baseline_failures = get_baseline_failures(test_command, test_cwd)
-
-    total_successful_deletions = 0
-    pass_count = 0
-    exit_reason = "Completed all possible safe deletions." # Default exit reason
-
-    try:
-        # Main loop: continues until no lines can be safely deleted in a full pass.
-        while True:
-            pass_count += 1
-            logging.info(f"\n--- Starting Pass {pass_count} ---")
-            pass_start_time = time.time() # Start time for the current pass
-            
-            # Read the current state of the file at the beginning of each pass.
-            current_lines = file_path.read_text().splitlines(keepends=True)
-            if not current_lines:
-                logging.info("File is empty. No more lines to process.")
-                break
-
-            successful_deletions_this_pass = 0
-            lines_processed_in_pass = 0
-            
-            # Create a temporary mutable copy of the lines for the current pass.
-            temp_lines_for_pass = list(current_lines) 
-            
-            # Iterate through the lines in the `temp_lines_for_pass`.
-            i = 0
-            while i < len(temp_lines_for_pass):
-                line_to_attempt_delete = temp_lines_for_pass[i]
-                
-                # Create a new list of lines with the current line removed.
-                test_deletion_lines = temp_lines_for_pass[:i] + temp_lines_for_pass[i+1:]
-                
-                # Write this modified content (with one line removed) back to the actual file.
-                file_path.write_text("".join(test_deletion_lines))
-                
-                logging.info(f"Attempting to delete line {i+1} (originally: '{line_to_attempt_delete.strip()[:50]}...')")
-                lines_processed_in_pass += 1
-                
-                # Run the tests on the modified file, passing the specified CWD.
-                current_failures, _ = run_command(test_command, test_cwd)
-                
-                # Check for improvement: if current failures are strictly less than baseline.
-                if current_failures < baseline_failures:
-                    logging.info(f"IMPROVEMENT DETECTED! Failures decreased from {baseline_failures} to {current_failures}.")
-                    logging.info("Keeping this improved version and exiting the loop.")
-                    total_successful_deletions += 1 # Count this as a successful "deletion" leading to improvement
-                    last_known_good_content = list(test_deletion_lines) # Update to the improved state
-                    file_path.write_text("".join(last_known_good_content)) # Ensure file is written
-                    exit_reason = "Improvement detected (failure rate decreased)."
-                    return # Exit main function immediately
-                
-                # Check for regression: if current failures are less than or equal to baseline, it's safe.
-                # If current_failures is sys.maxsize, this condition will be false, triggering a revert.
-                elif current_failures <= baseline_failures:
-                    logging.info(f"SUCCESS: Line {i+1} deleted. Failures: {current_failures} (baseline: {baseline_failures})")
-                    successful_deletions_this_pass += 1
-                    total_successful_deletions += 1
-                    
-                    # If deletion is successful, update `temp_lines_for_pass` to reflect this permanent change.
-                    # The list shrinks, so the next line to check is now at the current index `i`.
-                    temp_lines_for_pass = test_deletion_lines
-                    # Update the last known good content to this new state
-                    last_known_good_content = list(temp_lines_for_pass)
-                else:
-                    # If regression detected (failures increased, or pytest failed/no tests ran), revert the deletion.
-                    logging.warning(f"REGRESSION: Line {i+1} caused {current_failures} failures (baseline: {baseline_failures}). Reverting.")
-                    # Write the content *before* this specific deletion attempt back to the file.
-                    file_path.write_text("".join(temp_lines_for_pass)) 
-                    # Increment `i` to move to the next line, as this one was not deleted.
-                    i += 1
-                    
-                time.sleep(0.1) # Small delay to prevent excessive CPU usage or file I/O contention.
-
-            pass_end_time = time.time()
-            pass_duration = pass_end_time - pass_start_time
-            logging.info(f"--- Pass {pass_count} Summary: {successful_deletions_this_pass} lines successfully deleted. Duration: {pass_duration:.2f} seconds ---")
-
-            # If no lines were successfully deleted in an entire pass, it means we can't delete any more safely.
-            if successful_deletions_this_pass == 0:
-                logging.info("No lines could be safely deleted in this pass. Breaking the loop.")
-                break
-
-    except KeyboardInterrupt:
-        logging.info("\nScript interrupted by user.")
-        exit_reason = "Script interrupted by user."
-        # If interrupted, restore to the last known good state.
-        logging.info("Restoring file to last known good state due to interruption...")
-        file_path.write_text("".join(last_known_good_content))
-        logging.info("File restored to last known good state.")
-    except Exception as e:
-        logging.error(f"An unhandled error occurred: {e}")
-        exit_reason = f"An unhandled error occurred: {e}"
-        # In case of an unexpected error, also restore to the last known good state.
-        logging.info("Restoring file to last known good state due to an error...")
-        file_path.write_text("".join(last_known_good_content))
-        logging.info("File restored to last known good state.")
-    finally:
-        script_end_time = time.time()
-        total_script_duration = script_end_time - script_start_time
-
-        logging.info("\n--- Final Report ---")
-        logging.info(f"Total passes completed: {pass_count}")
-        logging.info(f"Total lines successfully deleted: {total_successful_deletions}")
-        logging.info(f"Total script duration: {total_script_duration:.2f} seconds")
-        logging.info(f"Exit Reason: {exit_reason}")
-        # The file is left in its modified state if the script runs to completion without interruption.
-        # If interrupted or an error occurred, it's restored to the last known good state.
-        logging.info(f"File '{file_path}' has been left with all successful deletions up to the last known good state or an improved state.")
-
-if __name__ == "__main__":
-    main()
+    # Create an instance of the MutationTester and run the process
+    tester = MutationTester(file_path_arg, test_cwd_arg, test_command_arg)
+    tester.run_mutation_process()
