@@ -1,6 +1,5 @@
 extern "C" {
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
 #include "xml.h"
 #include "graph.h"
