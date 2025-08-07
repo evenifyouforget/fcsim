@@ -13,14 +13,6 @@ extern "C" {
 #include <iostream>
 #include <vector>
 
-struct simple_sim_state {
-    struct design design;
-    b2World* world;
-    uint64_t tick;
-    bool has_won;
-    uint64_t tick_solve;
-};
-
 // Map ftlib piece types to fcsim types
 static int map_piece_type(int ftlib_type) {
     // ftlib type mapping from fcsim.h in ftlib
@@ -49,243 +41,10 @@ static int map_piece_type(int ftlib_type) {
     }
 }
 
-static bool init_sim_from_input(struct simple_sim_state* sim, int max_ticks) {
-    // Read ftlib format from stdin
-    int num_blocks;
-    if (scanf("%d", &num_blocks) != 1) {
-        return false;
-    }
-    
-    // Create XML structures to reuse existing conversion code
-    struct xml_level level = {0};
-    
-    // Read blocks and create linked list
-    struct xml_block* prev_level_block = NULL;
-    struct xml_block* prev_player_block = NULL;
-    
-    for (int i = 0; i < num_blocks; i++) {
-        int type_id, id;
-        double x, y, w, h, angle;
-        int joint1, joint2;
-        
-        if (scanf("%d %d %lf %lf %lf %lf %lf %d %d", 
-                  &type_id, &id, &x, &y, &w, &h, &angle, &joint1, &joint2) != 9) {
-            return false;
-        }
-        
-        struct xml_block* block = (struct xml_block*)calloc(1, sizeof(struct xml_block));
-        if (!block) {
-            return false;
-        }
-        
-        block->type = map_piece_type(type_id);
-        block->id = id;  // Use ftlib id for joint references (CRITICAL FIX)
-        block->position.x = x;
-        block->position.y = y;
-        
-        // Convert circle sizes from ftlib diameter to XML radius
-        // Only apply to static/dynamic circles (1, 3), NOT to wheels (5, 7, 8) 
-        if (type_id == 1 || type_id == 3) { // Only static/dynamic circles
-            block->width = w / 2.0;   // ftlib diameter -> XML radius
-            block->height = h / 2.0;
-        } else {
-            block->width = w;         // Wheels and rods use same size in both formats
-            block->height = h;
-        }
-        
-        block->rotation = angle;
-        block->goal_block = (type_id == 4 || type_id == 5); // GP pieces are goal blocks
-        block->joints = NULL;
-        block->next = NULL;
-        
-        // Debug output
-        if (type_id == 4 || type_id == 5) {
-            fprintf(stderr, "DEBUG: Created goal piece - ftlib_type=%d, xml_type=%d, goal_block=%d\n", 
-                    type_id, block->type, block->goal_block);
-        }
-        
-        // Add joints if they exist
-        if (joint1 != -1 || joint2 != -1) {
-            if (joint1 != -1) {
-                struct xml_joint* joint = (struct xml_joint*)calloc(1, sizeof(struct xml_joint));
-                joint->id = joint1;
-                joint->next = block->joints;
-                block->joints = joint;
-            }
-            if (joint2 != -1) {
-                struct xml_joint* joint = (struct xml_joint*)calloc(1, sizeof(struct xml_joint));
-                joint->id = joint2;
-                joint->next = block->joints;
-                block->joints = joint;
-            }
-        }
-        
-        // Add to appropriate list (level blocks for static/dynamic, player blocks for GP/wheels/rods)
-        if (type_id <= 3) { // Static and dynamic pieces -> level blocks
-            if (!level.level_blocks) {
-                level.level_blocks = block;
-            } else {
-                prev_level_block->next = block;
-            }
-            prev_level_block = block;
-        } else { // GP pieces, wheels, rods -> player blocks
-            if (!level.player_blocks) {
-                level.player_blocks = block;
-            } else {
-                prev_player_block->next = block;
-            }
-            prev_player_block = block;
-        }
-    }
-    
-    // Read build area
-    if (scanf("%lf %lf %lf %lf", &level.start.position.x, &level.start.position.y, 
-              &level.start.width, &level.start.height) != 4) {
-        return false;
-    }
-    
-    // Read goal area  
-    if (scanf("%lf %lf %lf %lf", &level.end.position.x, &level.end.position.y,
-              &level.end.width, &level.end.height) != 4) {
-        return false;
-    }
-    
-    // Convert to internal representation using existing code
-    convert_xml(&level, &sim->design);
-    
-    // Debug: Check what blocks we have after conversion
-    struct block* block;
-    int level_count = 0, player_count = 0;
-    for (block = sim->design.level_blocks.head; block; block = block->next) {
-        level_count++;
-        double x = 0, y = 0, w = 0, h = 0;
-        switch (block->shape.type) {
-            case SHAPE_RECT:
-                x = block->shape.rect.x; y = block->shape.rect.y;
-                w = block->shape.rect.w; h = block->shape.rect.h;
-                break;
-            case SHAPE_CIRC:
-                x = block->shape.circ.x; y = block->shape.circ.y;
-                w = h = block->shape.circ.radius * 2;
-                break;
-            default: break;
-        }
-        fprintf(stderr, "DEBUG: Level block %d - fcsim_type_id=%d, pos=(%.1f,%.1f), size=(%.1fx%.1f)\n", 
-                level_count, block->type_id, x, y, w, h);
-    }
-    for (block = sim->design.player_blocks.head; block; block = block->next) {
-        player_count++;
-        double x = 0, y = 0, w = 0, h = 0;
-        switch (block->shape.type) {
-            case SHAPE_BOX:
-                x = block->shape.box.x; y = block->shape.box.y;
-                w = block->shape.box.w; h = block->shape.box.h;
-                break;
-            case SHAPE_WHEEL:
-                x = block->shape.wheel.center->x; y = block->shape.wheel.center->y;
-                w = h = block->shape.wheel.radius * 2;
-                break;
-            case SHAPE_ROD:
-                x = (block->shape.rod.from->x + block->shape.rod.to->x) / 2;
-                y = (block->shape.rod.from->y + block->shape.rod.to->y) / 2;
-                w = sqrt(pow(block->shape.rod.to->x - block->shape.rod.from->x, 2) + 
-                        pow(block->shape.rod.to->y - block->shape.rod.from->y, 2));
-                h = block->shape.rod.width;
-                break;
-            default: break;
-        }
-        if (block->goal) {
-            fprintf(stderr, "DEBUG: Player block %d - GOAL BLOCK with fcsim_type_id=%d, pos=(%.1f,%.1f), size=(%.1fx%.1f)\n", 
-                    player_count, block->type_id, x, y, w, h);
-        } else {
-            fprintf(stderr, "DEBUG: Player block %d - fcsim_type_id=%d, pos=(%.1f,%.1f), size=(%.1fx%.1f)\n", 
-                    player_count, block->type_id, x, y, w, h);
-        }
-    }
-    
-    xml_free(&level);
-    
-    // Generate physics world
-    sim->world = gen_world(&sim->design);
-    if (!sim->world) {
-        return false;
-    }
-    
-    sim->tick = 0;
-    sim->has_won = false;
-    sim->tick_solve = 0;
-    
-    // Debug initial setup before any physics steps
-    struct block* goal_block = NULL;
-    for (struct block* block = sim->design.player_blocks.head; block; block = block->next) {
-        if (block->goal) {
-            goal_block = block;
-            break;
-        }
-    }
-    
-    if (goal_block && goal_block->body) {
-        double gx = goal_block->body->m_position.x;
-        double gy = goal_block->body->m_position.y;
-        fprintf(stderr, "DEBUG: Tick 0 BEFORE physics - goal_pos=(%.1f,%.1f)\n", gx, gy);
-    } else {
-        fprintf(stderr, "DEBUG: Tick 0 - no goal block body found yet\n");
-    }
-    
-    return true;
-}
-
-static void step_sim(struct simple_sim_state* sim) {
-    step(sim->world);
-    sim->tick++;
-    
-    // Check for win condition
-    if (!sim->has_won) {
-        bool goal_achieved = goal_blocks_inside_goal_area(&sim->design);
-        if (sim->tick == 0 || sim->tick == 1 || sim->tick % 100 == 0) { // Debug tick 0, 1, then every 100 ticks
-            // Find goal block and check its position
-            struct block* goal_block = NULL;
-            for (struct block* block = sim->design.player_blocks.head; block; block = block->next) {
-                if (block->goal) {
-                    goal_block = block;
-                    break;
-                }
-            }
-            
-            if (goal_block && goal_block->body) {
-                double gx = goal_block->body->m_position.x;
-                double gy = goal_block->body->m_position.y;
-                double goal_area_x = sim->design.goal_area.x;
-                double goal_area_y = sim->design.goal_area.y;
-                double goal_area_w = sim->design.goal_area.w;
-                double goal_area_h = sim->design.goal_area.h;
-                
-                fprintf(stderr, "DEBUG: Tick %lld, goal_achieved=%d, goal_pos=(%.1f,%.1f), goal_area=(%.1f,%.1f,%.1fx%.1f)\n", 
-                        (long long)sim->tick, goal_achieved, gx, gy, goal_area_x, goal_area_y, goal_area_w, goal_area_h);
-            } else {
-                fprintf(stderr, "DEBUG: Tick %lld, goal_achieved=%d, no goal block body found\n", 
-                        (long long)sim->tick, goal_achieved);
-            }
-        }
-        if (goal_achieved) {
-            sim->has_won = true;
-            sim->tick_solve = sim->tick;
-            fprintf(stderr, "DEBUG: GOAL ACHIEVED at tick %lld!\n", (long long)sim->tick);
-        }
-    }
-}
-
-static void cleanup_sim(struct simple_sim_state* sim) {
-    if (sim->world) {
-        // Box2D world cleanup is handled internally
-        sim->world = NULL;
-    }
-}
 
 
 int main(int argc, char* argv[]) {
-    // CHIMERA: Copy the simulation logic from run_single_design_xml.cpp exactly
-    // Read max_ticks from command line argument (matching XML version interface)
+    // CHIMERA: Read max_ticks from command line argument (matching XML version interface)
     int64_t max_ticks = 1000; // Default value
     if (argc > 1) {
         max_ticks = atoi(argv[1]);
@@ -299,10 +58,10 @@ int main(int argc, char* argv[]) {
     }
     max_ticks = stdin_max_ticks; // Use stdin value if provided
     
-    // Initialize ftlib format parsing but convert to XML for arena_init
+    // CHIMERA: Parse ftlib format to XIR (ftlib → XIR)
     struct xml_level level = {0};
     
-    // Read blocks and create linked list (keep existing ftlib parsing logic)
+    // Read blocks and create linked list
     int num_blocks;
     if (scanf("%d", &num_blocks) != 1) {
         return 1;
@@ -387,41 +146,64 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // CHIMERA: Use existing conversion to internal design (keeping upper half logic)
-    struct simple_sim_state sim;
-    convert_xml(&level, &sim.design);
+    // CHIMERA: Set up arena by inlining arena_init and replacing XML parsing
+    arena* arena_ptr = new arena();
+    
+    // Arena initialization (from arena_init) 
+    arena_ptr->view.x = 0.0f;
+    arena_ptr->view.y = 0.0f;
+    arena_ptr->view.width = 800;
+    arena_ptr->view.height = 800;
+    arena_ptr->view.scale = 1.0f;
+    arena_ptr->cursor_x = 0;
+    arena_ptr->cursor_y = 0;
+    arena_ptr->shift = false;
+    arena_ptr->ctrl = false;
+    arena_ptr->tool = TOOL_MOVE;
+    arena_ptr->tool_hidden = TOOL_MOVE;
+    arena_ptr->state = STATE_NORMAL;
+    arena_ptr->hover_joint = NULL;
+    arena_ptr->hover_block = NULL;
+    arena_ptr->root_joints_moving = NULL;
+    arena_ptr->root_blocks_moving = NULL;
+    arena_ptr->blocks_moving = NULL;
+    
+    // CHIMERA: Replace xml_parse + convert_xml with direct XIR → internal design conversion
+    convert_xml(&level, &arena_ptr->design);
     xml_free(&level);
     
-    // Generate physics world
-    sim.world = gen_world(&sim.design);
-    if (!sim.world) {
-        return 1;
-    }
-    
-    sim.tick = 0;
-    sim.has_won = false;
-    sim.tick_solve = 0;
+    // Continue arena initialization (from arena_init)
+    arena_ptr->world = gen_world(&arena_ptr->design);
+    arena_ptr->tick = 0;
+    arena_ptr->has_won = false;
+    arena_ptr->preview_gp_trajectory = false;
+    arena_ptr->preview_design = NULL;
+    arena_ptr->preview_world = NULL;
+    arena_ptr->preview_has_won = false;
 
-    // CHIMERA: Use the exact same simulation loop logic as run_single_design_xml.cpp
-    // But instead of arena, use our simple_sim_state and step logic
-    while (sim.tick < (uint64_t)max_ticks && !sim.has_won) {
-        step(sim.world);
-        sim.tick++;
+    // TO CLAUDE - DO NOT MODIFY ANYTHING BELOW THIS LINE
+
+    // Run to solve or end - simplified approach that was working before
+    while (arena_ptr->tick < (uint64_t)max_ticks && !arena_ptr->has_won) {
+        step(arena_ptr->world);
+        arena_ptr->tick++;
         
         // Check for win condition using the existing goal checking logic  
-        if (!sim.has_won && goal_blocks_inside_goal_area(&sim.design)) {
-            sim.has_won = true;
-            sim.tick_solve = sim.tick;
+        if (!arena_ptr->has_won && goal_blocks_inside_goal_area(&arena_ptr->design)) {
+            arena_ptr->has_won = true;
+            arena_ptr->tick_solve = arena_ptr->tick;
         }
     }
 
-    // CHIMERA: Output in exact same format as run_single_design_xml.cpp
-    std::cout << (sim.has_won ? (long long)sim.tick_solve : -1LL) << std::endl << (long long)sim.tick << std::endl;
+    // Report
+    std::cout << (arena_ptr->has_won ? (long long)arena_ptr->tick_solve : -1LL) << std::endl << (long long)arena_ptr->tick << std::endl;
 
     return 0;
 }
 
-// CHIMERA: Copy stubs from run_single_design_xml.cpp for compatibility
+// stubs - functions that are called somewhere and therefore require linking
+// but don't have any effect on this CLI use case
+
 extern "C" {
 
 int set_interval(void (*func)(void *arg), int delay, void *arg) {return 0;}
