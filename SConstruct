@@ -1,3 +1,41 @@
+import SCons.Builder
+import subprocess
+import json
+import os
+
+# Define a custom builder to generate the version.js file
+def generate_version_js(target, source, env):
+    try:
+        # Get Git information
+        branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip().decode('utf-8')
+        dirty = subprocess.check_output(['git', 'status', '--porcelain']).strip().decode('utf-8') != ''
+        commits = subprocess.check_output(['git', 'rev-list', '--count', 'HEAD']).strip().decode('utf-8')
+        sha = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
+
+        # Create the version list
+        version_info = [
+            branch,
+            dirty,
+            int(commits),
+            sha
+        ]
+
+        # Format the output as a JavaScript function
+        js_content = f'function getVersionInfo() {{\n  return {json.dumps(version_info)};\n}}'
+
+        # Write to the target file
+        with open(target[0].abspath, 'w') as f:
+            f.write(js_content)
+
+        print(f"Generated {target[0].name} with version info from git.")
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        print(f"Error getting git information: {e}")
+        # Create a fallback file to prevent build failure
+        with open(target[0].abspath, 'w') as f:
+            f.write('function getVersionInfo() { return ["unknown", true, 0, "unknown"]; }')
+        print(f"Generated a fallback {target[0].name} file.")
+    return None
+
 # source files
 common_sources = [
     "src/arena.c",
@@ -187,3 +225,12 @@ build_with_variant(run_single_design_env, "build/run_single_design/", run_single
 build_with_variant(run_single_design_env, "build/run_single_design_xml/", run_single_design_xml_sources_all, target = 'run_single_design_xml')
 build_with_variant(test_env, "build/test/", test_sources_all, target = 'stl_test')
 build_with_variant(wasm_env, "build/wasm/", wasm_sources_all, target = 'html/fcsim.wasm')
+
+# Automated version tagging - build html/version.js
+# Add the custom builder to the environment
+js_env = Environment()
+js_builder = SCons.Builder.Builder(action=generate_version_js)
+js_env.Append(BUILDERS={'VersionJSBuilder': js_builder})
+
+# Use the builder to generate the file
+js_env.VersionJSBuilder('html/version.js', [])
