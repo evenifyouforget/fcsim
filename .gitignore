@@ -1,8 +1,10 @@
 *.o
 *.d
 *.xml
-fcsim
-fcsim-fpatan
+run_single_design
+run_single_design_xml
+fcsim*
+html/fcsim.wasm
 stl_test
 tags
 .ninja_log
@@ -12,3 +14,4 @@ tags
 # SCons files
 .sconsign*
 build/
+html/version.js

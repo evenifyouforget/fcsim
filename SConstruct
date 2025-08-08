@@ -1,3 +1,41 @@
+import SCons.Builder
+import subprocess
+import json
+import os
+
+# Define a custom builder to generate the version.js file
+def generate_version_js(target, source, env):
+    try:
+        # Get Git information
+        branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip().decode('utf-8')
+        dirty = subprocess.check_output(['git', 'status', '--porcelain']).strip().decode('utf-8') != ''
+        commits = subprocess.check_output(['git', 'rev-list', '--count', 'HEAD']).strip().decode('utf-8')
+        sha = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
+
+        # Create the version list
+        version_info = [
+            branch,
+            dirty,
+            int(commits),
+            sha
+        ]
+
+        # Format the output as a JavaScript function
+        js_content = f'function getVersionInfo() {{\n  return {json.dumps(version_info)};\n}}'
+
+        # Write to the target file
+        with open(target[0].abspath, 'w') as f:
+            f.write(js_content)
+
+        print(f"Generated {target[0].name} with version info from git.")
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        print(f"Error getting git information: {e}")
+        # Create a fallback file to prevent build failure
+        with open(target[0].abspath, 'w') as f:
+            f.write('function getVersionInfo() { return ["unknown", true, 0, "unknown"]; }')
+        print(f"Generated a fallback {target[0].name} file.")
+    return None
+
 # source files
 common_sources = [
     "src/arena.c",
@@ -46,6 +84,12 @@ linux_sources = [
     "src/timing.cpp",
     "src/fpmath/fpatan.s",
     ]
+run_single_design_sources = [
+    "src/run_single_design.cpp",
+    ]
+run_single_design_xml_sources = [
+    "src/run_single_design_xml.cpp",
+    ]
 wasm_sources = [
     "src/arch/wasm/math.c",
     "src/arch/wasm/malloc.c",
@@ -54,6 +98,8 @@ wasm_sources = [
     ]
 
 linux_sources_all = common_sources + linux_sources
+run_single_design_sources_all = common_sources + run_single_design_sources
+run_single_design_xml_sources_all = common_sources + run_single_design_xml_sources
 test_sources_all = stl_mock_sources + test_sources
 wasm_sources_all = common_sources + stl_mock_sources + wasm_sources
 
@@ -61,6 +107,9 @@ wasm_sources_all = common_sources + stl_mock_sources + wasm_sources
 libs = [
     "X11",
     "GL",
+    "pthread",
+    ]
+run_single_design_libs = [
     "pthread",
     ]
 
@@ -76,6 +125,9 @@ test_defines = [
     ]
 fpatan_defines = [
     "USE_FPATAN",
+    ]
+run_single_defines = [
+    "CLI",
     ]
 
 werror_ccflags = [
@@ -137,6 +189,14 @@ linux_env = base_env.Clone(
     )
 linux_env.VariantDir("build/linux", ".", False)
 
+run_single_design_env = base_env.Clone(
+    CCFLAGS = common_ccflags + linux_ccflags,
+    CPPPATH = common_include,
+    CPPDEFINES = run_single_defines,
+    LIBS = run_single_design_libs
+    )
+run_single_design_env.VariantDir("build/run_single_design", ".", False)
+
 test_env = base_env.Clone(
     CCFLAGS = common_ccflags + test_ccflags,
     CPPPATH = common_include + wasm_include,
@@ -161,5 +221,16 @@ def build_with_variant(env, variant_dir, source_files, *args, **kwargs):
     env.Program(*args, source = source_files, **kwargs)
 build_with_variant(linux_env, "build/linux/", linux_sources_all, target = 'fcsim')
 build_with_variant(linux_env, "build/linux2/", linux_sources_all, target = 'fcsim-fpatan', CPPDEFINES = ['USE_FPATAN'])
+build_with_variant(run_single_design_env, "build/run_single_design/", run_single_design_sources_all, target = 'run_single_design')
+build_with_variant(run_single_design_env, "build/run_single_design_xml/", run_single_design_xml_sources_all, target = 'run_single_design_xml')
 build_with_variant(test_env, "build/test/", test_sources_all, target = 'stl_test')
 build_with_variant(wasm_env, "build/wasm/", wasm_sources_all, target = 'html/fcsim.wasm')
+
+# Automated version tagging - build html/version.js
+# Add the custom builder to the environment
+js_env = Environment()
+js_builder = SCons.Builder.Builder(action=generate_version_js)
+js_env.Append(BUILDERS={'VersionJSBuilder': js_builder})
+
+# Use the builder to generate the file
+js_env.VersionJSBuilder('html/version.js', [])
