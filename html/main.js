@@ -74,12 +74,16 @@ function set_user_id(user_id_value) {
 
 set_user_id(localStorage.getItem("userId"));
 
+let account_menu_opened = false;
+
 function showAccountMenu() {
 	accountMenu.style.display = 'block';
+	account_menu_opened = true;
 }
 
 function hideAccountMenu() {
 	accountMenu.style.display = 'none';
+	account_menu_opened = false;
 }
 
 function _loginOnTextReceived(text) {
@@ -471,14 +475,14 @@ function to_button(code)
 
 function canvas_keydown(event)
 {
-	if (opened)
+	if (opened || account_menu_opened)
 		return;
 	inst.exports.key_down(to_key(event.code));
 }
 
 function canvas_keyup(event)
 {
-	if (opened)
+	if (opened || account_menu_opened)
 		return;
 	inst.exports.key_up(to_key(event.code));
 }
