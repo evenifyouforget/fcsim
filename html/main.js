@@ -57,6 +57,8 @@ const accountStatus = document.getElementById('account-status');
 
 let user_id;
 
+// Set the user ID within this session (does not affect persistent storage)
+// Convention: falsy (including empty) value = logged out
 function set_user_id(user_id_value) {
 	user_id = user_id_value;
 	if(user_id) {
@@ -80,42 +82,51 @@ function hideAccountMenu() {
 	accountMenu.style.display = 'none';
 }
 
+function _loginOnTextReceived(text) {
+	let parser = new DOMParser();
+	let xml = parser.parseFromString(text, "text/xml");
+	let user_id_tag = xml.getElementsByTagName("userId")[0];
+
+	if (!user_id_tag) {
+		accountStatus.textContent = "Login failed";
+	} else {
+		let user_id = user_id_tag.childNodes[0].nodeValue;
+		localStorage.setItem("userId", user_id);
+		set_user_id(user_id);
+	}
+}
+
+function _loginOnRequestResult(response) {
+	let text_promise = response.text();
+
+	text_promise.then(_loginOnTextReceived);
+}
+
 function handleLogin(event) {
 	event.preventDefault(); // Prevent default form submission
 	const username = usernameField.value;
 	const password = passwordField.value;
 
-	// Implement your actual login logic here (e.g., API call, Firebase auth)
-	console.log('Attempting to log in with:', { username, password });
+	accountStatus.textContent = "Attempting log in";
 
-	// Update status message
-	accountStatus.textContent = 'Logging in...';
+	let request_promise = fetch(FC_URL + "/logIn.php", {
+		method: "POST",
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded'
+		},
+		body: new URLSearchParams({
+			"userName": username,
+			"password": password,
+		})
+	});
 
-	// Example: Simulate login success/failure
-	setTimeout(() => {
-		if (username === 'user' && password === 'pass') { // Replace with actual validation
-			accountStatus.textContent = `Status: Logged in as ${username}.`;
-			// Further actions: disable login button, enable logout, etc.
-		} else {
-			accountStatus.textContent = 'Status: Login failed. Invalid credentials.';
-		}
-	}, 1500);
+	request_promise.then(_loginOnRequestResult);
 }
 
 function handleLogout() {
-	// Implement your actual logout logic here (e.g., clear session, API call)
-	console.log('Attempting to log out.');
-
-	// Update status message
-	accountStatus.textContent = 'Logging out...';
-
-	// Example: Simulate logout
-	setTimeout(() => {
-		accountStatus.textContent = 'Status: Not logged in.';
-		// Further actions: clear fields, enable login button, disable logout, etc.
-		usernameField.value = '';
-		passwordField.value = '';
-	}, 1000);
+	localStorage.removeItem("userId");
+	set_user_id(undefined);
+	close(); // close save menu
 }
 
 let opened = false;
