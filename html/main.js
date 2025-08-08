@@ -41,21 +41,81 @@ function linkElement(url, text) {
 	return el;
 }
 
-let play_button  = document.getElementById("play");
 let save_button  = document.getElementById("save");
 let save_menu    = document.getElementById("save_menu");
-let login_link   = document.getElementById("login");
 let save_form    = document.getElementById("save_form");
 let close_button = document.getElementById("close");
 let design_link  = document.getElementById("link");
+const accountButton = document.getElementById('account-button');
+const accountMenu = document.getElementById('account_menu');
+const closeAccountMenuButton = document.getElementById('close-account-menu');
+const loginButton = document.getElementById('login-button');
+const logoutButton = document.getElementById('logout-button');
+const usernameField = document.getElementById('username-field');
+const passwordField = document.getElementById('password-field');
+const accountStatus = document.getElementById('account-status');
 
-let user_id = localStorage.getItem("userId");
-if (user_id) {
-	login_link.innerHTML = "Log out";
-	login_link.href = SELF_URL + "/logout.html"
-} else {
-	save_button.disabled = true;
-	login_link.href = SELF_URL + "/login.html"
+let user_id;
+
+function set_user_id(user_id_value) {
+	user_id = user_id_value;
+	if(user_id) {
+		// Currently logged in
+		accountStatus.textContent = "Logged in";
+		save_button.disabled = false;
+	} else {
+		// Currently logged out
+		accountStatus.textContent = "Logged out";
+		save_button.disabled = true;
+	}
+}
+
+set_user_id(localStorage.getItem("userId"));
+
+function showAccountMenu() {
+	accountMenu.style.display = 'block';
+}
+
+function hideAccountMenu() {
+	accountMenu.style.display = 'none';
+}
+
+function handleLogin(event) {
+	event.preventDefault(); // Prevent default form submission
+	const username = usernameField.value;
+	const password = passwordField.value;
+
+	// Implement your actual login logic here (e.g., API call, Firebase auth)
+	console.log('Attempting to log in with:', { username, password });
+
+	// Update status message
+	accountStatus.textContent = 'Logging in...';
+
+	// Example: Simulate login success/failure
+	setTimeout(() => {
+		if (username === 'user' && password === 'pass') { // Replace with actual validation
+			accountStatus.textContent = `Status: Logged in as ${username}.`;
+			// Further actions: disable login button, enable logout, etc.
+		} else {
+			accountStatus.textContent = 'Status: Login failed. Invalid credentials.';
+		}
+	}, 1500);
+}
+
+function handleLogout() {
+	// Implement your actual logout logic here (e.g., clear session, API call)
+	console.log('Attempting to log out.');
+
+	// Update status message
+	accountStatus.textContent = 'Logging out...';
+
+	// Example: Simulate logout
+	setTimeout(() => {
+		accountStatus.textContent = 'Status: Not logged in.';
+		// Further actions: clear fields, enable login button, disable logout, etc.
+		usernameField.value = '';
+		passwordField.value = '';
+	}, 1000);
 }
 
 let opened = false;
@@ -79,9 +139,12 @@ function close(event)
 	opened = false;
 }
 
-play_button.addEventListener("click", play);
 save_button.addEventListener("click", save);
 close_button.addEventListener("click", close);
+accountButton.addEventListener('click', showAccountMenu);
+closeAccountMenuButton.addEventListener('click', hideAccountMenu);
+loginButton.addEventListener('click', handleLogin);
+logoutButton.addEventListener('click', handleLogout);
 
 let canvas = document.getElementById("canvas");
 let gl = canvas.getContext("webgl");
