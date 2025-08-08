@@ -552,7 +552,7 @@ function alloc_str(str)
 function on_text(text)
 {
 	console.log(text);
-	design_link.innerHTML = self_url_full() + "?designId=" + text;
+	design_link.innerHTML = design_link.href = self_url_full() + "?designId=" + text;
 	design_link.style.display = "block";
 }
 
