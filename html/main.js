@@ -54,6 +54,13 @@ const logoutButton = document.getElementById('logout-button');
 const usernameField = document.getElementById('username-field');
 const passwordField = document.getElementById('password-field');
 const accountStatus = document.getElementById('account-status');
+let version_button  = document.getElementById("version-button");
+let version_menu  = document.getElementById("version_menu");
+let version_commit_number  = document.getElementById("version_commit_number");
+let version_branch_name  = document.getElementById("version_branch_name");
+let version_is_dirty  = document.getElementById("version_is_dirty");
+let version_sha  = document.getElementById("version_sha");
+let close_version_menu  = document.getElementById("close-version-menu");
 
 let user_id;
 
@@ -84,6 +91,25 @@ function showAccountMenu() {
 function hideAccountMenu() {
 	accountMenu.style.display = 'none';
 	account_menu_opened = false;
+}
+
+let version_menu_opened = false;
+
+function showVersionMenu() {
+	version_menu.style.display = 'block';
+	version_menu_opened = true;
+	// fetch version info lazily, provided by version.js
+	let versionInfo = getVersionInfo();
+	version_branch_name.textContent = versionInfo[0];
+	version_is_dirty.textContent = versionInfo[1];
+	version_commit_number.textContent = versionInfo[2];
+	version_sha.textContent = versionInfo[3];
+	console.log(versionInfo);
+}
+
+function hideVersionMenu() {
+	version_menu.style.display = 'none';
+	version_menu_opened = false;
 }
 
 function _loginOnTextReceived(text) {
@@ -160,6 +186,8 @@ accountButton.addEventListener('click', showAccountMenu);
 closeAccountMenuButton.addEventListener('click', hideAccountMenu);
 loginButton.addEventListener('click', handleLogin);
 logoutButton.addEventListener('click', handleLogout);
+version_button.addEventListener('click', showVersionMenu);
+close_version_menu.addEventListener('click', hideVersionMenu);
 
 let canvas = document.getElementById("canvas");
 let gl = canvas.getContext("webgl");
@@ -475,14 +503,14 @@ function to_button(code)
 
 function canvas_keydown(event)
 {
-	if (opened || account_menu_opened)
+	if (opened || account_menu_opened || version_menu_opened)
 		return;
 	inst.exports.key_down(to_key(event.code));
 }
 
 function canvas_keyup(event)
 {
-	if (opened || account_menu_opened)
+	if (opened || account_menu_opened || version_menu_opened)
 		return;
 	inst.exports.key_up(to_key(event.code));
 }

@@ -31,7 +31,7 @@ canvas {
 #save {
 	background-color: deepskyblue;
 }
-#save_menu, #account_menu {
+#save_menu, #account_menu, #version_menu {
 	position: fixed;
 	top: 50%;
 	left: 50%;
@@ -45,6 +45,9 @@ canvas {
 }
 #link {
 	display: none;
+}
+#version-button {
+    background-color: #c7c96a;
 }
 #account-button {
     background-color: #4CAF50;
@@ -75,7 +78,7 @@ canvas {
     background-color: #DC3545;
     color: white;
 }
-#close-account-menu, #close, #_saveSubmit {
+#close-account-menu, #close, #_saveSubmit, #close-version-menu {
     background-color: #6C757D;
     color: white;
     padding: 8px 15px;
@@ -98,6 +101,7 @@ canvas {
 <div id="tools">
 	<button class="tool" id="account-button"> Account </button>
 	<button class="tool" id="save"> Save </button>
+	<button class="tool" id="version-button"> Version </button>
 	<span id="notification"></span>
 </div>
 <div id="save_menu">
@@ -128,6 +132,13 @@ canvas {
     </form>
     <p id="account-status"></p>
     <button class="close" id="close-account-menu"> Close </button>
+</div>
+<div id="version_menu">
+	<p>Patch number: <span id="version_commit_number"></span></p>
+	<p>Built from branch: <span id="version_branch_name"></span></p>
+	<p>Has local changes?: <span id="version_is_dirty"></span></p>
+	<p>SHA: <span id="version_sha"></span></p>
+    <button class="close" id="close-version-menu"> Close </button>
 </div>
 <canvas id="canvas"></canvas>
 <script src="version.js"></script>
