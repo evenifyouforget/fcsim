@@ -14,4 +14,3 @@ tags
 # SCons files
 .sconsign*
 build/
-html/version.js
