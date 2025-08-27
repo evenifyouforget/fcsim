@@ -137,6 +137,9 @@ bool is_design_legal(struct design *design);
 bool goal_blocks_inside_goal_area(struct design *design);
 void tick_func(void *arg);
 
+int block_list_len(struct block_list *list);
+int design_piece_count(struct block_list *list);
+
 void start_stop(struct arena *arena);
 bool is_running(struct arena *arena);
 void update_tool(struct arena *arena);

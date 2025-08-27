@@ -899,6 +899,17 @@ void draw_tick_counter(struct arena *arena)
     x = draw_text_default(arena, tps_value >= 1e9?"Infinity":std::to_string((int64_t)rint(tps_value)), x, 10);
     x = draw_text_default(arena, !tps_is_prediction?"TPS average":"TPS predicted", x, 10, 1);
 
+    // piece counter
+    x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+    int design_pieces = design_piece_count(&arena->design.player_blocks);
+    int total_pieces = block_list_len(&arena->design.player_blocks);
+    int goal_pieces = total_pieces - design_pieces;
+    int available_limit = 120 - goal_pieces;
+    x = draw_text_default(arena, std::to_string(design_pieces), x, 10);
+    x = draw_text_default(arena, "/", x, 10, 1);
+    x = draw_text_default(arena, std::to_string(available_limit), x, 10, 1);
+    x = draw_text_default(arena, "pc", x, 10, 1);
+
 #ifdef __wasm__
     // memory stats for web only
     x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
