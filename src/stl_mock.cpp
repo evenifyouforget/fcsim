@@ -36,7 +36,7 @@ std::string& std::string::operator=(const std::string& other) {
 }
 
 std::string& std::string::operator=(const char* other) {
-    _data.clear();
+    _data = std::vector<char>();
     for(_length = 0; other[_length]; ++_length) {
         _data.push_back(other[_length]);
     }
