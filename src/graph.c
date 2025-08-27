@@ -121,6 +121,7 @@ uint32_t piece_color_table[FCSIM_NUM_TYPES][2] = {
 	{0xffbc6667, 0xfff29291}, // FCSIM_GOAL_AREA
 	{0x00000000, 0xff87bdf1}, // FCSIM_SKY
 	{0xff404886, 0xff3a3b54}, // FCSIM_UI_BUTTON
+	{0xffb8100b, 0xffcf42fe}, // FCSIM_GOAL_RECT_OVERTURNED
 // FCSIM_NUM_TYPES
 };
 
