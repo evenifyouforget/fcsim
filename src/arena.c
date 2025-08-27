@@ -613,8 +613,17 @@ struct block *block_hit_test(struct arena *arena, float x, float y)
 
 static void get_rect_bb(struct shell *shell, struct area *area)
 {
-	float sina = fp_sin(shell->angle);
-	float cosa = fp_cos(shell->angle);
+    // replicate truncation weirdness
+    float angle_degrees = shell->angle * 57.295779513082320876763;
+    if (fabs(angle_degrees) >= 32768) {
+        angle_degrees = -32768;
+    } else {
+        angle_degrees = (int)angle_degrees;
+    }
+    float angle_radians = angle_degrees * 0.017453292519943295769245;
+
+	float sina = fp_sin(angle_radians);
+	float cosa = fp_cos(angle_radians);
 	float wc = shell->rect.w * cosa;
 	float ws = shell->rect.w * sina;
 	float hc = shell->rect.h * cosa;
