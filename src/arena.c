@@ -618,7 +618,8 @@ static void get_rect_bb(struct shell *shell, struct area *area)
     if (fabs(angle_degrees) >= 32768) {
         angle_degrees = -32768;
     } else {
-        angle_degrees = (int)angle_degrees;
+		// likewise with ftlib, we're not sure enough truncation is a good change
+        // angle_degrees = (int)angle_degrees;
     }
     float angle_radians = angle_degrees * 0.017453292519943295769245;
 
