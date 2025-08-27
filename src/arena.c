@@ -1551,6 +1551,18 @@ int block_list_len(struct block_list *list)
 	return res;
 }
 
+int design_piece_count(struct block_list *list)
+{
+	struct block *block;
+	int res = 0;
+
+	for (block = list->head; block; block = block->next)
+		if (!block->goal)
+			res++;
+
+	return res;
+}
+
 void mouse_down_tool(struct arena *arena, float x, float y)
 {
 	if (arena->tool == TOOL_MOVE) {
