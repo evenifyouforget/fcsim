@@ -312,6 +312,12 @@ static void block_graphics_add_rect_single(struct block_graphics *graphics,
 
 static void block_graphics_add_rect(struct block_graphics *graphics,
 				    struct shell shell, int type_id, int z_offset, color overlay) {
+    const double CLAMP_ANGLE = 571.90948929350191576662;
+    if(type_id == FCSIM_GOAL_RECT && std::abs(shell.angle) >= CLAMP_ANGLE) {
+        struct shell shell_copy = shell;
+        shell_copy.angle = -CLAMP_ANGLE;
+        block_graphics_add_rect_single(graphics, shell_copy, alpha_over(get_color_by_type(FCSIM_GOAL_RECT_OVERTURNED, 0), overlay), z_offset + 1);
+    }
     if(graphics->simple_graphics) {
         block_graphics_add_rect_single(graphics, shell, alpha_over(get_color_by_type(type_id, 1), overlay), z_offset + 1);
         return;
