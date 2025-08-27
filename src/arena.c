@@ -188,6 +188,7 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 	arena->preview_gp_trajectory = false;
 	arena->preview_design = NULL;
 	arena->preview_world = NULL;
+	arena->preview_trail = NULL;
 	arena->preview_has_won = false;
 	arena->lock_if_preview_solves = false;
 

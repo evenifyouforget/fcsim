@@ -626,6 +626,14 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
     }
     if(button.id == ui_button_id{5, 0}) {
         arena->preview_gp_trajectory ^= 1; // toggle
+        
+        // Clean up preview trail memory when feature is disabled
+        if(!arena->preview_gp_trajectory && arena->preview_trail) {
+            multi_trail_t* all_trails = (multi_trail_t*)arena->preview_trail;
+            all_trails->trails.clear(); // Clear std::vector to free its memory
+            free(arena->preview_trail); // Free the multi_trail_t object
+            arena->preview_trail = nullptr;
+        }
     }
     if(button.id == ui_button_id{9, 0}) {
         arena->lock_if_preview_solves ^= 1; // toggle
