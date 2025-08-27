@@ -64,8 +64,8 @@ extern "C" void tick_func(void *arg)
             // populate new data from clone
             the_arena->preview_design = clean_copy_design(&the_arena->design);
             the_arena->preview_world = gen_world(the_arena->preview_design);
-            // clear trails
-            all_trails->trails.clear();
+            // clear trails and free memory (replace with empty vector)
+            all_trails->trails = std::vector<trail_t>();
         }
         bool is_preview_design_legal = is_design_legal(the_arena->preview_design);
         // tick until time budget is exhausted
