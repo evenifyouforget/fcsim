@@ -162,9 +162,9 @@ void block_graphics::push_triangle(uint32_t v1, uint32_t v2, uint32_t v3, int z_
 }
 
 void block_graphics::push_all_layers() {
-    _indices.clear();
-    _coords.clear();
-    _colors.clear();
+    _indices = std::vector<uint32_t>();
+    _coords = std::vector<float>();
+    _colors = std::vector<float>();
     for(auto it = layers.begin(); it != layers.end(); ++it) {
         uint32_t offset = _coords.size() / 2;
         for(auto jt = it->indices.begin(); jt != it->indices.end(); ++jt) {
@@ -178,7 +178,7 @@ void block_graphics::push_all_layers() {
 }
 
 void block_graphics::clear() {
-    layers.clear();
+    layers = std::vector<block_graphics_layer>();
 }
 
 void fps_tracker_t::push_record(int64_t tick_value) {
@@ -206,8 +206,8 @@ double fps_tracker_t::get_tps(size_t interval) {
 }
 
 void fps_tracker_t::clear() {
-    records_ms.clear();
-    records_tick.clear();
+    records_ms = std::vector<double>();
+    records_tick = std::vector<int64_t>();
     samples = 0;
 }
 
@@ -630,7 +630,7 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
         // Clean up preview trail memory when feature is disabled
         if(!arena->preview_gp_trajectory && arena->preview_trail) {
             multi_trail_t* all_trails = (multi_trail_t*)arena->preview_trail;
-            all_trails->trails.clear(); // Clear std::vector to free its memory
+            all_trails->trails = std::vector<trail_t>(); // Clear std::vector to free its memory
             free(arena->preview_trail); // Free the multi_trail_t object
             arena->preview_trail = nullptr;
         }
@@ -642,7 +642,7 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
 
 void regenerate_ui_buttons(arena* arena) {
     ui_button_collection* all_buttons = (ui_button_collection*)arena->ui_buttons;
-    all_buttons->buttons.clear();
+    all_buttons->buttons = std::vector<ui_button_single>();
 
     float vw = arena->view.width;
     float vh = arena->view.height;
