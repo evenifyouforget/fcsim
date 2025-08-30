@@ -1,9 +1,13 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+# Workflow for CI checks on PRs and deployment to GitHub Pages on push to main
+name: CI/CD Pipeline for Pages
 
 on:
-  # Runs on pushes targeting the default branch
+  # Runs the entire workflow (build and deploy) on pushes to the main branch
   push:
+    branches: ["main", "v2.0-beta-build"]
+
+  # Runs only the CI checks on pull requests to the main branch
+  pull_request:
     branches: ["main"]
 
   # Allows you to run this workflow manually from the Actions tab
@@ -22,8 +26,41 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Single deploy job since we're just deploying
+  # CI Sanity Check job for pull requests
+  ci-check:
+    # This job runs only on pull_request events
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout deploy branch
+        uses: actions/checkout@v4
+        with:
+          # Use the deploy branch as the base for the build
+          ref: 'v2.0-beta-build'
+
+      # Merge PR branch into the deploy branch, keeping PR's version on conflicts
+      - name: Merge PR branch
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions Bot"
+          # Fetch the PR's head commit
+          git fetch origin ${{ github.event.pull_request.head.sha }}
+          git merge ${{ github.event.pull_request.head.sha }} --no-edit -Xtheirs --allow-unrelated-histories || {
+            echo "Merge failed, reverting to last safe state."
+            git merge --abort
+            exit 1
+          }
+
+      - name: Install requirements
+        run: sh install_requirements.sh
+
+      - name: Build with scons
+        run: scons
+      
+  # Deployment job that runs only on push events to the main branch or workflow dispatch
   deploy:
+    # This job runs only on push to main or manual dispatch
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -33,13 +70,34 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: 'v2.0-beta-build'
+
+      # Merge main into the current branch, keeping main's version on conflicts
+      - name: Merge main branch
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions Bot"
+          git fetch origin main
+          git merge origin/main --no-edit -Xtheirs --allow-unrelated-histories || {
+            echo "Merge failed, reverting to last safe state."
+            git merge --abort
+            exit 1
+          }
+
+      - name: Install requirements
+        run: sh install_requirements.sh
+
+      - name: Build with scons
+        run: scons
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
           path: 'html/'
+          
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

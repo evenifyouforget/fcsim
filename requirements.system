@@ -2,3 +2,4 @@ clang
 libx11-dev
 libgl-dev
 lld
+scons
