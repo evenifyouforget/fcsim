@@ -4,7 +4,7 @@ name: CI/CD Pipeline for Pages
 on:
   # Runs the entire workflow (build and deploy) on pushes to the main branch
   push:
-    branches: ["main"]
+    branches: ["main", "v2.0-beta-build"]
 
   # Runs only the CI checks on pull requests to the main branch
   pull_request:
