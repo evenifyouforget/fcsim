@@ -32,19 +32,20 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout deploy branch
         uses: actions/checkout@v4
         with:
-          # Use the source branch for the PR
-          ref: ${{ github.event.pull_request.head.ref }}
+          # Use the deploy branch as the base for the build
+          ref: 'v2.0-beta-build'
 
-      # Merge main into the current branch, keeping main's version on conflicts
-      - name: Merge main branch
+      # Merge PR branch into the deploy branch, keeping PR's version on conflicts
+      - name: Merge PR branch
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions Bot"
-          git fetch origin main
-          git merge origin/main --no-edit -Xtheirs --allow-unrelated-histories || {
+          # Fetch the PR's head commit
+          git fetch origin ${{ github.event.pull_request.head.sha }}
+          git merge ${{ github.event.pull_request.head.sha }} --no-edit -Xtheirs --allow-unrelated-histories || {
             echo "Merge failed, reverting to last safe state."
             git merge --abort
             exit 1
