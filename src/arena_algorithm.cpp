@@ -8,6 +8,7 @@
 #include "arena.hpp"
 #include "stl_compat.h"
 #include "interval.h"
+#include "xoroshiro.hpp"
 
 extern "C" void tick_func(void *arg)
 {
@@ -100,4 +101,16 @@ void multi_trail_t::submit_frame(design* current_design) {
             trail_index++;
 		}
 	}
+}
+
+extern "C" void microtweak_jitter() {
+    int64_t rand_x = (int64_t)(general_prng.next());
+    int64_t rand_y = (int64_t)(general_prng.next());
+    microtweak_dx += rand_x * 1e-30;
+    microtweak_dy += rand_y * 1e-30;
+}
+
+extern "C" void microtweak_reset() {
+    microtweak_dx = 0;
+    microtweak_dy = 0;
 }

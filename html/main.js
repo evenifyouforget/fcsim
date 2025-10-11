@@ -472,6 +472,7 @@ function canvas_draw(timestamp)
 
 function to_key(code)
 {
+	// I have no idea what this numbering system is.
 	if (code == "Space") return 65;
 	if (code == "KeyR") return 27;
 	if (code == "KeyM") return 58;
@@ -492,6 +493,7 @@ function to_key(code)
 	if (code == "Digit0") return 19;
 	if (code == "ShiftLeft") return 50;
 	if (code == "ControlLeft") return 37;
+	if (code == "Period") return 190;
 	return 0;
 }
 

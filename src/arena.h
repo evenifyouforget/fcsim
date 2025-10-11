@@ -143,6 +143,7 @@ int design_piece_count(struct block_list *list);
 void start_stop(struct arena *arena);
 bool is_running(struct arena *arena);
 void update_tool(struct arena *arena);
+void action_move(struct arena *arena, int x, int y);
 
 extern GLuint block_program;
 extern GLuint block_program_coord_attrib;
@@ -161,5 +162,14 @@ extern int _fcsim_speed_preset;
 #endif
 void change_speed_factor(struct arena *arena, double new_factor, int new_base_fps_mod);
 void change_speed_preset(struct arena *arena, int preset_index);
+
+// microtweaking
+extern double microtweak_dx;
+extern double microtweak_dy;
+void microtweak_jitter();
+void microtweak_reset();
+
+// entropy sources
+void general_prng_add_entropy(uint64_t value);
 
 #endif

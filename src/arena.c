@@ -60,6 +60,9 @@ const char *joint_fragment_shader_src =
 GLuint joint_program;
 GLuint joint_program_coord_attrib;
 
+double microtweak_dx = 0;
+double microtweak_dy = 0;
+
 void pixel_to_world(struct view *view, int x, int y, float *x_world, float *y_world)
 {
 	*x_world = view->x + view->scale * (2 * x - view->width);
@@ -458,6 +461,13 @@ void arena_key_down_event(struct arena *arena, int key)
 		break;
 	case 37: /* ctrl */
 		arena->ctrl = true;
+		break;
+	case 190: /* period */
+		// apply random microtweak
+		if(arena->state == STATE_MOVE) {
+			microtweak_jitter();
+			action_move(arena, arena->cursor_x, arena->cursor_y);
+		}
 		break;
 	}
 
@@ -1001,8 +1011,8 @@ void action_move(struct arena *arena, int x, int y)
 
 	pixel_to_world(&arena->view, x, y, &x_world, &y_world);
 
-	dx = x_world - arena->move_orig_x;
-	dy = y_world - arena->move_orig_y;
+	dx = x_world - arena->move_orig_x + microtweak_dx;
+	dy = y_world - arena->move_orig_y + microtweak_dy;
 
 	update_move(arena, dx, dy);
 }
@@ -1205,6 +1215,9 @@ void arena_mouse_move_event(struct arena *arena, int x, int y)
 
 	arena->cursor_x = x;
 	arena->cursor_y = y;
+
+	general_prng_add_entropy(x);
+	general_prng_add_entropy(y);
 }
 
 void joint_dfs(struct arena *arena, struct joint *joint, bool value, bool all);
@@ -1237,6 +1250,8 @@ void mouse_up_move(struct arena *arena)
 	arena->root_joints_moving = NULL;
 	arena->root_blocks_moving = NULL;
 	arena->blocks_moving = NULL;
+
+	microtweak_reset();
 }
 
 void mouse_up_new_block(struct arena *arena)
