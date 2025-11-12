@@ -494,6 +494,7 @@ function to_key(code)
 	if (code == "ShiftLeft") return 50;
 	if (code == "ControlLeft") return 37;
 	if (code == "Period") return 190;
+	if (code == "Comma") return 191;
 	return 0;
 }
 

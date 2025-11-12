@@ -41,6 +41,22 @@ struct angel_manager_t {
         }
         current_offset = offsets[current_index];
     }
+    void decay_step() {
+        if(!decaying) {
+            return;
+        }
+        std::vector<int> alive_index;
+        for(int i = 0; i < (int)offsets.size(); ++i) {
+            if(offsets[i].x != 0 || offsets[i].y != 0) {
+                alive_index.push_back(i);
+            }
+        }
+        if(alive_index.size() == 0) {
+            return;
+        }
+        int kill_index = alive_index[general_prng.next() % alive_index.size()];
+        offsets[kill_index] = {0,0};
+    }
 };
 angel_manager_t* angels = nullptr;
 
@@ -54,8 +70,8 @@ extern "C" void angel_reset() {
     ensure_angels();
     angels->magnitude = 3000;
     angels->decaying = false;
-    double angle_base_offset = general_prng.next();
-    double angle_base_multiplier = general_prng.next();
+    double angle_base_offset = general_prng.next() * 3.406121580086554589335173e-19;
+    double angle_base_multiplier = general_prng.next() * 3.406121580086554589335173e-19;
     angels->offsets.clear();
     for(int i = 0; i < 120; ++i) {
         double angle = angle_base_offset + angle_base_multiplier * i;
@@ -64,6 +80,11 @@ extern "C" void angel_reset() {
             angels->magnitude * sin(angle)
         });
     }
+}
+
+extern "C" void angel_start_decay() {
+    ensure_angels();
+    angels->decaying = true;
 }
 
 template <typename T> void append_vector(std::vector<T>& a, std::vector<T>& b) {
@@ -563,6 +584,7 @@ void block_graphics_reset(arena* arena, struct design *design)
 
     // fill all layers
     ensure_angels();
+    angels->decay_step();
     angels->current_index = -999999;
 	block_graphics_add_area(graphics, design->build_area, FCSIM_BUILD_AREA);
 	block_graphics_add_area(graphics, design->goal_area, FCSIM_GOAL_AREA);

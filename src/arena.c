@@ -470,6 +470,10 @@ void arena_key_down_event(struct arena *arena, int key)
 			action_move(arena, arena->cursor_x, arena->cursor_y);
 		}
 		break;
+	case 191: /* comma */
+		// start decaying angels
+		angel_start_decay();
+		break;
 	}
 
 	update_tool(arena);

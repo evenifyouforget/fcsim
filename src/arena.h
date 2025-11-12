@@ -169,6 +169,7 @@ extern double microtweak_dy;
 void microtweak_jitter();
 void microtweak_reset();
 void angel_reset();
+void angel_start_decay();
 
 // entropy sources
 void general_prng_add_entropy(uint64_t value);
