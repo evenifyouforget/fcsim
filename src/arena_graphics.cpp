@@ -31,7 +31,7 @@ struct {
     bool decaying = false;
     std::vector<vec2> offsets;
     void update_offset(int type_id) {
-        if(current_index < 0 || current_index >= offsets.size()) {
+        if(current_index < 0 || current_index >= (int64_t)offsets.size()) {
             current_offset = {0,0};
             return;
         }
