@@ -272,6 +272,8 @@ std::vector<joint> generate_joints(block* block) {
     // TODO: correct joint order
     const int type_id = block->type_id;
     shell shell = get_shell(block);
+    shell.x += angels.current_offset.x;
+    shell.y += angels.current_offset.y;
     std::vector<joint> result;
     float sina_half = sinf(shell.angle) / 2;
     float cosa_half = cosf(shell.angle) / 2;
