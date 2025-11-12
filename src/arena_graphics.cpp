@@ -18,6 +18,43 @@ extern "C" {
 }
 #include "arena.hpp"
 #include "math.h"
+#include "xoroshiro.hpp"
+
+struct vec2 {
+    double x = 0, y = 0;
+};
+
+struct {
+    double magnitude = 0;
+    int current_index = 0;
+    vec2 current_offset = {0,0};
+    bool decaying = false;
+    std::vector<vec2> offsets;
+    void update_offset(int type_id) {
+        if(current_index < 0 || current_index >= offsets.size()) {
+            return;
+        }
+        if(type_id == FCSIM_GOAL_CIRCLE || type_id == FCSIM_GOAL_RECT) {
+            return;
+        }
+        current_offset = offsets[current_index];
+    }
+} angels;
+
+extern "C" void angel_reset() {
+    angels.magnitude = 3000;
+    angels.decaying = false;
+    double angle_base_offset = general_prng.next();
+    double angle_base_multiplier = general_prng.next();
+    angels.offsets.clear();
+    for(int i = 0; i < 120; ++i) {
+        double angle = angle_base_offset + angle_base_multiplier * i;
+        angels.offsets.push_back(vec2{
+            angels.magnitude * cos(angle),
+            angels.magnitude * sin(angle)
+        });
+    }
+}
 
 template <typename T> void append_vector(std::vector<T>& a, std::vector<T>& b) {
     for(auto it = b.begin(); it != b.end(); ++it) {
@@ -313,6 +350,7 @@ static void block_graphics_add_rect_single(struct block_graphics *graphics,
 static void block_graphics_add_rect(struct block_graphics *graphics,
 				    struct shell shell, int type_id, int z_offset, color overlay) {
     const double CLAMP_ANGLE = 571.90948929350191576662;
+    angels.update_offset(type_id);
     if(type_id == FCSIM_GOAL_RECT && std::abs(shell.angle) >= CLAMP_ANGLE) {
         struct shell shell_copy = shell;
         shell_copy.angle = -CLAMP_ANGLE;
@@ -348,6 +386,7 @@ static void block_graphics_add_rect(struct block_graphics *graphics,
 static void block_graphics_add_area(struct block_graphics *graphics,
 				    struct area area, int type_id)
 {
+    angels.update_offset(type_id);
     shell area_shell;
     area_shell.type = SHELL_RECT;
     area_shell.rect.w = area.w;
@@ -406,6 +445,7 @@ static void block_graphics_add_circ(struct block_graphics *graphics,
 				    struct shell shell, int type_id, color overlay)
 {
     const int z_offset = 2;
+    angels.update_offset(type_id);
     if(graphics->simple_graphics) {
         block_graphics_add_circ_single(graphics, shell, alpha_over(get_color_by_type(type_id, 1), overlay), z_offset + 1);
         return;
@@ -474,6 +514,8 @@ static void block_graphics_add_block(struct block_graphics *graphics,
     for(auto it = joints_generated.begin(); it != joints_generated.end(); ++it) {
         block_graphics_add_joint(graphics, *it, color{0,0,0,0});
     }
+
+    angels.current_index++;
 }
 
 void block_graphics_push_and_bind(block_graphics* graphics) {
@@ -499,6 +541,7 @@ void block_graphics_reset(arena* arena, struct design *design)
     graphics->clear();
 
     // fill all layers
+    angels.current_index = -999999;
 	block_graphics_add_area(graphics, design->build_area, FCSIM_BUILD_AREA);
 	block_graphics_add_area(graphics, design->goal_area, FCSIM_GOAL_AREA);
 
@@ -506,6 +549,7 @@ void block_graphics_reset(arena* arena, struct design *design)
 	for (block = design->level_blocks.head; block; block = block->next)
 		block_graphics_add_block(graphics, block);
 
+    angels.current_index = 0;
 	for (block = design->player_blocks.head; block; block = block->next)
 		block_graphics_add_block(graphics, block);
 }

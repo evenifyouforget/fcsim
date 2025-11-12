@@ -464,6 +464,7 @@ void arena_key_down_event(struct arena *arena, int key)
 		break;
 	case 190: /* period */
 		// apply random microtweak
+		angel_reset();
 		if(arena->state == STATE_MOVE) {
 			microtweak_jitter();
 			action_move(arena, arena->cursor_x, arena->cursor_y);
