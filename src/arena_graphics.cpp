@@ -32,9 +32,11 @@ struct {
     std::vector<vec2> offsets;
     void update_offset(int type_id) {
         if(current_index < 0 || current_index >= offsets.size()) {
+            current_offset = {0,0};
             return;
         }
         if(type_id == FCSIM_GOAL_CIRCLE || type_id == FCSIM_GOAL_RECT) {
+            current_offset = {0,0};
             return;
         }
         current_offset = offsets[current_index];
@@ -351,6 +353,8 @@ static void block_graphics_add_rect(struct block_graphics *graphics,
 				    struct shell shell, int type_id, int z_offset, color overlay) {
     const double CLAMP_ANGLE = 571.90948929350191576662;
     angels.update_offset(type_id);
+    shell.x += angels.current_offset.x;
+    shell.y += angels.current_offset.y;
     if(type_id == FCSIM_GOAL_RECT && std::abs(shell.angle) >= CLAMP_ANGLE) {
         struct shell shell_copy = shell;
         shell_copy.angle = -CLAMP_ANGLE;
@@ -446,6 +450,8 @@ static void block_graphics_add_circ(struct block_graphics *graphics,
 {
     const int z_offset = 2;
     angels.update_offset(type_id);
+    shell.x += angels.current_offset.x;
+    shell.y += angels.current_offset.y;
     if(graphics->simple_graphics) {
         block_graphics_add_circ_single(graphics, shell, alpha_over(get_color_by_type(type_id, 1), overlay), z_offset + 1);
         return;
