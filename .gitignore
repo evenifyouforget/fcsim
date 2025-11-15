@@ -3,7 +3,8 @@
 *.xml
 run_single_design
 run_single_design_xml
-fcsim*
+fcsim
+fcsim-fpatan
 html/fcsim.wasm
 stl_test
 tags
