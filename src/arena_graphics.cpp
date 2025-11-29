@@ -636,6 +636,10 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
     if(button.id == ui_button_id{9, 0}) {
         arena->lock_if_preview_solves ^= 1; // toggle
     }
+    if(button.id == ui_button_id{10, 0}) {
+        // rotate color palette
+        piece_color_palette_offset = (piece_color_palette_offset + 1) % FCSIM_NUM_PALETTES;
+    }
 }
 
 void regenerate_ui_buttons(arena* arena) {
@@ -853,6 +857,12 @@ void regenerate_ui_buttons(arena* arena) {
         button.texts.push_back(ui_button_text{"Lock", 1, 0, 5});
         button.texts.push_back(ui_button_text{"if solve", 1, 0, -5});
         button.highlighted = arena->lock_if_preview_solves;
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{10, 0}, vw - 30, vh - 55 - 30 * 1.5f, 70, 30, 2};
+        button.texts.push_back(ui_button_text{"Change", 1, 0, 5});
+        button.texts.push_back(ui_button_text{"Color", 1, 0, -5});
         all_buttons->buttons.push_back(button);
     }
 }
