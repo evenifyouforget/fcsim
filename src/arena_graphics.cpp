@@ -1018,7 +1018,7 @@ extern "C" void block_graphics_init(struct arena *ar)
     ar->autostop_on_solve = false;
     if(is_dark_mode()) {
         // default palette for dark mode
-        piece_color_palette_offset = 1;
+        piece_color_palette_offset = 2;
     }
 }
 
