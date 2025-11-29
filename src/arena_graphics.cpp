@@ -1016,6 +1016,10 @@ extern "C" void block_graphics_init(struct arena *ar)
     ar->ui_toolbar_opened = false;
     ar->single_ticks_remaining = -1;
     ar->autostop_on_solve = false;
+    if(is_dark_mode()) {
+        // default palette for dark mode
+        piece_color_palette_offset = 1;
+    }
 }
 
 extern "C" bool arena_mouse_click_button(struct arena *arena) {

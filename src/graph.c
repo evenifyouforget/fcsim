@@ -126,6 +126,13 @@ uint32_t piece_color_table[FCSIM_NUM_TYPES][2 * FCSIM_NUM_PALETTES] = {
 };
 uint32_t piece_color_palette_offset = 0;
 
+// no dark mode detection for native
+#ifndef __wasm__
+int is_dark_mode() {
+	return 0;
+}
+#endif
+
 void get_color_by_type(int type_id, int slot, struct color * c) {
 	uint32_t argb = piece_color_table[type_id][slot + 2 * piece_color_palette_offset];
 	uint32_t b = argb & 0xff;
