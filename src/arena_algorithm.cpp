@@ -100,10 +100,21 @@ void multi_trail_t::submit_frame(design* current_design) {
     }
     // scan for joints
     std::vector<joint> joint_positions;
-    for (block* the_block = current_design->player_blocks.head; the_block; the_block = the_block->next) {
+    for (block* the_block = current_design->level_blocks.head; the_block; the_block = the_block->next) {
         switch(the_block->type_id) {
             case FCSIM_DYN_RECT:
             case FCSIM_DYN_CIRCLE:
+            {
+                std::vector<joint> generated = generate_joints(the_block, true);
+                for(size_t i = 0; i < generated.size(); ++i) {
+                    joint_positions.push_back(generated[i]);
+                }
+                break;
+            }
+        }
+    }
+    for (block* the_block = current_design->player_blocks.head; the_block; the_block = the_block->next) {
+        switch(the_block->type_id) {
             case FCSIM_WHEEL:
             case FCSIM_CW_WHEEL:
             case FCSIM_CCW_WHEEL:
