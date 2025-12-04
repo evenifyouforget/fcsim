@@ -14,7 +14,7 @@ extern "C" {
 
 // recommended to keep this to at most FCSIM_EXTRA_COLORS
 // but safe even if increased higher
-#define MAX_JOINT_TRACKERS 15
+#define MAX_JOINT_TRACKERS 23
 
 struct trail_t {
     std::vector<b2Vec2> datapoints;
