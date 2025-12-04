@@ -12,7 +12,9 @@ extern "C" {
 #include "box2d/b2Vec.h"
 }
 
-#define MAX_JOINT_TRACKERS 25
+// recommended to keep this to at most FCSIM_EXTRA_COLORS
+// but safe even if increased higher
+#define MAX_JOINT_TRACKERS 15
 
 struct trail_t {
     std::vector<b2Vec2> datapoints;
@@ -22,6 +24,7 @@ struct multi_trail_t {
     std::vector<uint64_t> joint_tracker_offsets;
     int joint_tracker_bump = 0;
     std::vector<trail_t> trails;
+    size_t num_goal_pieces = 0;
     bool accepting();
     void submit_frame(design*);
 };

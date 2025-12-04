@@ -131,6 +131,7 @@ void multi_trail_t::submit_frame(design* current_design) {
             trail_index++;
 		}
 	}
+    num_goal_pieces = trail_index;
     for(size_t i = 0; i < joint_tracker_offsets.size(); ++i) {
         size_t joint_index = joint_tracker_offsets[i] % joint_positions.size();
         // record position in the corresponding location

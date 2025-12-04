@@ -990,11 +990,10 @@ void draw_ui(arena* arena) {
 }
 
 void preview_trail_draw(arena* arena) {
-    const double LINE_RADIUS = 2;
-
     block_graphics* graphics = (block_graphics*)arena->block_graphics_v2;
 
     multi_trail_t* all_trails = (multi_trail_t*)arena->preview_trail;
+    const double thickness = 10.0 / (4 + all_trails->trails.size());
     for(size_t trail_index = 0; trail_index < all_trails->trails.size(); ++trail_index) {
         trail_t& the_trail = all_trails->trails[trail_index];
         if(the_trail.datapoints.size() < 2) {
@@ -1003,7 +1002,14 @@ void preview_trail_draw(arena* arena) {
         b2Vec2 last = the_trail.datapoints[0];
         for(size_t datapoint_index = 1; datapoint_index < the_trail.datapoints.size(); ++datapoint_index) {
             b2Vec2 current = the_trail.datapoints[datapoint_index];
-            block_graphics_add_line(graphics, last, current, LINE_RADIUS, get_color_by_type(FCSIM_GOAL_CIRCLE, 0), 4);
+            block_graphics_add_line(
+                graphics,
+                last,
+                current,
+                thickness,
+                get_color_by_type(trail_index < all_trails->num_goal_pieces ? FCSIM_GOAL_CIRCLE : all_trails->num_goal_pieces - trail_index - 1, 0),
+                4
+            );
             last = current;
         }
     }

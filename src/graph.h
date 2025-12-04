@@ -153,9 +153,11 @@ extern struct material water_rod_material;
 #define FCSIM_GOAL_RECT_OVERTURNED 18
 #define FCSIM_NUM_TYPES 19
 #define FCSIM_NUM_PALETTES 3
+#define FCSIM_EXTRA_COLORS 23
 
 extern uint32_t piece_color_table[FCSIM_NUM_TYPES][2 * FCSIM_NUM_PALETTES];
 extern uint32_t piece_color_palette_offset;
+extern uint32_t piece_extra_color_table[FCSIM_EXTRA_COLORS];
 
 // does the host user prefer dark mode?
 int is_dark_mode();

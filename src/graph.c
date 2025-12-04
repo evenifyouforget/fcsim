@@ -126,6 +126,34 @@ uint32_t piece_color_table[FCSIM_NUM_TYPES][2 * FCSIM_NUM_PALETTES] = {
 };
 uint32_t piece_color_palette_offset = 0;
 
+// generated using chroma.js
+// chroma.cubehelix().start(0).rotations(3).gamma(0.7).lightness([0.2, 0.8])
+uint32_t piece_extra_color_table[FCSIM_EXTRA_COLORS] = {
+	0xff804137,
+	0xff786bb5,
+	0xff65b483,
+	0xffd8a98e,
+	0xffdac4f3,
+	0xff447a33,
+	0xffbc6a75,
+	0xff95a0dc,
+	0xff9fd5a4,
+	0xfff4d0cb,
+	0xff467d9d,
+	0xff80a457,
+	0xffdf95b1,
+	0xffb6ceef,
+	0xff685e22,
+	0xffa961a2,
+	0xff6cb0bb,
+	0xffb9c388,
+	0xfff2c4e0,
+	0xff328566,
+	0xffa98653,
+	0xffc592d5,
+	0xff9dd7cf,
+};
+
 // no dark mode detection for native
 #ifndef __wasm__
 int is_dark_mode() {
@@ -134,7 +162,7 @@ int is_dark_mode() {
 #endif
 
 void get_color_by_type(int type_id, int slot, struct color * c) {
-	uint32_t argb = piece_color_table[type_id][slot + 2 * piece_color_palette_offset];
+	uint32_t argb = type_id < 0 ? piece_extra_color_table[(-type_id-1) % FCSIM_EXTRA_COLORS] : piece_color_table[type_id][slot + 2 * piece_color_palette_offset];
 	uint32_t b = argb & 0xff;
 	uint32_t g = (argb >> 8) & 0xff;
 	uint32_t r = (argb >> 16) & 0xff;
