@@ -993,7 +993,7 @@ void preview_trail_draw(arena* arena) {
     block_graphics* graphics = (block_graphics*)arena->block_graphics_v2;
 
     multi_trail_t* all_trails = (multi_trail_t*)arena->preview_trail;
-    const double thickness = 10.0 / (4 + all_trails->trails.size());
+    const double thickness = 22.0 / (10 + all_trails->trails.size());
     for(size_t trail_index = 0; trail_index < all_trails->trails.size(); ++trail_index) {
         trail_t& the_trail = all_trails->trails[trail_index];
         if(the_trail.datapoints.size() < 2) {
