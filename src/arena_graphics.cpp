@@ -229,7 +229,7 @@ joint joint_from_xy(float x, float y) {
     return result;
 }
 
-std::vector<joint> generate_joints(block* block) {
+std::vector<joint> generate_joints(block* block, bool allow_fake_joints) {
     // TODO: correct joint order
     const int type_id = block->type_id;
     shell shell = get_shell(block);
@@ -285,8 +285,21 @@ std::vector<joint> generate_joints(block* block) {
             }
         }
         break;
+        case FCSIM_DYN_CIRCLE:
+        case FCSIM_DYN_RECT:
+        {
+            if(allow_fake_joints) {
+                // pattern: dynamic (up to 1)
+                result.push_back(joint_from_xy(shell.x, shell.y));
+            }
+        }
+        break;
     }
     return result;
+}
+
+std::vector<joint> generate_joints(block* block) {
+    return generate_joints(block, false);
 }
 
 static void block_graphics_add_rect_single(struct block_graphics *graphics,
