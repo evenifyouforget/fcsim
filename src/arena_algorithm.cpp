@@ -50,7 +50,8 @@ extern "C" void tick_func(void *arg)
             the_arena->preview_trail = _new<multi_trail_t>();
         }
         multi_trail_t* all_trails = (multi_trail_t*)the_arena->preview_trail;
-        if(the_arena->preview_design == nullptr || the_arena->preview_design->modcount != the_arena->design.modcount) {
+        // joint tracker bump forces redraw
+        if(the_arena->preview_design == nullptr || the_arena->preview_design->modcount != the_arena->design.modcount || all_trails->joint_tracker_bump != 0) {
             // refresh preview design
             // manually clear old data
             the_arena->preview_has_won = false;
