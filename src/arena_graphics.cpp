@@ -561,6 +561,7 @@ void block_graphics_draw(struct block_graphics *graphics, struct view *view, boo
 }
 
 void on_button_clicked(arena* arena, ui_button_single& button) {
+    multi_trail_t* all_trails = (multi_trail_t*)arena->preview_trail;
     if(button.id == ui_button_id{0, 0}) {
         arena->ui_toolbar_opened = true;
     }
@@ -653,6 +654,10 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
         // rotate color palette
         piece_color_palette_offset = (piece_color_palette_offset + 1) % FCSIM_NUM_PALETTES;
     }
+    if(button.id == ui_button_id{10, 0}) {
+        // queue tracker bump
+        all_trails->joint_tracker_bump++;
+    }
 }
 
 void regenerate_ui_buttons(arena* arena) {
@@ -661,6 +666,8 @@ void regenerate_ui_buttons(arena* arena) {
 
     float vw = arena->view.width;
     float vh = arena->view.height;
+
+    multi_trail_t* all_trails = (multi_trail_t*)arena->preview_trail;
 
     {
         ui_button_single button{{0, 0}, 75, vh, 30, 30};
@@ -876,6 +883,13 @@ void regenerate_ui_buttons(arena* arena) {
         ui_button_single button{{10, 0}, vw - 30, vh - 55 - 30 * 1.5f, 70, 30, 2};
         button.texts.push_back(ui_button_text{"Change", 1, 0, 5});
         button.texts.push_back(ui_button_text{"Color", 1, 0, -5});
+        all_buttons->buttons.push_back(button);
+    }
+    {
+        ui_button_single button{{11, 0}, vw - 30, vh - 55 - 30 * 2.5f, 70, 30, 2};
+        button.texts.push_back(ui_button_text{"More", 1, 0, 5});
+        button.texts.push_back(ui_button_text{"Trails", 1, 0, -5});
+        button.highlighted = all_trails->joint_tracker_offsets.size() != 0;
         all_buttons->buttons.push_back(button);
     }
 }

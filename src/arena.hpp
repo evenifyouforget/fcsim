@@ -12,14 +12,15 @@ extern "C" {
 #include "box2d/b2Vec.h"
 }
 
-#define MAX_TRACKER_OFFSETS 25
+#define MAX_JOINT_TRACKERS 25
 
 struct trail_t {
     std::vector<b2Vec2> datapoints;
 };
 
 struct multi_trail_t {
-    std::vector<uint64_t> tracker_offsets;
+    std::vector<uint64_t> joint_tracker_offsets;
+    int joint_tracker_bump = 0;
     std::vector<trail_t> trails;
     bool accepting();
     void submit_frame(design*);
