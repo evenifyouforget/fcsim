@@ -8,6 +8,7 @@
 #include "arena.hpp"
 #include "stl_compat.h"
 #include "interval.h"
+#include "xoroshiro.hpp"
 
 extern "C" void tick_func(void *arg)
 {
@@ -49,7 +50,8 @@ extern "C" void tick_func(void *arg)
             the_arena->preview_trail = _new<multi_trail_t>();
         }
         multi_trail_t* all_trails = (multi_trail_t*)the_arena->preview_trail;
-        if(the_arena->preview_design == nullptr || the_arena->preview_design->modcount != the_arena->design.modcount) {
+        // joint tracker bump forces redraw
+        if(the_arena->preview_design == nullptr || the_arena->preview_design->modcount != the_arena->design.modcount || all_trails->joint_tracker_bump != 0) {
             // refresh preview design
             // manually clear old data
             the_arena->preview_has_won = false;
@@ -87,6 +89,46 @@ bool multi_trail_t::accepting() {
 }
 
 void multi_trail_t::submit_frame(design* current_design) {
+    // apply bump
+    for(;joint_tracker_bump > 0;--joint_tracker_bump) {
+        if(joint_tracker_offsets.size() < MAX_JOINT_TRACKERS) {
+            joint_tracker_offsets.push_back(general_prng.next());
+        }
+        for(size_t i = 0; i < joint_tracker_offsets.size(); ++i) {
+            joint_tracker_offsets[i] += i + 1;
+        }
+    }
+    // scan for joints
+    std::vector<joint> joint_positions;
+    for (block* the_block = current_design->level_blocks.head; the_block; the_block = the_block->next) {
+        switch(the_block->type_id) {
+            case FCSIM_DYN_RECT:
+            case FCSIM_DYN_CIRCLE:
+            {
+                std::vector<joint> generated = generate_joints(the_block, true);
+                for(size_t i = 0; i < generated.size(); ++i) {
+                    joint_positions.push_back(generated[i]);
+                }
+                break;
+            }
+        }
+    }
+    for (block* the_block = current_design->player_blocks.head; the_block; the_block = the_block->next) {
+        switch(the_block->type_id) {
+            case FCSIM_WHEEL:
+            case FCSIM_CW_WHEEL:
+            case FCSIM_CCW_WHEEL:
+            case FCSIM_ROD:
+            case FCSIM_SOLID_ROD:
+            {
+                std::vector<joint> generated = generate_joints(the_block, true);
+                for(size_t i = 0; i < generated.size(); ++i) {
+                    joint_positions.push_back(generated[i]);
+                }
+                break;
+            }
+        }
+    }
     // scan for goal pieces
     size_t trail_index = 0;
     for (block* the_block = current_design->player_blocks.head; the_block; the_block = the_block->next) {
@@ -100,4 +142,15 @@ void multi_trail_t::submit_frame(design* current_design) {
             trail_index++;
 		}
 	}
+    num_goal_pieces = trail_index;
+    for(size_t i = 0; i < joint_tracker_offsets.size(); ++i) {
+        size_t joint_index = joint_tracker_offsets[i] % joint_positions.size();
+        // record position in the corresponding location
+        while(trails.size() <= trail_index) {
+            trails.emplace_back();
+        }
+        const b2Vec2 position = b2Vec2{joint_positions[joint_index].x, joint_positions[joint_index].y};
+        trails[trail_index].datapoints.push_back(position);
+        trail_index++;
+    }
 }

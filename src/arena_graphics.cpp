@@ -229,7 +229,7 @@ joint joint_from_xy(float x, float y) {
     return result;
 }
 
-std::vector<joint> generate_joints(block* block) {
+std::vector<joint> generate_joints(block* block, bool allow_fake_joints) {
     // TODO: correct joint order
     const int type_id = block->type_id;
     shell shell = get_shell(block);
@@ -285,8 +285,21 @@ std::vector<joint> generate_joints(block* block) {
             }
         }
         break;
+        case FCSIM_DYN_CIRCLE:
+        case FCSIM_DYN_RECT:
+        {
+            if(allow_fake_joints) {
+                // pattern: dynamic (up to 1)
+                result.push_back(joint_from_xy(shell.x, shell.y));
+            }
+        }
+        break;
     }
     return result;
+}
+
+std::vector<joint> generate_joints(block* block) {
+    return generate_joints(block, false);
 }
 
 static void block_graphics_add_rect_single(struct block_graphics *graphics,
@@ -548,6 +561,7 @@ void block_graphics_draw(struct block_graphics *graphics, struct view *view, boo
 }
 
 void on_button_clicked(arena* arena, ui_button_single& button) {
+    multi_trail_t* all_trails = (multi_trail_t*)arena->preview_trail;
     if(button.id == ui_button_id{0, 0}) {
         arena->ui_toolbar_opened = true;
     }
@@ -640,6 +654,10 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
         // rotate color palette
         piece_color_palette_offset = (piece_color_palette_offset + 1) % FCSIM_NUM_PALETTES;
     }
+    if(button.id == ui_button_id{11, 0}) {
+        // queue tracker bump
+        all_trails->joint_tracker_bump++;
+    }
 }
 
 void regenerate_ui_buttons(arena* arena) {
@@ -648,6 +666,8 @@ void regenerate_ui_buttons(arena* arena) {
 
     float vw = arena->view.width;
     float vh = arena->view.height;
+
+    multi_trail_t* all_trails = (multi_trail_t*)arena->preview_trail;
 
     {
         ui_button_single button{{0, 0}, 75, vh, 30, 30};
@@ -865,6 +885,13 @@ void regenerate_ui_buttons(arena* arena) {
         button.texts.push_back(ui_button_text{"Color", 1, 0, -5});
         all_buttons->buttons.push_back(button);
     }
+    {
+        ui_button_single button{{11, 0}, vw - 30, vh - 55 - 30 * 2.5f, 70, 30, 2};
+        button.texts.push_back(ui_button_text{"More", 1, 0, 5});
+        button.texts.push_back(ui_button_text{"Trails", 1, 0, -5});
+        button.highlighted = all_trails->joint_tracker_offsets.size() != 0;
+        all_buttons->buttons.push_back(button);
+    }
 }
 
 // Draw text, and return the x where the text ends
@@ -963,11 +990,10 @@ void draw_ui(arena* arena) {
 }
 
 void preview_trail_draw(arena* arena) {
-    const double LINE_RADIUS = 2;
-
     block_graphics* graphics = (block_graphics*)arena->block_graphics_v2;
 
     multi_trail_t* all_trails = (multi_trail_t*)arena->preview_trail;
+    const double thickness = 22.0 / (10 + all_trails->trails.size());
     for(size_t trail_index = 0; trail_index < all_trails->trails.size(); ++trail_index) {
         trail_t& the_trail = all_trails->trails[trail_index];
         if(the_trail.datapoints.size() < 2) {
@@ -976,7 +1002,14 @@ void preview_trail_draw(arena* arena) {
         b2Vec2 last = the_trail.datapoints[0];
         for(size_t datapoint_index = 1; datapoint_index < the_trail.datapoints.size(); ++datapoint_index) {
             b2Vec2 current = the_trail.datapoints[datapoint_index];
-            block_graphics_add_line(graphics, last, current, LINE_RADIUS, get_color_by_type(FCSIM_GOAL_CIRCLE, 0), 4);
+            block_graphics_add_line(
+                graphics,
+                last,
+                current,
+                thickness,
+                get_color_by_type(trail_index < all_trails->num_goal_pieces ? FCSIM_GOAL_CIRCLE : all_trails->num_goal_pieces - trail_index - 1, 0),
+                4
+            );
             last = current;
         }
     }
