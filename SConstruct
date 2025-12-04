@@ -50,6 +50,7 @@ common_sources = [
     "src/str.c",
     "src/text.c",
     "src/xml.c",
+    "src/xoroshiro.cpp",
     "src/box2d/b2BlockAllocator.c",
     "src/box2d/b2Body.cpp",
     "src/box2d/b2BroadPhase.cpp",
