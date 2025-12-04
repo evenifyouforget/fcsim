@@ -26,4 +26,6 @@ struct multi_trail_t {
     void submit_frame(design*);
 };
 
+std::vector<joint> generate_joints(block* block, bool allow_fake_joints);
+
 #endif // ARENA_HPP

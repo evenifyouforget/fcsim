@@ -654,7 +654,7 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
         // rotate color palette
         piece_color_palette_offset = (piece_color_palette_offset + 1) % FCSIM_NUM_PALETTES;
     }
-    if(button.id == ui_button_id{10, 0}) {
+    if(button.id == ui_button_id{11, 0}) {
         // queue tracker bump
         all_trails->joint_tracker_bump++;
     }
