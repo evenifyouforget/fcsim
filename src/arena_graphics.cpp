@@ -932,6 +932,22 @@ void draw_tick_counter(struct arena *arena)
     x = draw_text_default(arena, std::to_string(total_memory_used_bytes() / 1000000), x, 10);
     x = draw_text_default(arena, "MB", x, 10, 1);
 #endif
+
+    // first gp location
+    design* current_design = &arena->design;
+    for (block* the_block = current_design->player_blocks.head; the_block; the_block = the_block->next) {
+		if (the_block->goal) {
+            const b2Vec2 position = the_block->body->m_position;
+            x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+            x = draw_text_default(arena, "(", x, 10);
+            x = draw_text_default(arena, std::to_string(position.x), x, 10);
+            x = draw_text_default(arena, ", ", x, 10);
+            x = draw_text_default(arena, std::to_string(position.y), x, 10);
+            x = draw_text_default(arena, ")", x, 10);
+            x = draw_text_default(arena, "gp", x, 10, 1);
+            break;
+		}
+	}
 }
 
 void draw_ui(arena* arena) {
