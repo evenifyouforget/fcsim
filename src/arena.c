@@ -1205,6 +1205,9 @@ void arena_mouse_move_event(struct arena *arena, int x, int y)
 
 	arena->cursor_x = x;
 	arena->cursor_y = y;
+
+	general_prng_add_entropy(x);
+	general_prng_add_entropy(y);
 }
 
 void joint_dfs(struct arena *arena, struct joint *joint, bool value, bool all);
