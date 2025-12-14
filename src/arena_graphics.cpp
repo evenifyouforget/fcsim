@@ -935,16 +935,14 @@ void draw_tick_counter(struct arena *arena)
         x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 5);
         std::string checksum_text;
         for(int i = 0; i < 6; ++i) {
-            // 6 digits, base 62
-            int digit = actual_checksum % 62;
-            actual_checksum /= 62;
+            // 6 digits, base 36
+            int digit = actual_checksum % 36;
+            actual_checksum /= 36;
             char c;
             if(digit < 10) {
                 c = '0' + digit;
-            } else if(digit < 36) {
-                c = 'A' + (digit - 10);
             } else {
-                c = 'a' + (digit - 36);
+                c = 'a' + (digit - 10);
             }
             checksum_text += c;
         }
