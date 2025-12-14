@@ -934,9 +934,11 @@ void draw_tick_counter(struct arena *arena)
 #endif
 
     // fine adjustment factor
-    x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-    x = draw_text_default(arena, std::to_string(arena->fine_adjustment_factor), x, 10);
-    x = draw_text_default(arena, "adjustment", x, 10, 1);
+    if(arena->fine_adjustment_factor != 0) {
+        x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+        x = draw_text_default(arena, std::to_string(arena->fine_adjustment_factor), x, 10);
+        x = draw_text_default(arena, "adjustment", x, 10, 1);
+    }
 }
 
 void draw_ui(arena* arena) {
