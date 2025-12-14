@@ -150,6 +150,7 @@ struct string {
     void append(char);
     string& operator=(const string& other);
     string& operator=(const char* other);
+    string& operator+=(char);
     size_t size() const;
     char& operator[](size_t pos);
 };

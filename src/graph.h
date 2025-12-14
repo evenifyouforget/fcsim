@@ -38,6 +38,7 @@ struct joint {
 	double x, y;
 	struct attach_list att;
 	bool visited;
+	uint64_t _checksum_uid;
 };
 
 struct joint *new_joint(struct block *gen, double x, double y);

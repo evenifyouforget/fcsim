@@ -137,6 +137,10 @@ bool is_design_legal(struct design *design);
 bool goal_blocks_inside_goal_area(struct design *design);
 void tick_func(void *arg);
 
+// recalculate checksum; store the value and return it
+// 31-bit checksum, always a positive value
+int recalculate_design_checksum(struct design *design);
+
 int block_list_len(struct block_list *list);
 int design_piece_count(struct block_list *list);
 

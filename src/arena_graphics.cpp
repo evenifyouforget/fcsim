@@ -922,6 +922,35 @@ void draw_tick_counter(struct arena *arena)
     x = draw_text_default(arena, std::to_string(total_memory_used_bytes() / 1000000), x, 10);
     x = draw_text_default(arena, "MB", x, 10, 1);
 #endif
+
+    // second row
+    x = 10;
+    float y = 10 + FONT_Y_INCREMENT * 2;
+    int actual_checksum = recalculate_design_checksum(&arena->design);
+    int expect_checksum = arena->design.expect_checksum;
+    if(actual_checksum != 0) {
+        if(expect_checksum != 0) {
+            x = draw_text_default(arena, actual_checksum == expect_checksum ? "[OK]" : "[!]", x, y);
+        }
+        x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 5);
+        std::string checksum_text;
+        for(int i = 0; i < 6; ++i) {
+            // 6 digits, base 62
+            int digit = actual_checksum % 62;
+            actual_checksum /= 62;
+            char c;
+            if(digit < 10) {
+                c = '0' + digit;
+            } else if(digit < 36) {
+                c = 'A' + (digit - 10);
+            } else {
+                c = 'a' + (digit - 36);
+            }
+            checksum_text += c;
+        }
+        x = draw_text_default(arena, checksum_text, x, y);
+        x = draw_text_default(arena, "checksum", x, y, 1);
+    }
 }
 
 void draw_ui(arena* arena) {
