@@ -550,11 +550,18 @@ function alloc_str(str)
 }
 
 let last_exported_checksum = 0;
-let import_checksum = params.get('checksum');
-if(import_checksum) {
-	import_checksum = parseInt(import_checksum);
-} else {
-	import_checksum = 0;
+let import_checksum_str = params.get('checksum');
+let import_checksum = 0;
+if(import_checksum_str) {
+	import_checksum = parseInt(import_checksum_str);
+	if(isNaN(import_checksum)) {
+		// attempt to parse little-endian base 36
+		import_checksum = parseInt(import_checksum_str.split('').reverse().join(''), 36);
+		if(isNaN(import_checksum)) {
+			// both methods failed
+			import_checksum = 0;
+		}
+	}
 }
 
 function on_text(text)
