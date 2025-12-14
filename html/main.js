@@ -553,15 +553,9 @@ let last_exported_checksum = 0;
 let import_checksum_str = params.get('checksum');
 let import_checksum = 0;
 if(import_checksum_str) {
-	if(import_checksum_str.length == 6) {
-		// attempt to parse little-endian base 36
-		import_checksum = parseInt(import_checksum_str.split('').reverse().join(''), 36);
-	} else {
-		// attempt to parse normal integer
-		import_checksum = parseInt(import_checksum_str);
-	}
+	import_checksum = parseInt(import_checksum_str.split('').reverse().join(''), 36);
 	if(isNaN(import_checksum)) {
-		// adaptive parse failed
+		// parse failed
 		import_checksum = 0;
 	}
 }
@@ -569,7 +563,8 @@ if(import_checksum_str) {
 function on_text(text)
 {
 	console.log(text);
-	design_link.innerHTML = design_link.href = self_url_full() + "?designId=" + text + "&checksum=" + last_exported_checksum;
+	let export_checksum_str = last_exported_checksum.toString(36).split('').reverse().join('');
+	design_link.innerHTML = design_link.href = self_url_full() + "?designId=" + text + "&checksum=" + export_checksum_str;
 	design_link.style.display = "block";
 }
 
