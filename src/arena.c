@@ -152,6 +152,7 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 
 	arena->shift = false;
 	arena->ctrl = false;
+	arena->fine_adjustment_factor = 0;
 
 	arena->tool = TOOL_MOVE;
 	arena->tool_hidden = TOOL_MOVE;
@@ -999,10 +1000,17 @@ void action_move(struct arena *arena, int x, int y)
 	float dx;
 	float dy;
 
+	float adjustment_mult = 1;
+	for(int i = arena->fine_adjustment_factor; i < 0; i++) {
+		adjustment_mult *= 0.5;
+	}
+
 	pixel_to_world(&arena->view, x, y, &x_world, &y_world);
 
 	dx = x_world - arena->move_orig_x;
 	dy = y_world - arena->move_orig_y;
+	dx *= adjustment_mult;
+	dy *= adjustment_mult;
 
 	update_move(arena, dx, dy);
 }
@@ -1633,7 +1641,21 @@ void arena_mouse_button_down_event(struct arena *arena, int button)
 
 void arena_scroll_event(struct arena *arena, int delta)
 {
-	arena->view.scale *= (1.0f - delta * 0.05f);
+	if(arena->shift) {
+		// sign only
+		delta = (delta > 0) ? 1 : -1;
+		// change fine adjustment factor
+		arena->fine_adjustment_factor += delta;
+		// clamp in the range (-50, 0)
+		if(arena->fine_adjustment_factor < -50) {
+			arena->fine_adjustment_factor = -50;
+		} else if(arena->fine_adjustment_factor > 0) {
+			arena->fine_adjustment_factor = 0;
+		}
+	} else {
+		// zoom
+		arena->view.scale *= (1.0f - delta * 0.05f);
+	}
 }
 
 void arena_size_event(struct arena *arena, float width, float height)

@@ -71,6 +71,7 @@ struct arena {
 	int cursor_y;
 	bool shift;
 	bool ctrl;
+	int fine_adjustment_factor;
 
 	enum tool tool;
 	enum tool tool_hidden;
