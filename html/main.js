@@ -549,10 +549,18 @@ function alloc_str(str)
 	return mem;
 }
 
+let last_exported_checksum = 0;
+let import_checksum = params.get('checksum');
+if(import_checksum) {
+	import_checksum = parseInt(import_checksum);
+} else {
+	import_checksum = 0;
+}
+
 function on_text(text)
 {
 	console.log(text);
-	design_link.innerHTML = design_link.href = self_url_full() + "?designId=" + text;
+	design_link.innerHTML = design_link.href = self_url_full() + "?designId=" + text + "&checksum=" + last_exported_checksum;
 	design_link.style.display = "block";
 }
 
@@ -575,6 +583,7 @@ function save_design(event)
 
 	let xml = inst.exports.export(user, name, desc);
 	let len = inst.exports.strlen(xml);
+	last_exported_checksum = inst.exports.get_main_design_checksum();
 
 	let xml_str = make_cstring(xml);
 
@@ -602,7 +611,7 @@ function init_module(results)
 	let mem_uint8 = new Uint8Array(inst.exports.memory.buffer, mem, len);
 	mem_uint8.set(buffer_uint8);
 
-	inst.exports.init(mem, buffer_uint8.length);
+	inst.exports.init(mem, buffer_uint8.length, import_checksum);
 	inst.exports.resize(canvas.width, canvas.height);
 	window.requestAnimationFrame(canvas_draw);
 	addEventListener("keydown", canvas_keydown);

@@ -193,6 +193,8 @@ struct design {
 	struct area goal_area;
 	int level_id;
 	int modcount; // increments whenever any change is made
+	int expect_checksum; // 0 means unknown
+	int actual_checksum;
 };
 
 enum shell_type {

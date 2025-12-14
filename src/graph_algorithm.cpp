@@ -64,6 +64,8 @@ design* _clean_copy(std::unordered_map<void*, void*>& pointer_map, design* old_o
     new_obj->goal_area = old_obj->goal_area;
     new_obj->level_id = old_obj->level_id;
     new_obj->modcount = old_obj->modcount;
+    new_obj->expect_checksum = old_obj->expect_checksum;
+    new_obj->actual_checksum = old_obj->actual_checksum;
     return new_obj;
 }
 
