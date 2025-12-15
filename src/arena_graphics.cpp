@@ -932,6 +932,13 @@ void draw_tick_counter(struct arena *arena)
     x = draw_text_default(arena, std::to_string(total_memory_used_bytes() / 1000000), x, 10);
     x = draw_text_default(arena, "MB", x, 10, 1);
 #endif
+
+    // fine adjustment factor
+    if(arena->fine_adjustment_factor != 0) {
+        x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+        x = draw_text_default(arena, std::to_string(arena->fine_adjustment_factor), x, 10);
+        x = draw_text_default(arena, "adjustment", x, 10, 1);
+    }
 }
 
 void draw_ui(arena* arena) {
