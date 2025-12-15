@@ -103,7 +103,7 @@ function showVersionMenu() {
 	version_branch_name.textContent = versionInfo[0];
 	version_uncommitted_lines.textContent = versionInfo[1];
 	version_described_version.textContent = versionInfo[2];
-	version_build_timestamp.textContent = versionInfo[3];
+	version_build_timestamp.textContent = new Date(versionInfo[3] * 1000).toISOString();
 	console.log(versionInfo);
 }
 
