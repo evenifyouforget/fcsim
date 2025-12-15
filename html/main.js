@@ -410,6 +410,10 @@ let gl_env = {
 		clearInterval(id);
 	},
 
+	is_dark_mode() {
+		return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 1 : 0;
+	},
+
 	print_slice(str, len) {
 		console.log(make_string(str, len));
 	},
