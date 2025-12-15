@@ -9,6 +9,191 @@
 #include "stl_compat.h"
 #include "interval.h"
 
+struct checksum_state_t {
+    uint64_t value = 0;
+    uint64_t joint_uid = 0;
+};
+
+uint64_t _checksum_value_combine(uint64_t x, uint64_t y) {
+    x = x * 0x6a999a34a7c5df1bull + y + 0xd10dbc37a7c9b29bull;
+    x ^= x >> 33;
+    return x;
+}
+
+void _add_value_to_checksum(checksum_state_t& state, uint64_t x) {
+    state.value = _checksum_value_combine(state.value, x);
+}
+
+void _add_value_to_checksum(checksum_state_t& state, double x) {
+    union {
+        double as_double;
+        uint64_t as_uint64;
+    } union_value;
+    union_value.as_double = x;
+    _add_value_to_checksum(state, union_value.as_uint64);
+}
+
+void _add_area_to_checksum(checksum_state_t& state, struct area* area) {
+    _add_value_to_checksum(state, area->x);
+    _add_value_to_checksum(state, area->y);
+    _add_value_to_checksum(state, area->w);
+    _add_value_to_checksum(state, area->h);
+    //_add_value_to_checksum(state, area->expand);
+}
+
+void _add_joint_to_checksum(checksum_state_t& state, struct joint* joint) {
+    if(joint == nullptr) {
+        _add_value_to_checksum(state, (uint64_t)(0));
+        return;
+    }
+    _add_value_to_checksum(state, (uint64_t)(joint->_checksum_uid));
+}
+
+void _assign_joint_uid(checksum_state_t& state, struct joint* joint, int phase) {
+    if(joint == nullptr) {
+        return;
+    }
+    switch(phase) {
+        case 0: {
+            // set initial id
+            joint->_checksum_uid = ++state.joint_uid;
+            break;
+        }
+        case 1: {
+            // count neighbours
+            if(joint->prev != nullptr) {
+                joint->_checksum_uid = _checksum_value_combine(joint->_checksum_uid, 1);
+                joint->_checksum_uid = _checksum_value_combine(joint->_checksum_uid, joint->prev->_checksum_uid);
+            }
+            if(joint->next != nullptr) {
+                joint->_checksum_uid = _checksum_value_combine(joint->_checksum_uid, 2);
+                joint->_checksum_uid = _checksum_value_combine(joint->_checksum_uid, joint->next->_checksum_uid);
+            }
+            break;
+        }
+    }
+}
+
+void _add_block_to_checksum(checksum_state_t& state, struct block* block, int phase) {
+    switch(phase) {
+        case 0:
+        case 1: {
+            // joint-only passes
+            switch(block->shape.type) {
+                case shape_type::SHAPE_BOX: {
+                    _assign_joint_uid(state, block->shape.box.center, phase);
+                    for(int i = 0; i < 4; ++i) {
+                        _assign_joint_uid(state, block->shape.box.corners[i], phase);
+                    }
+                    break;
+                }
+                case shape_type::SHAPE_ROD: {
+                    _assign_joint_uid(state, block->shape.rod.from, phase);
+                    _assign_joint_uid(state, block->shape.rod.to, phase);
+                    break;
+                }
+                case shape_type::SHAPE_WHEEL: {
+                    _assign_joint_uid(state, block->shape.wheel.center, phase);
+                    for(int i = 0; i < 4; ++i) {
+                        _assign_joint_uid(state, block->shape.wheel.spokes[i], phase);
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+        case 2: {
+            // gather main hash
+            _add_value_to_checksum(state, (uint64_t)(block->type_id));
+            _add_value_to_checksum(state, (uint64_t)(block->shape.type));
+            switch(block->shape.type) {
+                case shape_type::SHAPE_RECT: {
+                    _add_value_to_checksum(state, block->shape.rect.x);
+                    _add_value_to_checksum(state, block->shape.rect.y);
+                    _add_value_to_checksum(state, block->shape.rect.w);
+                    _add_value_to_checksum(state, block->shape.rect.h);
+                    _add_value_to_checksum(state, block->shape.rect.angle);
+                    break;
+                }
+                case shape_type::SHAPE_CIRC: {
+                    _add_value_to_checksum(state, block->shape.circ.x);
+                    _add_value_to_checksum(state, block->shape.circ.y);
+                    _add_value_to_checksum(state, block->shape.circ.radius);
+                    break;
+                }
+                case shape_type::SHAPE_BOX: {
+                    _add_value_to_checksum(state, block->shape.box.x);
+                    _add_value_to_checksum(state, block->shape.box.y);
+                    _add_value_to_checksum(state, block->shape.box.w);
+                    _add_value_to_checksum(state, block->shape.box.h);
+                    _add_value_to_checksum(state, block->shape.box.angle);
+                    _add_joint_to_checksum(state, block->shape.box.center);
+                    for(int i = 0; i < 4; ++i) {
+                        _add_joint_to_checksum(state, block->shape.box.corners[i]);
+                    }
+                    break;
+                }
+                case shape_type::SHAPE_ROD: {
+                    _add_joint_to_checksum(state, block->shape.rod.from);
+                    _add_joint_to_checksum(state, block->shape.rod.to);
+                    _add_value_to_checksum(state, block->shape.rod.width);
+                    break;
+                }
+                case shape_type::SHAPE_WHEEL: {
+                    _add_joint_to_checksum(state, block->shape.wheel.center);
+                    _add_value_to_checksum(state, block->shape.wheel.radius);
+                    _add_value_to_checksum(state, block->shape.wheel.angle);
+                    //_add_value_to_checksum(state, (uint64_t)(block->shape.wheel.spin));
+                    for(int i = 0; i < 4; ++i) {
+                        _add_joint_to_checksum(state, block->shape.wheel.spokes[i]);
+                    }
+                    break;
+                }
+            }
+            // shell is theoretically redundant, but we add it anyway
+            shell shell_normalized;
+            get_shell(&shell_normalized, &block->shape);
+            _add_value_to_checksum(state, shell_normalized.x);
+            _add_value_to_checksum(state, shell_normalized.y);
+            _add_value_to_checksum(state, shell_normalized.angle);
+            _add_value_to_checksum(state, (uint64_t)(shell_normalized.type));
+            switch(shell_normalized.type) {
+                case SHELL_CIRC: {
+                    _add_value_to_checksum(state, shell_normalized.circ.radius);
+                    break;
+                }
+                case SHELL_RECT: {
+                    _add_value_to_checksum(state, shell_normalized.rect.w);
+                    _add_value_to_checksum(state, shell_normalized.rect.h);
+                    break;
+                }
+            }
+            break;
+        }
+    }
+}
+
+extern "C" int recalculate_design_checksum(struct design *design) {
+    checksum_state_t state;
+    struct block *block;
+    for(int phase = 0; phase < 3; ++phase) {
+        for (block = design->level_blocks.head; block; block = block->next)
+            _add_block_to_checksum(state, block, phase);
+
+        for (block = design->player_blocks.head; block; block = block->next)
+            _add_block_to_checksum(state, block, phase);
+    }
+    _add_area_to_checksum(state, &design->build_area);
+    _add_area_to_checksum(state, &design->goal_area);
+    int result = (int)(state.value & 0x7fffffff);
+    // require not 0
+    if(result == 0) {
+        result = 1;
+    }
+    design->actual_checksum = result;
+    return result;
+}
+
 extern "C" void tick_func(void *arg)
 {
 	arena* the_arena = (arena*)arg;

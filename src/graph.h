@@ -38,6 +38,7 @@ struct joint {
 	double x, y;
 	struct attach_list att;
 	bool visited;
+	uint64_t _checksum_uid;
 };
 
 struct joint *new_joint(struct block *gen, double x, double y);
@@ -198,6 +199,8 @@ struct design {
 	struct area goal_area;
 	int level_id;
 	int modcount; // increments whenever any change is made
+	int expect_checksum; // 0 means unknown
+	int actual_checksum;
 };
 
 enum shell_type {

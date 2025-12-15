@@ -14,7 +14,7 @@ void button_down(int button);
 void button_up(int button);
 void scroll(int delta);
 void resize(int w, int h);
-void init(char *xml, int len);
+void init(char *xml, int len, int expect_checksum);
 void draw(void);
 
 void process_events(Display *dpy, Window win)
@@ -189,7 +189,7 @@ int main(void)
 	glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
 	glXMakeCurrent(dpy, win, glc);
 
-	init(poocs_xml, sizeof(poocs_xml));
+	init(poocs_xml, sizeof(poocs_xml), 0);
 
 	while (1) {
 		pthread_mutex_lock(&mutex);

@@ -193,6 +193,9 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len)
 	arena->lock_if_preview_solves = false;
 
 	change_speed_preset(arena, 2);
+
+	arena->design.expect_checksum = 0;
+	arena->design.actual_checksum = 0;
 }
 
 /* TODO: dedupe */

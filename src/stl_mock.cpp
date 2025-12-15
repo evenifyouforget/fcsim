@@ -43,6 +43,11 @@ std::string& std::string::operator=(const char* other) {
     return *this;
 }
 
+std::string& std::string::operator+=(char c) {
+    append(c);
+    return *this;
+}
+
 std::string std::to_string(int64_t value) {
     if(value == 0)return "0";
     bool neg = value < 0;
