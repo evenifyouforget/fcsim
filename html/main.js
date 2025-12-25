@@ -56,10 +56,10 @@ const passwordField = document.getElementById('password-field');
 const accountStatus = document.getElementById('account-status');
 let version_button  = document.getElementById("version-button");
 let version_menu  = document.getElementById("version_menu");
-let version_commit_number  = document.getElementById("version_commit_number");
+let version_uncommitted_lines  = document.getElementById("version_uncommitted_lines");
 let version_branch_name  = document.getElementById("version_branch_name");
-let version_is_dirty  = document.getElementById("version_is_dirty");
-let version_sha  = document.getElementById("version_sha");
+let version_described_version  = document.getElementById("version_described_version");
+let version_build_timestamp  = document.getElementById("version_build_timestamp");
 let close_version_menu  = document.getElementById("close-version-menu");
 
 let user_id;
@@ -101,9 +101,9 @@ function showVersionMenu() {
 	// fetch version info lazily, provided by version.js
 	let versionInfo = getVersionInfo();
 	version_branch_name.textContent = versionInfo[0];
-	version_is_dirty.textContent = versionInfo[1];
-	version_commit_number.textContent = versionInfo[2];
-	version_sha.textContent = versionInfo[3];
+	version_uncommitted_lines.textContent = versionInfo[1];
+	version_described_version.textContent = versionInfo[2];
+	version_build_timestamp.textContent = new Date(versionInfo[3] * 1000).toISOString();
 	console.log(versionInfo);
 }
 
