@@ -61,6 +61,7 @@ let version_branch_name  = document.getElementById("version_branch_name");
 let version_is_dirty  = document.getElementById("version_is_dirty");
 let version_sha  = document.getElementById("version_sha");
 let close_version_menu  = document.getElementById("close-version-menu");
+let steam_button  = document.getElementById("steam-button");
 
 let user_id;
 
@@ -654,6 +655,13 @@ if(!design_id && !level_id) {
 
         notification.appendChild(helpDiv);
     }
+
+	function openInSteam() {
+		let steamUrl = "fantasticcontraption1:" + (design_id ? "designId=" + design_id : "levelId=" + level_id);
+		window.location = steamUrl;
+	}
+
+	steam_button.addEventListener('click', openInSteam);
 }
 
 let response_promise = fetch(FC_URL + "/retrieveLevel.php", {
