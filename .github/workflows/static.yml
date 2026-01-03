@@ -13,7 +13,13 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+# Centralized configuration for branch names
+env:
+  MAIN_BRANCH: "main"
+  # This branch contains specialized web artifacts and release configs 
+  # that are excluded from the main source tree.
+  BUILD_BRANCH: "v2.0-beta-build"
+
 permissions:
   contents: read
   pages: write
@@ -32,24 +38,28 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout deploy branch
+      - name: Checkout Main (Base for Versioning)
         uses: actions/checkout@v4
         with:
-          # Use the deploy branch as the base for the build
-          ref: 'v2.0-beta-build'
+          ref: ${{ env.MAIN_BRANCH }}
+          fetch-depth: 0 # Full history for correct git versioning
+
+      - name: Fetch all tags
+        run: git fetch --force --tags
 
       # Merge PR branch into the deploy branch, keeping PR's version on conflicts
       - name: Merge PR branch
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions Bot"
-          # Fetch the PR's head commit
+          
+          # Pull in artifacts/configs specifically for the web release
+          git fetch origin ${{ env.BUILD_BRANCH }}
+          git merge origin/${{ env.BUILD_BRANCH }} --no-edit -Xtheirs
+          
+          # Merge the PR head
           git fetch origin ${{ github.event.pull_request.head.sha }}
-          git merge ${{ github.event.pull_request.head.sha }} --no-edit -Xtheirs --allow-unrelated-histories || {
-            echo "Merge failed, reverting to last safe state."
-            git merge --abort
-            exit 1
-          }
+          git merge ${{ github.event.pull_request.head.sha }} --no-edit -Xtheirs --allow-unrelated-histories
 
       - name: Install requirements
         run: sh install_requirements.sh
@@ -66,22 +76,23 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Main (Base for Versioning)
         uses: actions/checkout@v4
         with:
-          ref: 'v2.0-beta-build'
+          ref: ${{ env.MAIN_BRANCH }}
+          fetch-depth: 0
 
-      # Merge main into the current branch, keeping main's version on conflicts
-      - name: Merge main branch
+      - name: Fetch all tags
+        run: git fetch --force --tags
+
+      - name: Merge Web Artifacts into Main
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions Bot"
-          git fetch origin main
-          git merge origin/main --no-edit -Xtheirs --allow-unrelated-histories || {
-            echo "Merge failed, reverting to last safe state."
-            git merge --abort
-            exit 1
-          }
+          
+          # Pull in the specialized web-only artifacts from branch B
+          git fetch origin ${{ env.BUILD_BRANCH }}
+          git merge origin/${{ env.BUILD_BRANCH }} --no-edit -Xtheirs --allow-unrelated-histories
 
       - name: Install requirements
         run: sh install_requirements.sh
