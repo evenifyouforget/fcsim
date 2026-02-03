@@ -3,51 +3,96 @@ import subprocess
 import json
 import os
 import time
+import urllib.request
 
 # Define a custom builder to generate the version.js file
 def generate_version_js(target, source, env):
     """
-    Generates a version.js file containing build and Git information.
-    The output structure is: 
-    [branch (string), uncommitted_lines (int), described_version (string), build_timestamp (int)]
+    Generates a version.js file containing rich HTML for the version menu.
+    Fetches info from Git and GitHub API.
     """
-    build_timestamp = int(time.time()) 
+    build_timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+    github_token = os.environ.get('GITHUB_TOKEN')
 
-    try:
-        # Get Git information
-        branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip().decode('utf-8')
-        described_version = subprocess.check_output(['git', 'describe', '--tags', '--always']).strip().decode('utf-8')
-        uncommitted_lines = 0
-        diff_output = subprocess.check_output(['git', 'diff', '--numstat']).strip().decode('utf-8')
+    def run_git(args):
+        try:
+            return subprocess.check_output(['git'] + args).strip().decode('utf-8')
+        except:
+            return None
+
+    # 1. Get Basic Git Info
+    branch = run_git(['rev-parse', '--abbrev-ref', 'HEAD']) or "unknown"
+    described_version = run_git(['describe', '--tags', '--always']) or "v0.0.0"
+    
+    # 2. Extract GitHub Repo Info
+    remote_url = run_git(['remote', 'get-url', 'origin']) or ""
+    repo_path = ""
+    if "github.com" in remote_url:
+        # Handles both https://github.com/user/repo and git@github.com:user/repo
+        repo_path = remote_url.split('github.com')[-1].replace(':', '/').replace('.git', '').strip('/')
+    
+    repo_url = f"https://github.com/{repo_path}" if repo_path else None
+    
+    # 3. Find PR (GitHub API)
+    pr_link_html = ""
+    if repo_path and branch != "main" and branch != "master":
+        api_url = f"https://api.github.com/repos/{repo_path}/pulls?head={repo_path.split('/')[0]}:{branch}&state=open"
+        try:
+            req = urllib.request.Request(api_url)
+            if github_token:
+                req.add_header('Authorization', f'token {github_token}')
+            
+            with urllib.request.urlopen(req, timeout=5) as response:
+                pulls = json.loads(response.read().decode())
+                if pulls:
+                    pr = pulls[0]
+                    pr_link_html = f'<a href="{pr["html_url"]}" target="_blank" class="pr-badge">PR #{pr["number"]}</a>'
+                else:
+                    pr_link_html = '<span class="no-pr">No active PR</span>'
+        except Exception as e:
+            print(f"GitHub API Error: {e}")
+            pr_link_html = '<span class="no-pr">PR status unavailable</span>'
+
+    # 4. Get Commit Log since last tag
+    changelog_html = "<ul><li>No recent commits found.</li></ul>"
+    last_tag = run_git(['describe', '--tags', '--abbrev=0'])
+    if last_tag:
+        # Get up to 100 commits
+        log_cmd = ['log', f'{last_tag}..HEAD', '--oneline', '-n', '100']
+        log_output = run_git(log_cmd)
+        if log_output:
+            lines = log_output.splitlines()
+            items = []
+            for line in lines:
+                sha, msg = line.split(' ', 1)
+                commit_url = f'{repo_url}/commit/{sha}' if repo_url else "#"
+                items.append(f'<li><a href="{commit_url}" target="_blank" class="commit-sha">{sha}</a> {msg}</li>')
+            changelog_html = f'<ul>{"".join(items)}</ul>'
+
+    # 5. Build Final HTML String
+    release_link = f'<a href="{repo_url}/releases/tag/{last_tag}" target="_blank">{last_tag}</a>' if (repo_url and last_tag) else last_tag
+    
+    html_payload = f"""
+    <div class="version-content">
+        <h3>Version Info</h3>
+        <p><strong>Release:</strong> {release_link}</p>
+        <p><strong>Branch:</strong> {branch} {pr_link_html}</p>
+        <p><strong>Built:</strong> {build_timestamp}</p>
         
-        if diff_output:
-            for line in diff_output.splitlines():
-                # Format: <added>\t<deleted>\t<filename>
-                parts = line.split()
-                if len(parts) >= 2 and parts[0].isdigit() and parts[1].isdigit():
-                    uncommitted_lines += int(parts[0]) + int(parts[1])
+        <h4>Recent Commits (since {last_tag or 'start'}):</h4>
+        <div class="changelog-container">
+            {changelog_html}
+        </div>
+    </div>
+    """
 
-        version_info = [
-            branch,
-            uncommitted_lines, 
-            described_version,
-            build_timestamp
-        ]
+    # Format the output as a JavaScript file
+    js_content = f'const VERSION_HTML = {json.dumps(html_payload)};\n'
+    js_content += f'function getVersionHtml() {{ return VERSION_HTML; }}'
 
-        # Format the output as a JavaScript function
-        js_content = f'function getVersionInfo() {{\n  return {json.dumps(version_info)};\n}}'
+    with open(target[0].abspath, 'w') as f:
+        f.write(js_content)
 
-        # Write to the target file
-        with open(target[0].abspath, 'w') as f:
-            f.write(js_content)
-
-        print(f"Generated {target[0].name} with version info from git.")
-    except (subprocess.CalledProcessError, FileNotFoundError) as e:
-        print(f"Error getting git information: {e}")
-        # Create a fallback file to prevent build failure
-        with open(target[0].abspath, 'w') as f:
-            f.write(f'function getVersionInfo() {{ return ["unknown", 0, "unknown-version", {build_timestamp}]; }}')
-        print(f"Generated a fallback {target[0].name} file.")
     return None
 
 # source files
