@@ -38,6 +38,7 @@ struct joint {
 	double x, y;
 	struct attach_list att;
 	bool visited;
+	uint64_t _checksum_uid;
 };
 
 struct joint *new_joint(struct block *gen, double x, double y);
@@ -150,9 +151,15 @@ extern struct material water_rod_material;
 #define FCSIM_GOAL_AREA   15
 #define FCSIM_SKY 16
 #define FCSIM_UI_BUTTON 17
-#define FCSIM_NUM_TYPES 18
+#define FCSIM_GOAL_RECT_OVERTURNED 18
+#define FCSIM_NUM_TYPES 19
+#define FCSIM_NUM_PALETTES 3
 
-extern uint32_t piece_color_table[FCSIM_NUM_TYPES][2];
+extern uint32_t piece_color_table[FCSIM_NUM_TYPES][2 * FCSIM_NUM_PALETTES];
+extern uint32_t piece_color_palette_offset;
+
+// does the host user prefer dark mode?
+int is_dark_mode();
 
 struct block {
 	struct block *prev;
@@ -192,6 +199,8 @@ struct design {
 	struct area goal_area;
 	int level_id;
 	int modcount; // increments whenever any change is made
+	int expect_checksum; // 0 means unknown
+	int actual_checksum;
 };
 
 enum shell_type {

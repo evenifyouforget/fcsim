@@ -2,6 +2,7 @@
 #define TEXT_H
 
 #include "gl.h"
+#include "stddef.h"
 
 #define FONT_SCALE_DEFAULT 2.0f
 #define FONT_X_INCREMENT 6.0f

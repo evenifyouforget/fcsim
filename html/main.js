@@ -41,21 +41,123 @@ function linkElement(url, text) {
 	return el;
 }
 
-let play_button  = document.getElementById("play");
 let save_button  = document.getElementById("save");
 let save_menu    = document.getElementById("save_menu");
-let login_link   = document.getElementById("login");
 let save_form    = document.getElementById("save_form");
 let close_button = document.getElementById("close");
 let design_link  = document.getElementById("link");
+const accountButton = document.getElementById('account-button');
+const accountMenu = document.getElementById('account_menu');
+const closeAccountMenuButton = document.getElementById('close-account-menu');
+const loginButton = document.getElementById('login-button');
+const logoutButton = document.getElementById('logout-button');
+const usernameField = document.getElementById('username-field');
+const passwordField = document.getElementById('password-field');
+const accountStatus = document.getElementById('account-status');
+let version_button  = document.getElementById("version-button");
+let version_menu  = document.getElementById("version_menu");
+let version_uncommitted_lines  = document.getElementById("version_uncommitted_lines");
+let version_branch_name  = document.getElementById("version_branch_name");
+let version_described_version  = document.getElementById("version_described_version");
+let version_build_timestamp  = document.getElementById("version_build_timestamp");
+let close_version_menu  = document.getElementById("close-version-menu");
+let steam_button  = document.getElementById("steam-button");
 
-let user_id = localStorage.getItem("userId");
-if (user_id) {
-	login_link.innerHTML = "Log out";
-	login_link.href = SELF_URL + "/logout.html"
-} else {
-	save_button.disabled = true;
-	login_link.href = SELF_URL + "/login.html"
+let user_id;
+
+// Set the user ID within this session (does not affect persistent storage)
+// Convention: falsy (including empty) value = logged out
+function set_user_id(user_id_value) {
+	user_id = user_id_value;
+	if(user_id) {
+		// Currently logged in
+		accountStatus.textContent = "Logged in";
+		save_button.disabled = false;
+	} else {
+		// Currently logged out
+		accountStatus.textContent = "Logged out";
+		save_button.disabled = true;
+	}
+}
+
+set_user_id(localStorage.getItem("userId"));
+
+let account_menu_opened = false;
+
+function showAccountMenu() {
+	accountMenu.style.display = 'block';
+	account_menu_opened = true;
+}
+
+function hideAccountMenu() {
+	accountMenu.style.display = 'none';
+	account_menu_opened = false;
+}
+
+let version_menu_opened = false;
+
+function showVersionMenu() {
+	version_menu.style.display = 'block';
+	version_menu_opened = true;
+	// fetch version info lazily, provided by version.js
+	let versionInfo = getVersionInfo();
+	version_branch_name.textContent = versionInfo[0];
+	version_uncommitted_lines.textContent = versionInfo[1];
+	version_described_version.textContent = versionInfo[2];
+	version_build_timestamp.textContent = new Date(versionInfo[3] * 1000).toISOString();
+	console.log(versionInfo);
+}
+
+function hideVersionMenu() {
+	version_menu.style.display = 'none';
+	version_menu_opened = false;
+}
+
+function _loginOnTextReceived(text) {
+	let parser = new DOMParser();
+	let xml = parser.parseFromString(text, "text/xml");
+	let user_id_tag = xml.getElementsByTagName("userId")[0];
+
+	if (!user_id_tag) {
+		accountStatus.textContent = "Login failed";
+	} else {
+		let user_id = user_id_tag.childNodes[0].nodeValue;
+		localStorage.setItem("userId", user_id);
+		set_user_id(user_id);
+	}
+}
+
+function _loginOnRequestResult(response) {
+	let text_promise = response.text();
+
+	text_promise.then(_loginOnTextReceived);
+}
+
+function handleLogin(event) {
+	event.preventDefault(); // Prevent default form submission
+	const username = usernameField.value;
+	const password = passwordField.value;
+
+	accountStatus.textContent = "Attempting log in";
+
+	let request_promise = fetch(FC_URL + "/logIn.php", {
+		method: "POST",
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded'
+		},
+		body: new URLSearchParams({
+			"userName": username,
+			"password": password,
+		})
+	});
+
+	request_promise.then(_loginOnRequestResult);
+}
+
+function handleLogout() {
+	localStorage.removeItem("userId");
+	set_user_id(undefined);
+	close(); // close save menu
 }
 
 let opened = false;
@@ -79,9 +181,14 @@ function close(event)
 	opened = false;
 }
 
-play_button.addEventListener("click", play);
 save_button.addEventListener("click", save);
 close_button.addEventListener("click", close);
+accountButton.addEventListener('click', showAccountMenu);
+closeAccountMenuButton.addEventListener('click', hideAccountMenu);
+loginButton.addEventListener('click', handleLogin);
+logoutButton.addEventListener('click', handleLogout);
+version_button.addEventListener('click', showVersionMenu);
+close_version_menu.addEventListener('click', hideVersionMenu);
 
 let canvas = document.getElementById("canvas");
 let gl = canvas.getContext("webgl");
@@ -304,6 +411,10 @@ let gl_env = {
 		clearInterval(id);
 	},
 
+	is_dark_mode() {
+		return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 1 : 0;
+	},
+
 	print_slice(str, len) {
 		console.log(make_string(str, len));
 	},
@@ -397,14 +508,14 @@ function to_button(code)
 
 function canvas_keydown(event)
 {
-	if (opened)
+	if (opened || account_menu_opened || version_menu_opened)
 		return;
 	inst.exports.key_down(to_key(event.code));
 }
 
 function canvas_keyup(event)
 {
-	if (opened)
+	if (opened || account_menu_opened || version_menu_opened)
 		return;
 	inst.exports.key_up(to_key(event.code));
 }
@@ -443,10 +554,22 @@ function alloc_str(str)
 	return mem;
 }
 
+let last_exported_checksum = 0;
+let import_checksum_str = params.get('checksum');
+let import_checksum = 0;
+if(import_checksum_str) {
+	import_checksum = parseInt(import_checksum_str.split('').reverse().join(''), 36);
+	if(isNaN(import_checksum)) {
+		// parse failed
+		import_checksum = 0;
+	}
+}
+
 function on_text(text)
 {
 	console.log(text);
-	design_link.innerHTML = self_url_full() + "?designId=" + text;
+	let export_checksum_str = last_exported_checksum.toString(36).split('').reverse().join('');
+	design_link.innerHTML = design_link.href = self_url_full() + "?designId=" + text + "&checksum=" + export_checksum_str;
 	design_link.style.display = "block";
 }
 
@@ -469,6 +592,7 @@ function save_design(event)
 
 	let xml = inst.exports.export(user, name, desc);
 	let len = inst.exports.strlen(xml);
+	last_exported_checksum = inst.exports.get_main_design_checksum();
 
 	let xml_str = make_cstring(xml);
 
@@ -496,7 +620,7 @@ function init_module(results)
 	let mem_uint8 = new Uint8Array(inst.exports.memory.buffer, mem, len);
 	mem_uint8.set(buffer_uint8);
 
-	inst.exports.init(mem, buffer_uint8.length);
+	inst.exports.init(mem, buffer_uint8.length, import_checksum);
 	inst.exports.resize(canvas.width, canvas.height);
 	window.requestAnimationFrame(canvas_draw);
 	addEventListener("keydown", canvas_keydown);
@@ -532,6 +656,13 @@ if(!design_id && !level_id) {
 
         notification.appendChild(helpDiv);
     }
+
+	function openInSteam() {
+		let steamUrl = "fantasticcontraption1:" + (design_id ? "designId=" + design_id : "levelId=" + level_id);
+		window.location = steamUrl;
+	}
+
+	steam_button.addEventListener('click', openInSteam);
 }
 
 let response_promise = fetch(FC_URL + "/retrieveLevel.php", {
