@@ -1,3 +1,3 @@
 function getVersionInfo() {
-  return ["gp-tracker", true, 434, "89e776240a970b8d5cf0839db0f90b4037f50053"];
+  return ["variant-0g", 0, "v5.1-stable-10-gd979c20", 1770134156];
 }

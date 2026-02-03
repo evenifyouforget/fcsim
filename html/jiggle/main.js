@@ -632,7 +632,6 @@ if(!design_id && !level_id) {
     if (notification) {
         const helpDiv = document.createElement("div");
 
-        helpDiv.appendChild(chainElement(["p"], "jiggle addon - press . while grabbing a joint to jiggle it"));
         helpDiv.appendChild(chainElement(["p"], "To load levels or designs, use ?levelId or ?designId"));
 		helpDiv.appendChild(chainElement(["p", "b"], "Examples"));
 		helpDiv.appendChild(chainElement(["p"], linkElement(self_url_full() + "?levelId=646726")));
