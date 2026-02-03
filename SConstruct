@@ -90,7 +90,7 @@ def generate_version_js(target, source, env):
         <p><strong>Release:</strong> {release_link}</p>
         <p><strong>Branch:</strong> {branch} {pr_link_html}</p>
         <p><strong>Built:</strong> {build_timestamp}</p>
-        
+
         <h4>Recent Commits (since {last_tag or "start"}):</h4>
         <div class="changelog-container">
             {changelog_html}

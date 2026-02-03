@@ -16,7 +16,7 @@ on:
 # Centralized configuration for branch names
 env:
   MAIN_BRANCH: "main"
-  # This branch contains specialized web artifacts and release configs 
+  # This branch contains specialized web artifacts and release configs
   # that are excluded from the main source tree.
   BUILD_BRANCH: "v2.0-beta-build"
 
@@ -52,11 +52,11 @@ jobs:
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions Bot"
-          
+
           # Pull in artifacts/configs specifically for the web release
           git fetch origin ${{ env.BUILD_BRANCH }}
           git merge origin/${{ env.BUILD_BRANCH }} --no-edit -Xtheirs
-          
+
           # Merge the PR head
           git fetch origin ${{ github.event.pull_request.head.sha }}
           git merge ${{ github.event.pull_request.head.sha }} --no-edit -Xtheirs --allow-unrelated-histories
@@ -66,7 +66,7 @@ jobs:
 
       - name: Build with scons
         run: scons
-      
+
   # Deployment job that runs only on push events to the main branch or workflow dispatch
   deploy:
     # This job runs only on push to main or manual dispatch
@@ -89,7 +89,7 @@ jobs:
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions Bot"
-          
+
           # Pull in the specialized web-only artifacts from branch B
           git fetch origin ${{ env.BUILD_BRANCH }}
           git merge origin/${{ env.BUILD_BRANCH }} --no-edit -Xtheirs --allow-unrelated-histories
@@ -108,7 +108,7 @@ jobs:
         with:
           # Upload entire repository
           path: 'html/'
-          
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

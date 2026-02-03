@@ -9,14 +9,14 @@
 #define FONT_Y_INCREMENT 10.0f
 
 struct text {
-	GLuint vertex_buf;
-	size_t vertex_cnt;
+  GLuint vertex_buf;
+  size_t vertex_cnt;
 };
 
 struct text_stream {
-	GLuint vertex_buf;
-	size_t vertex_cnt;
-	size_t len;
+  GLuint vertex_buf;
+  size_t vertex_cnt;
+  size_t len;
 };
 
 bool text_compile_shaders(void);

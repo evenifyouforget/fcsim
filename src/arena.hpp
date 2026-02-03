@@ -13,13 +13,13 @@ extern "C" {
 }
 
 struct trail_t {
-    std::vector<b2Vec2> datapoints;
+  std::vector<b2Vec2> datapoints;
 };
 
 struct multi_trail_t {
-    std::vector<trail_t> trails;
-    bool accepting();
-    void submit_frame(design*);
+  std::vector<trail_t> trails;
+  bool accepting();
+  void submit_frame(design *);
 };
 
 #endif // ARENA_HPP
