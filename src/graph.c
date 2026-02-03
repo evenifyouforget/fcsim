@@ -138,7 +138,7 @@ uint32_t piece_color_table[FCSIM_NUM_TYPES][2 * FCSIM_NUM_PALETTES] = {
      0xff213b64}, // FCSIM_UI_BUTTON
     {0xffb8100b, 0xffcf42fe, 0xffcb0330, 0xff5c0c1c, 0xffcb0330,
      0xff5c0c1c}, // FCSIM_GOAL_RECT_OVERTURNED
-    // FCSIM_NUM_TYPES
+                  // FCSIM_NUM_TYPES
 };
 uint32_t piece_color_palette_offset = 0;
 
