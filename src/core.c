@@ -48,7 +48,7 @@ void resize(int w, int h)
 	arena_size_event(&the_arena, w, h);
 }
 
-void init(char *xml, int len)
+void init(char *xml, int len, int expect_checksum)
 {
 	bool res;
 
@@ -61,6 +61,11 @@ void init(char *xml, int len)
 	*/
 
 	arena_init(&the_arena, 800, 800, xml, len);
+	the_arena.design.expect_checksum = expect_checksum;
+}
+
+int get_main_design_checksum() {
+	return the_arena.design.actual_checksum;
 }
 
 char *export_design(struct design *design, char *user, char *name, char *desc);
