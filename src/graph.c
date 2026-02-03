@@ -102,31 +102,39 @@ static void init_attach_list(struct attach_list *list)
 	list->tail = NULL;
 }
 
-uint32_t piece_color_table[FCSIM_NUM_TYPES][2] = {
-	{0xff007f09, 0xff01be02}, // FCSIM_STAT_RECT
-	{0xff007f09, 0xff01be02}, // FCSIM_STAT_CIRCLE
-	{0xffc5550e, 0xfff8dc2f}, // FCSIM_DYN_RECT
-	{0xffbd591b, 0xfff98931}, // FCSIM_DYN_CIRCLE
-	{0xffb86461, 0xfffe6766}, // FCSIM_GOAL_RECT
-	{0xffb86461, 0xfffe6766}, // FCSIM_GOAL_CIRCLE
-	{0xffb86461, 0xfffe6766}, // FCSIM_CW_GOAL_CIRCLE
-	{0xffb86461, 0xfffe6766}, // FCSIM_CCW_GOAL_CIRCLE
-	{0xff0b6afc, 0xff8cfce4}, // FCSIM_WHEEL
-	{0xfffd8003, 0xffffed00}, // FCSIM_CW_WHEEL
-	{0xffce49a3, 0xffffcfce}, // FCSIM_CCW_WHEEL
-	{0xfffeffff, 0xff0001fe}, // FCSIM_ROD
-	{0xffb55a04, 0xff6a3502}, // FCSIM_SOLID_ROD
-	{0x00ffffff, 0xff808080}, // FCSIM_JOINT
-	{0xff7878ee, 0xffbedcf8}, // FCSIM_BUILD_AREA
-	{0xffbc6667, 0xfff29291}, // FCSIM_GOAL_AREA
-	{0x00000000, 0xff87bdf1}, // FCSIM_SKY
-	{0xff404886, 0xff3a3b54}, // FCSIM_UI_BUTTON
-	{0xffb8100b, 0xffcf42fe}, // FCSIM_GOAL_RECT_OVERTURNED
+uint32_t piece_color_table[FCSIM_NUM_TYPES][2 * FCSIM_NUM_PALETTES] = {
+	{0xff007f09, 0xff01be02, 0xff13e722, 0xff1b6c1b, 0xffdbe3ec, 0xff14243c}, // FCSIM_STAT_RECT
+	{0xff007f09, 0xff01be02, 0xff13e722, 0xff1b6c1b, 0xffdbe3ec, 0xff14243c}, // FCSIM_STAT_CIRCLE
+	{0xffc5550e, 0xfff8dc2f, 0xffdb8414, 0xff573b25, 0xfff2c790, 0xff202327}, // FCSIM_DYN_RECT
+	{0xffbd591b, 0xfff98931, 0xffdb8414, 0xff573b25, 0xfff2c790, 0xff202327}, // FCSIM_DYN_CIRCLE
+	{0xffb86461, 0xfffe6766, 0xffb4231e, 0xff3f2929, 0xffe7796a, 0xff2d1431}, // FCSIM_GOAL_RECT
+	{0xffb86461, 0xfffe6766, 0xffb4231e, 0xff3f2929, 0xffe7796a, 0xff2d1431}, // FCSIM_GOAL_CIRCLE
+	{0xffb86461, 0xfffe6766, 0xffb4231e, 0xff3f2929, 0xffe7796a, 0xff2d1431}, // FCSIM_CW_GOAL_CIRCLE
+	{0xffb86461, 0xfffe6766, 0xffb4231e, 0xff3f2929, 0xffe7796a, 0xff2d1431}, // FCSIM_CCW_GOAL_CIRCLE
+	{0xff0b6afc, 0xff8cfce4, 0xff1261db, 0xff484e4f, 0xffa4dcdc, 0xff43435c}, // FCSIM_WHEEL
+	{0xfffd8003, 0xffffed00, 0xffede30d, 0xff484e4f, 0xffeaec8f, 0xff43435c}, // FCSIM_CW_WHEEL
+	{0xffce49a3, 0xffffcfce, 0xffde0db9, 0xff484e4f, 0xffe7aee6, 0xff43435c}, // FCSIM_CCW_WHEEL
+	{0xfffeffff, 0xff0001fe, 0xff571971, 0xff007f7f, 0xff2c1466, 0xffb59ada}, // FCSIM_ROD
+	{0xffb55a04, 0xff6a3502, 0xff484e4f, 0xff929c9e, 0xffa0e7ac, 0xff43435c}, // FCSIM_SOLID_ROD
+	{0x00ffffff, 0xff808080, 0x00ffffff, 0xffc2c6c6, 0x00ffffff, 0xffc1c3c3}, // FCSIM_JOINT
+	{0xff7878ee, 0xffbedcf8, 0xff9393f5, 0xff0e0b54, 0xff2d22e1, 0xff060e2d}, // FCSIM_BUILD_AREA
+	{0xffbc6667, 0xfff29291, 0xfff97b7d, 0xff5b100f, 0xffe42512, 0xff1b100d}, // FCSIM_GOAL_AREA
+	{0x00000000, 0xff87bdf1, 0x00000000, 0xff0c0c0c, 0x00000000, 0xff25487e}, // FCSIM_SKY
+	{0xff404886, 0xff3a3b54, 0xffa0a2ba, 0xff4b559b, 0xffa1b1c8, 0xff213b64}, // FCSIM_UI_BUTTON
+	{0xffb8100b, 0xffcf42fe, 0xffcb0330, 0xff5c0c1c, 0xffcb0330, 0xff5c0c1c}, // FCSIM_GOAL_RECT_OVERTURNED
 // FCSIM_NUM_TYPES
 };
+uint32_t piece_color_palette_offset = 0;
+
+// no dark mode detection for native
+#ifndef __wasm__
+int is_dark_mode() {
+	return 0;
+}
+#endif
 
 void get_color_by_type(int type_id, int slot, struct color * c) {
-	uint32_t argb = piece_color_table[type_id][slot];
+	uint32_t argb = piece_color_table[type_id][slot + 2 * piece_color_palette_offset];
 	uint32_t b = argb & 0xff;
 	uint32_t g = (argb >> 8) & 0xff;
 	uint32_t r = (argb >> 16) & 0xff;

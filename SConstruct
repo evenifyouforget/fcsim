@@ -2,22 +2,36 @@ import SCons.Builder
 import subprocess
 import json
 import os
+import time
 
 # Define a custom builder to generate the version.js file
 def generate_version_js(target, source, env):
+    """
+    Generates a version.js file containing build and Git information.
+    The output structure is: 
+    [branch (string), uncommitted_lines (int), described_version (string), build_timestamp (int)]
+    """
+    build_timestamp = int(time.time()) 
+
     try:
         # Get Git information
         branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).strip().decode('utf-8')
-        dirty = subprocess.check_output(['git', 'status', '--porcelain']).strip().decode('utf-8') != ''
-        commits = subprocess.check_output(['git', 'rev-list', '--count', 'HEAD']).strip().decode('utf-8')
-        sha = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
+        described_version = subprocess.check_output(['git', 'describe', '--tags', '--always']).strip().decode('utf-8')
+        uncommitted_lines = 0
+        diff_output = subprocess.check_output(['git', 'diff', '--numstat']).strip().decode('utf-8')
+        
+        if diff_output:
+            for line in diff_output.splitlines():
+                # Format: <added>\t<deleted>\t<filename>
+                parts = line.split()
+                if len(parts) >= 2 and parts[0].isdigit() and parts[1].isdigit():
+                    uncommitted_lines += int(parts[0]) + int(parts[1])
 
-        # Create the version list
         version_info = [
             branch,
-            dirty,
-            int(commits),
-            sha
+            uncommitted_lines, 
+            described_version,
+            build_timestamp
         ]
 
         # Format the output as a JavaScript function
@@ -32,7 +46,7 @@ def generate_version_js(target, source, env):
         print(f"Error getting git information: {e}")
         # Create a fallback file to prevent build failure
         with open(target[0].abspath, 'w') as f:
-            f.write('function getVersionInfo() { return ["unknown", true, 0, "unknown"]; }')
+            f.write(f'function getVersionInfo() {{ return ["unknown", 0, "unknown-version", {build_timestamp}]; }}')
         print(f"Generated a fallback {target[0].name} file.")
     return None
 

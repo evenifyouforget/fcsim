@@ -724,6 +724,10 @@ void on_button_clicked(arena* arena, ui_button_single& button) {
     if(button.id == ui_button_id{9, 0}) {
         arena->lock_if_preview_solves ^= 1; // toggle
     }
+    if(button.id == ui_button_id{10, 0}) {
+        // rotate color palette
+        piece_color_palette_offset = (piece_color_palette_offset + 1) % FCSIM_NUM_PALETTES;
+    }
 }
 
 void regenerate_ui_buttons(arena* arena) {
@@ -943,6 +947,12 @@ void regenerate_ui_buttons(arena* arena) {
         button.highlighted = arena->lock_if_preview_solves;
         all_buttons->buttons.push_back(button);
     }
+    {
+        ui_button_single button{{10, 0}, vw - 30, vh - 55 - 30 * 1.5f, 70, 30, 2};
+        button.texts.push_back(ui_button_text{"Change", 1, 0, 5});
+        button.texts.push_back(ui_button_text{"Color", 1, 0, -5});
+        all_buttons->buttons.push_back(button);
+    }
 }
 
 // Draw text, and return the x where the text ends
@@ -1010,6 +1020,40 @@ void draw_tick_counter(struct arena *arena)
     x = draw_text_default(arena, std::to_string(total_memory_used_bytes() / 1000000), x, 10);
     x = draw_text_default(arena, "MB", x, 10, 1);
 #endif
+
+    // fine adjustment factor
+    if(arena->fine_adjustment_factor != 0) {
+        x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
+        x = draw_text_default(arena, std::to_string(arena->fine_adjustment_factor), x, 10);
+        x = draw_text_default(arena, "adjustment", x, 10, 1);
+    }
+
+    // second row
+    x = 10;
+    float y = 10 + FONT_Y_INCREMENT * 2;
+    int actual_checksum = recalculate_design_checksum(&arena->design);
+    int expect_checksum = arena->design.expect_checksum;
+    if(actual_checksum != 0) {
+        if(expect_checksum != 0) {
+            x = draw_text_default(arena, actual_checksum == expect_checksum ? "[OK]" : "[!]", x, y);
+        }
+        x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 5);
+        std::string checksum_text;
+        for(int i = 0; i < 6; ++i) {
+            // 6 digits, base 36
+            int digit = actual_checksum % 36;
+            actual_checksum /= 36;
+            char c;
+            if(digit < 10) {
+                c = '0' + digit;
+            } else {
+                c = 'a' + (digit - 10);
+            }
+            checksum_text += c;
+        }
+        x = draw_text_default(arena, checksum_text, x, y);
+        x = draw_text_default(arena, "checksum", x, y, 1);
+    }
 }
 
 void draw_ui(arena* arena) {
@@ -1094,6 +1138,10 @@ extern "C" void block_graphics_init(struct arena *ar)
     ar->ui_toolbar_opened = false;
     ar->single_ticks_remaining = -1;
     ar->autostop_on_solve = false;
+    if(is_dark_mode()) {
+        // default palette for dark mode
+        piece_color_palette_offset = 2;
+    }
 }
 
 extern "C" bool arena_mouse_click_button(struct arena *arena) {

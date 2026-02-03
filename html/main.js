@@ -56,11 +56,12 @@ const passwordField = document.getElementById('password-field');
 const accountStatus = document.getElementById('account-status');
 let version_button  = document.getElementById("version-button");
 let version_menu  = document.getElementById("version_menu");
-let version_commit_number  = document.getElementById("version_commit_number");
+let version_uncommitted_lines  = document.getElementById("version_uncommitted_lines");
 let version_branch_name  = document.getElementById("version_branch_name");
-let version_is_dirty  = document.getElementById("version_is_dirty");
-let version_sha  = document.getElementById("version_sha");
+let version_described_version  = document.getElementById("version_described_version");
+let version_build_timestamp  = document.getElementById("version_build_timestamp");
 let close_version_menu  = document.getElementById("close-version-menu");
+let steam_button  = document.getElementById("steam-button");
 
 let user_id;
 
@@ -101,9 +102,9 @@ function showVersionMenu() {
 	// fetch version info lazily, provided by version.js
 	let versionInfo = getVersionInfo();
 	version_branch_name.textContent = versionInfo[0];
-	version_is_dirty.textContent = versionInfo[1];
-	version_commit_number.textContent = versionInfo[2];
-	version_sha.textContent = versionInfo[3];
+	version_uncommitted_lines.textContent = versionInfo[1];
+	version_described_version.textContent = versionInfo[2];
+	version_build_timestamp.textContent = new Date(versionInfo[3] * 1000).toISOString();
 	console.log(versionInfo);
 }
 
@@ -410,6 +411,10 @@ let gl_env = {
 		clearInterval(id);
 	},
 
+	is_dark_mode() {
+		return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 1 : 0;
+	},
+
 	print_slice(str, len) {
 		console.log(make_string(str, len));
 	},
@@ -552,10 +557,22 @@ function alloc_str(str)
 	return mem;
 }
 
+let last_exported_checksum = 0;
+let import_checksum_str = params.get('checksum');
+let import_checksum = 0;
+if(import_checksum_str) {
+	import_checksum = parseInt(import_checksum_str.split('').reverse().join(''), 36);
+	if(isNaN(import_checksum)) {
+		// parse failed
+		import_checksum = 0;
+	}
+}
+
 function on_text(text)
 {
 	console.log(text);
-	design_link.innerHTML = design_link.href = self_url_full() + "?designId=" + text;
+	let export_checksum_str = last_exported_checksum.toString(36).split('').reverse().join('');
+	design_link.innerHTML = design_link.href = self_url_full() + "?designId=" + text + "&checksum=" + export_checksum_str;
 	design_link.style.display = "block";
 }
 
@@ -578,6 +595,7 @@ function save_design(event)
 
 	let xml = inst.exports.export(user, name, desc);
 	let len = inst.exports.strlen(xml);
+	last_exported_checksum = inst.exports.get_main_design_checksum();
 
 	let xml_str = make_cstring(xml);
 
@@ -605,7 +623,7 @@ function init_module(results)
 	let mem_uint8 = new Uint8Array(inst.exports.memory.buffer, mem, len);
 	mem_uint8.set(buffer_uint8);
 
-	inst.exports.init(mem, buffer_uint8.length);
+	inst.exports.init(mem, buffer_uint8.length, import_checksum);
 	inst.exports.resize(canvas.width, canvas.height);
 	window.requestAnimationFrame(canvas_draw);
 	addEventListener("keydown", canvas_keydown);
@@ -640,6 +658,13 @@ if(!design_id && !level_id) {
 
         notification.appendChild(helpDiv);
     }
+
+	function openInSteam() {
+		let steamUrl = "fantasticcontraption1:" + (design_id ? "designId=" + design_id : "levelId=" + level_id);
+		window.location = steamUrl;
+	}
+
+	steam_button.addEventListener('click', openInSteam);
 }
 
 let response_promise = fetch(FC_URL + "/retrieveLevel.php", {
