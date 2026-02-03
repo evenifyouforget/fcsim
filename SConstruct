@@ -248,4 +248,5 @@ js_builder = SCons.Builder.Builder(action=generate_version_js)
 js_env.Append(BUILDERS={'VersionJSBuilder': js_builder})
 
 # Use the builder to generate the file
-js_env.VersionJSBuilder('html/version.js', [])
+target = js_env.VersionJSBuilder('html/version.js', [])
+js_env.AlwaysBuild(target)
