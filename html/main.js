@@ -56,10 +56,9 @@ const passwordField = document.getElementById('password-field');
 const accountStatus = document.getElementById('account-status');
 let version_button  = document.getElementById("version-button");
 let version_menu  = document.getElementById("version_menu");
-let version_uncommitted_lines  = document.getElementById("version_uncommitted_lines");
-let version_branch_name  = document.getElementById("version_branch_name");
-let version_described_version  = document.getElementById("version_described_version");
-let version_build_timestamp  = document.getElementById("version_build_timestamp");
+// These specific elements are no longer needed for individual text updates 
+// because we inject a full HTML block into a target container instead.
+let version_target = document.getElementById("version-target") || document.getElementById("version_menu"); 
 let close_version_menu  = document.getElementById("close-version-menu");
 let steam_button  = document.getElementById("steam-button");
 
@@ -99,13 +98,16 @@ let version_menu_opened = false;
 function showVersionMenu() {
 	version_menu.style.display = 'block';
 	version_menu_opened = true;
-	// fetch version info lazily, provided by version.js
-	let versionInfo = getVersionInfo();
-	version_branch_name.textContent = versionInfo[0];
-	version_uncommitted_lines.textContent = versionInfo[1];
-	version_described_version.textContent = versionInfo[2];
-	version_build_timestamp.textContent = new Date(versionInfo[3] * 1000).toISOString();
-	console.log(versionInfo);
+	
+    // Integration with "Thick Build" version.js
+    // Instead of setting individual textContent fields, we inject the pre-rendered HTML
+    if (typeof getVersionHtml === 'function') {
+        // Try to find a specific target container, otherwise use the menu itself
+        const target = document.getElementById('version-target') || version_menu;
+        target.innerHTML = getVersionHtml();
+    } else {
+        console.error("version.js not loaded or getVersionHtml missing.");
+    }
 }
 
 function hideVersionMenu() {
