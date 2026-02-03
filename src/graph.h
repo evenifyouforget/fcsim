@@ -1,6 +1,7 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 typedef struct b2Body b2Body;

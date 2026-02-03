@@ -1,6 +1,8 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 
+#include "gl.h"
+
 struct button {
   GLuint vertex_buf;
   float r, g, b;
