@@ -71,6 +71,7 @@ struct arena {
 	int cursor_y;
 	bool shift;
 	bool ctrl;
+	int fine_adjustment_factor;
 
 	enum tool tool;
 	enum tool tool_hidden;
@@ -137,6 +138,13 @@ bool is_design_legal(struct design *design);
 bool goal_blocks_inside_goal_area(struct design *design);
 void tick_func(void *arg);
 
+// recalculate checksum; store the value and return it
+// 31-bit checksum, always a positive value
+int recalculate_design_checksum(struct design *design);
+
+int block_list_len(struct block_list *list);
+int design_piece_count(struct block_list *list);
+
 void start_stop(struct arena *arena);
 bool is_running(struct arena *arena);
 void update_tool(struct arena *arena);
@@ -158,5 +166,8 @@ extern int _fcsim_speed_preset;
 #endif
 void change_speed_factor(struct arena *arena, double new_factor, int new_base_fps_mod);
 void change_speed_preset(struct arena *arena, int preset_index);
+
+// entropy sources
+void general_prng_add_entropy(uint64_t value);
 
 #endif

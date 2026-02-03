@@ -1,0 +1,46 @@
+name: SCons Build on PR
+
+on:
+  pull_request:
+    branches:
+      - main # Or your default branch, e.g., master, develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # You can also use windows-latest or macos-latest if needed
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        # Fetch all history for all tags and branches, which can be useful for SCons if it relies on git history
+        fetch-depth: 0
+
+    - name: Install System Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang libx11-dev libgl-dev lld
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10' # Using a specific, commonly supported Python version
+
+    - name: Install SCons
+      run: |
+        python -m pip install --upgrade pip
+        pip install scons
+
+    - name: Run SCons Build
+      run: |
+        # This command will execute SCons assuming your SConstruct file is in the repository root.
+        # If your SConstruct file is in a subdirectory (e.g., 'src'), you would change this to:
+        # cd src && scons
+        scons
+
+    - name: Build Successful
+      run: |
+        echo "SCons build completed successfully! 🎉"
+        # GitHub Actions automatically considers a step successful if its command exits with a zero status code.
+        # No additional checks are typically needed here unless your scons command
+        # always exits with zero even on logical build failures (which is uncommon).

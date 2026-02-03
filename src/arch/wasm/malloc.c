@@ -16,7 +16,7 @@
 // and the game does not crash.
 // in the future, if the game is crashing, try setting the pad space higher.
 #ifndef MALLOC_PAD_SPACE
-#define MALLOC_PAD_SPACE 160000
+#define MALLOC_PAD_SPACE 180000
 #endif
 #ifndef MALLOC_MIN_BLOCK
 #define MALLOC_MIN_BLOCK 4

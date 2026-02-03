@@ -1,0 +1,102 @@
+name: fcsim-ftlib Preview Integration Test
+
+on:
+  pull_request:
+    branches:
+      - main # Or your default branch, e.g., 'master'
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest # Using a standard Ubuntu runner
+
+    steps:
+      - name: Checkout fcsim (this repo)
+        uses: actions/checkout@v4
+        with:
+          path: fcsim_repo # Clones the current fcsim repo into 'fcsim_repo'
+
+      - name: Checkout ftlib
+        uses: actions/checkout@v4
+        with:
+          repository: evenifyouforget/ftlib # Clones ftlib into 'ftlib_repo'
+          path: ftlib_repo
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9' # Using Python 3.9, adjust if ftlib requires a different version
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y scons clang libx11-dev libgl-dev lld valgrind
+
+      - name: Install ftlib dependencies
+        run: |
+          # Install pytest and any other dependencies ftlib might need
+          # If ftlib has a requirements.txt, uncomment the line below:
+          # pip install -r ftlib_repo/requirements.txt
+          pip install bc pytest pytest-json-report pytest-xdist # 'bc' is needed for floating-point arithmetic in shell scripts
+        working-directory: ./ftlib_repo # Run pip install from ftlib's directory
+
+      - name: Delete fcsim submodule and symlink local fcsim
+        run: |
+          echo "Removing existing fcsim submodule in ftlib..."
+          # Remove the fcsim submodule from ftlib_repo.
+          # Since working-directory is ftlib_repo, 'fcsim' refers to ftlib_repo/fcsim.
+          rm -rf fcsim
+          echo "Creating symlink from fcsim_repo to ftlib_repo/fcsim..."
+          # Create a symbolic link.
+          # Source: ../fcsim_repo (resolves to /home/runner/work/fcsim/fcsim/fcsim_repo from ftlib_repo)
+          # Target: fcsim (resolves to /home/runner/work/fcsim/fcsim/ftlib_repo/fcsim)
+          ln -s ../fcsim_repo fcsim
+          echo "Symlink created."
+        working-directory: ./ftlib_repo # Perform these actions relative to ftlib_repo
+
+      - name: Run ftlib tests and assert pass rate
+        id: run_tests # Assign an ID to this step to access its outputs
+        run: |
+          echo "Running ftlib tests..."
+          # Run pytest and capture its output.
+          # '|| true' ensures the script continues even if tests fail,
+          # allowing us to parse the output.
+          pytest_output=$(python3 -m pytest -s -n auto test --all 2>&1 || true)
+          echo "$pytest_output"
+
+          # Extract the summary line from pytest output
+          summary_line=$(echo "$pytest_output" | grep "==.*==" | tail -n 1)
+          echo "Summary line: $summary_line"
+
+          # Extract numbers for passed, failed, errors, and skipped tests
+          # Use ':-0' for default to 0 if a count type isn't found (e.g., no errors)
+          passed=$(echo "$summary_line" | grep -oP '\d+\s+passed' | awk '{print $1}' || echo 0)
+          failed=$(echo "$summary_line" | grep -oP '\d+\s+failed' | awk '{print $1}' || echo 0)
+          errors=$(echo "$summary_line" | grep -oP '\d+\s+errors' | awk '{print $1}' || echo 0)
+          skipped=$(echo "$summary_line" | grep -oP '\d+\s+skipped' | awk '{print $1}' || echo 0)
+
+          # Calculate total tests that were run (passed + failed + errors)
+          total_run=$((passed + failed + errors))
+          pass_rate=0
+
+          # Calculate pass rate if any tests were run
+          if [ "$total_run" -gt 0 ]; then
+            pass_rate=$(echo "scale=2; ($passed * 100) / $total_run" | bc)
+          fi
+
+          echo "Passed: $passed"
+          echo "Failed: $failed"
+          echo "Errors: $errors"
+          echo "Skipped: $skipped"
+          echo "Total Run: $total_run"
+          echo "Calculated Pass Rate: $pass_rate%"
+
+          min_pass_rate=83.9
+
+          # Compare calculated pass rate with the required minimum
+          if (( $(echo "$pass_rate < $min_pass_rate" | bc -l) )); then
+            echo "::error file=fcsim-ftlib-integration.yml::Pass rate ($pass_rate%) is below the required $min_pass_rate%."
+            exit 1 # Fail the workflow step
+          else
+            echo "Pass rate ($pass_rate%) meets or exceeds the required $min_pass_rate%."
+          fi
+        working-directory: ./ftlib_repo # Run pytest from ftlib's directory
