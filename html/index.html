@@ -1,151 +1,226 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-<title> fcsim </title>
-<meta charset="utf-8">
-<style>
-body {
-	margin: 0;
-}
-canvas {
-	display: block;
-	width: 100vw;
-	height: 100vh;
-}
-#tools {
-	position: fixed;
-	top: 10px;
-	left: 50%;
-	transform: translate(-50%, 0);
-	background: white;
-	padding: 10px;
-}
-.tool {
-	border: none;
-	padding: 10px;
-	color: white;
-}
-.tool:disabled {
-	background-color: lightgray !important;
-}
-#save {
-	background-color: deepskyblue;
-}
-#save_menu, #account_menu, #version_menu {
-	position: fixed;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	display: none;
-	background: white;
-	padding: 10px;
-}
-#save_form, #account_form {
-	display: inline;
-}
-#link {
-	display: none;
-}
-#steam-button {
-    background-color: #6b5ebd;
-}
-#version-button {
-    background-color: #c7c96a;
-}
-#account-button {
-    background-color: #4CAF50;
-}
-#account_menu input[type="text"],
-#account_menu input[type="password"],
-#save_menu input[name="name"],
-#save_menu textarea[name="description"] {
-    width: calc(100% - 20px);
-    padding: 8px 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-#account_menu button {
-    padding: 8px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-right: 5px;
-    font-weight: bold;
-}
-#login-button {
-    background-color: #007BFF;
-    color: white;
-}
-#logout-button {
-    background-color: #DC3545;
-    color: white;
-}
-#close-account-menu, #close, #_saveSubmit, #close-version-menu {
-    background-color: #6C757D;
-    color: white;
-    padding: 8px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-#account-status {
-    margin-top: 10px;
-    padding: 5px;
-    border: 1px dashed #ccc;
-    min-height: 2em;
-    color: #333;
-    font-size: 0.9em;
-}
-</style>
-</head>
-<body>
-<div id="tools">
-	<button class="tool" id="account-button"> Account </button>
-	<button class="tool" id="save"> Save </button>
-	<button class="tool" id="version-button"> Version </button>
-	<button class="tool" id="steam-button"> Steam </button>
-	<span id="notification"></span>
-</div>
-<div id="save_menu">
-	<form id="save_form">
-		<label for="name"> Name: </label>
-		<br>
-		<input name="name" maxlength="15" placeholder="Up to 15 characters">
-		<br>
-		<label for="description"> Description: </label>
-		<br>
-		<textarea name="description" maxlength="50" placeholder="Up to 50 characters"></textarea>
-		<br>
-		<br>
-		<input type="submit" value="Send" id="_saveSubmit">
-	</form>
-	<button class="close" id="close"> Close </button>
-	<p><a id="link"></a></p>
-</div>
-<div id="account_menu">
-    <h2 class="text-xl font-bold mb-4">Account Settings</h2>
-    <form id="account_form">
-        <label for="username-field">Username:</label><br>
-        <input type="text" id="username-field" name="username" placeholder="Enter your username"><br>
-        <label for="password-field">Password:</label><br>
-        <input type="password" id="password-field" name="password" placeholder="Enter your password"><br><br>
+  <head>
+    <title>fcsim</title>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        margin: 0;
+      }
+      canvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+      #tools {
+        position: fixed;
+        top: 10px;
+        left: 50%;
+        transform: translate(-50%, 0);
+        background: white;
+        padding: 10px;
+        z-index: 100;
+      }
+      .tool {
+        border: none;
+        padding: 10px;
+        color: white;
+        cursor: pointer;
+      }
+      .tool:disabled {
+        background-color: lightgray !important;
+      }
+      #save {
+        background-color: deepskyblue;
+      }
+      #save_menu,
+      #account_menu,
+      #version_menu {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: none;
+        background: white;
+        padding: 20px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        z-index: 1000;
+      }
+
+      /* Version Menu Specific Styles */
+      #version_menu {
+        width: 450px;
+        max-width: 90vw;
+      }
+      .changelog-container {
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+        padding: 10px;
+        font-size: 0.85em;
+        margin-top: 10px;
+      }
+      .changelog-container ul {
+        padding-left: 20px;
+        margin: 0;
+      }
+      .changelog-container li {
+        margin-bottom: 4px;
+      }
+      .commit-sha {
+        font-family: monospace;
+        color: #0366d6;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .pr-badge {
+        background: #28a745;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 0.8em;
+        text-decoration: none;
+        margin-left: 8px;
+      }
+      .no-pr {
+        color: #888;
+        font-size: 0.8em;
+        font-style: italic;
+        margin-left: 8px;
+      }
+
+      #save_form,
+      #account_form {
+        display: inline;
+      }
+      #link {
+        display: none;
+      }
+      #steam-button {
+        background-color: #6b5ebd;
+      }
+      #version-button {
+        background-color: #c7c96a;
+      }
+      #account-button {
+        background-color: #4caf50;
+      }
+      #account_menu input[type="text"],
+      #account_menu input[type="password"],
+      #save_menu input[name="name"],
+      #save_menu textarea[name="description"] {
+        width: calc(100% - 20px);
+        padding: 8px 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      #account_menu button {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 5px;
+        font-weight: bold;
+      }
+      #login-button {
+        background-color: #007bff;
+        color: white;
+      }
+      #logout-button {
+        background-color: #dc3545;
+        color: white;
+      }
+      #close-account-menu,
+      #close,
+      #_saveSubmit,
+      #close-version-menu {
+        background-color: #6c757d;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+        width: 100%;
+      }
+      #account-status {
+        margin-top: 10px;
+        padding: 5px;
+        border: 1px dashed #ccc;
+        min-height: 2em;
+        color: #333;
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="tools">
+      <button class="tool" id="account-button">Account</button>
+      <button class="tool" id="save">Save</button>
+      <button class="tool" id="version-button">Version</button>
+      <button class="tool" id="steam-button">Steam</button>
+      <span id="notification"></span>
+    </div>
+
+    <div id="save_menu">
+      <form id="save_form">
+        <label for="name"> Name: </label>
+        <br />
+        <input name="name" maxlength="15" placeholder="Up to 15 characters" />
+        <br />
+        <label for="description"> Description: </label>
+        <br />
+        <textarea
+          name="description"
+          maxlength="50"
+          placeholder="Up to 50 characters"
+        ></textarea>
+        <br />
+        <br />
+        <input type="submit" value="Send" id="_saveSubmit" />
+      </form>
+      <button class="close" id="close">Close</button>
+      <p><a id="link"></a></p>
+    </div>
+
+    <div id="account_menu">
+      <h2 class="text-xl font-bold mb-4">Account Settings</h2>
+      <form id="account_form">
+        <label for="username-field">Username:</label><br />
+        <input
+          type="text"
+          id="username-field"
+          name="username"
+          placeholder="Enter your username"
+        /><br />
+        <label for="password-field">Password:</label><br />
+        <input
+          type="password"
+          id="password-field"
+          name="password"
+          placeholder="Enter your password"
+        /><br /><br />
         <button type="submit" id="login-button">Log In</button>
         <button type="button" id="logout-button">Log Out</button>
-    </form>
-    <p id="account-status"></p>
-    <button class="close" id="close-account-menu"> Close </button>
-</div>
-<div id="version_menu">
-	<p>Patch number: <span id="version_described_version"></span></p>
-	<p>Built from branch: <span id="version_branch_name"></span></p>
-	<p>Local changes: <span id="version_uncommitted_lines"></span></p>
-	<p>Built on: <span id="version_build_timestamp"></span></p>
-    <button class="close" id="close-version-menu"> Close </button>
-</div>
-<canvas id="canvas"></canvas>
-<script src="version.js"></script>
-<script src="main.js"></script>
-</body>
+      </form>
+      <p id="account-status"></p>
+      <button class="close" id="close-account-menu">Close</button>
+    </div>
+
+    <div id="version_menu">
+      <!-- The SCons-generated HTML will be injected into this target -->
+      <div id="version-target">Loading version information...</div>
+      <button class="close" id="close-version-menu">Close</button>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <!-- Scripts must be in this order: version.js provides the data, main.js uses it -->
+    <script src="version.js"></script>
+    <script src="main.js"></script>
+  </body>
 </html>

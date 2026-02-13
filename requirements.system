@@ -1,5 +1,9 @@
 clang
-libx11-dev
+clang-format
 libgl-dev
+libx11-dev
 lld
+nodejs
+npm
+python3-pip
 scons

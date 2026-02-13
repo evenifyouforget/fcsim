@@ -28,7 +28,7 @@ gcc_wpedantic = [
     "-Wregister",
     "-Wvla",
     "-Wwrite-strings",
-    ]
+]
 gcc_wall = [
     "-Waddress",
     "-Waligned-new",
@@ -114,7 +114,7 @@ gcc_wall = [
     "-Wvla-parameter",
     "-Wvolatile-register-var",
     "-Wzero-length-bounds",
-    ]
+]
 gcc_wextra = [
     "-Wabsolute-value",
     "-Walloc-size",
@@ -144,37 +144,47 @@ gcc_wextra = [
     "-Wunterminated-string-initialization",
     "-Wunused-parameter",
     "-Wunused-but-set-parameter",
-    ]
+]
 all_warnings = set(gcc_wpedantic + gcc_wall + gcc_wextra)
+
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO)
     # parse args
     parser = argparse.ArgumentParser(
-                    prog='find_unused_warnings.py',
-                    description='Run scons and find warnings that are not triggered but exist in gcc')
-    parser.add_argument('-e', '--error', action='store_true', help="Print instead some Python code to make scons treat those warnings as errors")
+        prog="find_unused_warnings.py",
+        description="Run scons and find warnings that are not triggered but exist in gcc",
+    )
+    parser.add_argument(
+        "-e",
+        "--error",
+        action="store_true",
+        help="Print instead some Python code to make scons treat those warnings as errors",
+    )
     args = parser.parse_args()
     # run subprocess
-    subprocess.run(['scons', '-c'], text=True, capture_output=True)
-    proc = subprocess.run(['scons'], text=True, capture_output=True)
-    hit_warnings_all = re.findall('(.*?src.+?(-W[^\\s]+\\w).*)', proc.stderr)
+    subprocess.run(["scons", "-c"], text=True, capture_output=True)
+    proc = subprocess.run(["scons"], text=True, capture_output=True)
+    hit_warnings_all = re.findall("(.*?src.+?(-W[^\\s]+\\w).*)", proc.stderr)
     hit_warnings = {match[1] for match in hit_warnings_all}
     hit_warnings_dict = {match[1]: match[0] for match in hit_warnings_all}
     missed_warnings = all_warnings - hit_warnings
     # output
-    logging.info(f'{len(all_warnings)} total known warnings')
-    logging.info(f'{len(hit_warnings)} hit warnings')
-    logging.info(f'{len(missed_warnings)} missed warnings')
+    logging.info(f"{len(all_warnings)} total known warnings")
+    logging.info(f"{len(hit_warnings)} hit warnings")
+    logging.info(f"{len(missed_warnings)} missed warnings")
     if not args.error:
-        print('\n'.join(sorted(missed_warnings)))
+        print("\n".join(sorted(missed_warnings)))
     else:
         for warning in sorted(all_warnings):
             if warning not in hit_warnings:
                 print(f'    "-Werror={warning[2:]}",')
             else:
-                print(f'# auto comment: build would fail with this: {hit_warnings_dict[warning]}')
+                print(
+                    f"# auto comment: build would fail with this: {hit_warnings_dict[warning]}"
+                )
                 print(f'#   "-Werror={warning[2:]}",')
+
 
 if __name__ == "__main__":
     main()

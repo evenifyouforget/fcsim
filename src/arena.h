@@ -5,7 +5,8 @@
 #include "text.h"
 
 #define NO_CHANGE -1
-#define BASE_FPS_TABLE {30, 36}
+#define BASE_FPS_TABLE                                                         \
+  { 30, 36 }
 #define BASE_FPS_TABLE_SIZE 2
 #ifdef __wasm__
 #define MIN_MSPT 10
@@ -16,104 +17,105 @@
 #define TAU 6.28318530718
 
 struct view {
-	float x;
-	float y;
-	float scale;
-	float width;
-	float height;
+  float x;
+  float y;
+  float scale;
+  float width;
+  float height;
 };
 
 enum state {
-	STATE_NORMAL,
-	STATE_NORMAL_PAN,
-	STATE_NEW_ROD,
-	STATE_NEW_WHEEL,
-	STATE_MOVE,
-	STATE_RUNNING,
-	STATE_RUNNING_PAN,
+  STATE_NORMAL,
+  STATE_NORMAL_PAN,
+  STATE_NEW_ROD,
+  STATE_NEW_WHEEL,
+  STATE_MOVE,
+  STATE_RUNNING,
+  STATE_RUNNING_PAN,
 };
 
 enum tool {
-	TOOL_MOVE,
-	TOOL_ROD,
-	TOOL_SOLID_ROD,
-	TOOL_WHEEL,
-	TOOL_CW_WHEEL,
-	TOOL_CCW_WHEEL,
-	TOOL_DELETE,
+  TOOL_MOVE,
+  TOOL_ROD,
+  TOOL_SOLID_ROD,
+  TOOL_WHEEL,
+  TOOL_CW_WHEEL,
+  TOOL_CCW_WHEEL,
+  TOOL_DELETE,
 };
 
 struct block_head {
-	struct block_head *next;
-	struct block *block;
-	double orig_x;
-	double orig_y;
+  struct block_head *next;
+  struct block *block;
+  double orig_x;
+  double orig_y;
 };
 
 struct joint_head {
-	struct joint_head *next;
-	struct joint *joint;
-	double orig_x;
-	double orig_y;
+  struct joint_head *next;
+  struct joint *joint;
+  double orig_x;
+  double orig_y;
 };
 
 struct arena {
-	struct design design;
-	b2World *world;
+  struct design design;
+  b2World *world;
 
-	int ival;
-	int tick_ms;
-	int tick_multiply;
+  int ival;
+  int tick_ms;
+  int tick_multiply;
 
-	struct view view;
+  struct view view;
 
-	int cursor_x;
-	int cursor_y;
-	bool shift;
-	bool ctrl;
-	int fine_adjustment_factor;
+  int cursor_x;
+  int cursor_y;
+  bool shift;
+  bool ctrl;
+  int fine_adjustment_factor;
 
-	enum tool tool;
-	enum tool tool_hidden;
-	enum state state;
-	struct joint *hover_joint;
-	struct block *hover_block;
+  enum tool tool;
+  enum tool tool_hidden;
+  enum state state;
+  struct joint *hover_joint;
+  struct block *hover_block;
 
-	struct joint_head *root_joints_moving;
-	struct block_head *root_blocks_moving;
-	struct block_head *blocks_moving;
-	float move_orig_x;
-	float move_orig_y;
-	struct joint *move_orig_joint;
-	struct block *move_orig_block;
+  struct joint_head *root_joints_moving;
+  struct block_head *root_blocks_moving;
+  struct block_head *blocks_moving;
+  float move_orig_x;
+  float move_orig_y;
+  struct joint *move_orig_joint;
+  struct block *move_orig_block;
 
-	struct block *new_block;
+  struct block *new_block;
 
-	// for game graphics
-	void* block_graphics_v2; // actual type: block_graphics*
-	// for ui graphics
-	void* block_graphics_v2b; // actual type: block_graphics*
+  // for game graphics
+  void *block_graphics_v2; // actual type: block_graphics*
+  // for ui graphics
+  void *block_graphics_v2b; // actual type: block_graphics*
 
-	uint64_t frame_counter;
-	uint64_t tick;
-	uint64_t tick_solve;
-	// this text object has been repurposed for all text rendering
-	struct text_stream tick_counter;
-	bool has_won;
-	int single_ticks_remaining; // -1 for normal playback, 0 to disable, positive for step n frames
-	bool autostop_on_solve;
+  uint64_t frame_counter;
+  uint64_t tick;
+  uint64_t tick_solve;
+  // this text object has been repurposed for all text rendering
+  struct text_stream tick_counter;
+  bool has_won;
+  int single_ticks_remaining; // -1 for normal playback, 0 to disable, positive
+                              // for step n frames
+  bool autostop_on_solve;
 
-	bool preview_gp_trajectory;
-	struct design* preview_design;
-	b2World *preview_world;
-	void *preview_trail; // real type: multi_trail_t*
-	bool preview_has_won;
-	bool lock_if_preview_solves;
+  bool preview_gp_trajectory;
+  struct design *preview_design;
+  b2World *preview_world;
+  void *preview_trail; // real type: multi_trail_t*
+  bool preview_has_won;
+  bool lock_if_preview_solves;
 
-	// ui button templates
-	void* ui_buttons; // actual type: ui_button_collection*
-	bool ui_toolbar_opened;
-	bool ui_speedbar_opened;
+  // ui button templates
+  void *ui_buttons; // actual type: ui_button_collection*
+  bool ui_toolbar_opened;
+  bool ui_speedbar_opened;
 };
 
 bool arena_compile_shaders(void);
@@ -164,7 +166,8 @@ extern int _fcsim_base_fps_mod;
 extern double _fcsim_target_tps;
 extern int _fcsim_speed_preset;
 #endif
-void change_speed_factor(struct arena *arena, double new_factor, int new_base_fps_mod);
+void change_speed_factor(struct arena *arena, double new_factor,
+                         int new_base_fps_mod);
 void change_speed_preset(struct arena *arena, int preset_index);
 
 // entropy sources
