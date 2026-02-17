@@ -1531,6 +1531,7 @@ int design_piece_count(struct block_list *list) {
   return res;
 }
 
+const int MAX_PIECES_HARD_CAP = 300;
 void mouse_down_tool(struct arena *arena, float x, float y) {
   if (arena->tool == TOOL_MOVE) {
     mouse_down_move(arena, x, y);
@@ -1542,7 +1543,7 @@ void mouse_down_tool(struct arena *arena, float x, float y) {
     return;
   }
 
-  if (block_list_len(&arena->design.player_blocks) >= 120)
+  if (block_list_len(&arena->design.player_blocks) >= MAX_PIECES_HARD_CAP)
     return;
 
   if (arena->tool == TOOL_ROD || arena->tool == TOOL_SOLID_ROD) {
