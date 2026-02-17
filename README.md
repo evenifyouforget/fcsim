@@ -11,10 +11,16 @@ Currently, you can only build on Linux.
 First install the system requirements:
 
 ```sh
-sh install_requirements.sh
+bash install_requirements.sh
 ```
 
 This uses `apt` to install everything listed in `requirements.system`, assuming you have `apt` available on your distro (we tested on Linux Mint).
+
+Before doing any work, you should switch to the venv:
+
+```sh
+source .venv/bin/activate
+```
 
 ## Actual build
 

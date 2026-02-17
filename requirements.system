@@ -6,4 +6,4 @@ lld
 nodejs
 npm
 python3-pip
-scons
+python3-venv
