@@ -15,3 +15,6 @@ tags
 .sconsign*
 build/
 html/version.js
+
+# Python files
+.venv/

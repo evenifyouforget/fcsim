@@ -1,5 +1,9 @@
+#!/usr/bin/env bash
 # Install system depencences by running
 cat requirements.system | xargs sudo apt install -y
-# Additional dependencies for specific package managers
+# Additional dependencies for npm
 sudo npm install --global prettier
-python3 -m pip install ruff pre-commit
+# Many OS's forbid touching the global python, so we use venv
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install ruff pre-commit scons
