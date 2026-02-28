@@ -706,7 +706,7 @@ if (!design_id && !level_id) {
   }
 }
 
-for (const [key, value] of mySearchParams) {
+for (const [key, value] of params) {
   if (key.match(/.+DesignId.*/g)) {
     additional_design_ids.push(value);
   }
