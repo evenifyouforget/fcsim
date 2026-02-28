@@ -644,17 +644,20 @@ function save_design(event) {
 
 function init_module(results) {
   let module = results[0];
-  let buffer = results[1];
 
   inst = module.instance;
 
-  let buffer_uint8 = new Uint8Array(buffer);
-  let len = buffer_uint8.length;
-  let mem = inst.exports.malloc(len);
-  let mem_uint8 = new Uint8Array(inst.exports.memory.buffer, mem, len);
-  mem_uint8.set(buffer_uint8);
+  for (let i = 1; i < results.length; ++i) {
+    let buffer = results[i];
 
-  inst.exports.init(mem, buffer_uint8.length, import_checksum);
+    let buffer_uint8 = new Uint8Array(buffer);
+    let len = buffer_uint8.length;
+    let mem = inst.exports.malloc(len);
+    let mem_uint8 = new Uint8Array(inst.exports.memory.buffer, mem, len);
+    mem_uint8.set(buffer_uint8);
+
+    inst.exports.init(mem, buffer_uint8.length, import_checksum);
+  }
   inst.exports.resize(canvas.width, canvas.height);
   window.requestAnimationFrame(canvas_draw);
   addEventListener("keydown", canvas_keydown);
@@ -673,6 +676,8 @@ let module_promise = WebAssembly.instantiateStreaming(
 
 let design_id = params.get("designId");
 let level_id = params.get("levelId");
+// for merging purposes
+let additional_design_ids = [];
 
 // homepage behaviour: default brown
 if (!design_id && !level_id) {
@@ -701,6 +706,12 @@ if (!design_id && !level_id) {
   }
 }
 
+for (const [key, value] of mySearchParams) {
+  if (key.match(/.+DesignId.*/g)) {
+    additional_design_ids.push(value);
+  }
+}
+
 function openInSteam() {
   let steamUrl =
     "fantasticcontraption1:" +
@@ -710,19 +721,28 @@ function openInSteam() {
 
 steam_button.addEventListener("click", openInSteam);
 
-let response_promise = fetch(FC_URL + "/retrieveLevel.php", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded",
-  },
-  body: new URLSearchParams({
-    id: design_id ? design_id : level_id,
-    loadDesign: design_id ? "1" : "0",
-  }),
+let module_buffer_promise_list = [module_promise];
+
+function append_design(i_level_id, i_design_id) {
+  let response_promise = fetch(FC_URL + "/retrieveLevel.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      id: i_design_id ? i_design_id : i_level_id,
+      loadDesign: i_design_id ? "1" : "0",
+    }),
+  });
+
+  let buffer_promise = response_promise.then((resp) => resp.arrayBuffer());
+  module_buffer_promise_list.push(buffer_promise);
+}
+append_design(level_id, design_id);
+additional_design_ids.forEach((i_design_id) => {
+  append_design(undefined, i_design_id);
 });
 
-let buffer_promise = response_promise.then((resp) => resp.arrayBuffer());
-
-let module_buffer_promise = Promise.all([module_promise, buffer_promise]);
+let module_buffer_promise = Promise.all(module_buffer_promise_list);
 
 module_buffer_promise.then(init_module);
