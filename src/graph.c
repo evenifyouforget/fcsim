@@ -803,7 +803,8 @@ void merge_design(struct design *dst, struct design *src) {
       remove_joint(&src->joints, j);
       append_joint(&dst->joints, j);
     } else {
-      /* this joint is useless, free it */
+      /* this joint is useless, remove and free it */
+      remove_joint(&src->joints, j);
       free_joint(j);
     }
     j = nextj;
