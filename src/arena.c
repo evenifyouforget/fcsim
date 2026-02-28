@@ -137,51 +137,72 @@ bool arena_compile_shaders(void) {
 int num_times_init_called = 0;
 void arena_init(struct arena *arena, float w, float h, char *xml, int len) {
   struct xml_level level;
+  struct design tmp;
 
-  arena->view.x = 0.0f;
-  arena->view.y = 0.0f;
-  arena->view.width = w;
-  arena->view.height = h;
-  arena->view.scale = 1.0f;
-  arena->cursor_x = 0;
-  arena->cursor_y = 0;
+  /* on subsequent invocations we must clear old dynamic state */
+  if (num_times_init_called > 0) {
+    if (arena->world) {
+      free_world(arena->world, &arena->design);
+    }
+    if (arena->preview_world) {
+      free_world(arena->preview_world, arena->preview_design);
+    }
+    if (arena->preview_design) {
+      free_design(arena->preview_design);
+    }
+  }
 
-  arena->shift = false;
-  arena->ctrl = false;
-  arena->fine_adjustment_factor = 0;
-
-  arena->tool = TOOL_MOVE;
-  arena->tool_hidden = TOOL_MOVE;
-  arena->state = STATE_NORMAL;
-  arena->hover_joint = NULL;
-  arena->hover_block = NULL;
-
-  arena->root_joints_moving = NULL;
-  arena->root_blocks_moving = NULL;
-  arena->blocks_moving = NULL;
-
+  /* parse incoming xml into a temporary design */
+  memset(&tmp, 0, sizeof(tmp));
   xml_parse(xml, len, &level);
-  convert_xml(&level, &arena->design);
+  convert_xml(&level, &tmp);
+  xml_free(&level); /* avoid leak */
 
+  if (num_times_init_called == 0) {
+    /* first-time initialization of view/tools/etc. */
+    arena->view.x = 0.0f;
+    arena->view.y = 0.0f;
+    arena->view.width = w;
+    arena->view.height = h;
+    arena->view.scale = 1.0f;
+    arena->cursor_x = 0;
+    arena->cursor_y = 0;
+
+    arena->shift = false;
+    arena->ctrl = false;
+    arena->fine_adjustment_factor = 0;
+
+    arena->tool = TOOL_MOVE;
+    arena->tool_hidden = TOOL_MOVE;
+    arena->state = STATE_NORMAL;
+    arena->hover_joint = NULL;
+    arena->hover_block = NULL;
+
+    arena->root_joints_moving = NULL;
+    arena->root_blocks_moving = NULL;
+    arena->blocks_moving = NULL;
+
+    /* first design replaces arena->design entirely */
+    arena->design = tmp;
+
+#ifndef CLI
+    block_graphics_init(arena);
+#endif
+
+#ifndef CLI
+    text_stream_create(&arena->tick_counter, MAX_RENDER_TEXT_LENGTH);
+#endif
+  } else {
+    /* merge new data into existing design */
+    merge_design(&arena->design, &tmp);
+  }
+
+  /* regenerate physics world based on current design */
   arena->world = gen_world(&arena->design);
 
-#ifndef CLI
-  block_graphics_init(arena);
-#endif
-
-  /*
-  glGenBuffers(1, &arena->joint_coord_buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, arena->joint_coord_buffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(arena->joint_coords),
-               arena->joint_coords, GL_STREAM_DRAW);
-  */
-
+  /* reset gameplay state (tick, win flag, preview flags) */
   arena->tick = 0;
-#ifndef CLI
-  text_stream_create(&arena->tick_counter, MAX_RENDER_TEXT_LENGTH);
-#endif
   arena->has_won = false;
-
   arena->preview_gp_trajectory = false;
   arena->preview_design = NULL;
   arena->preview_world = NULL;
@@ -192,6 +213,7 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len) {
 
   arena->design.expect_checksum = 0;
   arena->design.actual_checksum = 0;
+
   num_times_init_called++;
 }
 

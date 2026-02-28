@@ -233,6 +233,12 @@ struct xml_level;
 void convert_xml(struct xml_level *xml_level, struct design *design);
 void free_design(struct design *design);
 
+// merge additional design pieces from `src` into `dst` according to the
+// conservative policy used by arena_init when multiple XML loads occur.
+// See comments in arena.c for behaviour; only rods/wheels that are not goals
+// are imported, their IDs offset, and all other data in `src` discarded.
+void merge_design(struct design *dst, struct design *src);
+
 b2World *gen_world(struct design *design);
 void free_world(b2World *world, struct design *design);
 

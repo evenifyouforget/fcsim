@@ -1,4 +1,5 @@
 #include "graph.h"
+#include "arena.h" /* for recalculate_design_checksum */
 #include "xml.h"
 #include <fpmath/fpmath.h>
 #include <math.h>
@@ -724,6 +725,100 @@ static void free_block_list(struct block_list *list) {
     free(block);
     block = next;
   }
+}
+
+
+static bool is_design_piece(struct block *block) {
+  if (block->goal)
+    return false;
+  switch (block->type_id) {
+  case FCSIM_ROD:
+  case FCSIM_SOLID_ROD:
+  case FCSIM_WHEEL:
+  case FCSIM_CW_WHEEL:
+  case FCSIM_CCW_WHEEL:
+    return true;
+  default:
+    return false;
+  }
+}
+
+static int max_block_id(const struct design *design) {
+  int max = 0;
+  struct block *b;
+  for (b = design->player_blocks.head; b; b = b->next)
+    if (b->id > max)
+      max = b->id;
+  return max;
+}
+
+static void clear_visited_blocks(struct design *design) {
+  struct block *b;
+  for (b = design->player_blocks.head; b; b = b->next)
+    b->visited = false;
+  for (b = design->level_blocks.head; b; b = b->next)
+    b->visited = false;
+}
+
+static void clear_visited_joints(struct design *design) {
+  struct joint *j;
+  for (j = design->joints.head; j; j = j->next)
+    j->visited = false;
+}
+
+static void clean_joint_attach_list(struct joint *j) {
+  struct attach_node *node = j->att.head;
+  while (node) {
+    struct attach_node *next = node->next;
+    if (!node->block->visited) {
+      remove_attach_node(&j->att, node);
+      free(node);
+    }
+    node = next;
+  }
+}
+
+void merge_design(struct design *dst, struct design *src) {
+  int offset = 1 + max_block_id(dst);
+  struct block *b = src->player_blocks.head;
+
+  /* move allowed blocks from src to dst */
+  while (b) {
+    struct block *next = b->next;
+    if (is_design_piece(b)) {
+      remove_block(&src->player_blocks, b);
+      b->id += offset;
+      b->visited = true; /* mark for joint retention */
+      append_block(&dst->player_blocks, b);
+    }
+    b = next;
+  }
+
+  /* process joints: keep only those attached to moved blocks */
+  struct joint *j = src->joints.head;
+  while (j) {
+    struct joint *nextj = j->next;
+    if (j->gen && j->gen->visited) {
+      clean_joint_attach_list(j);
+      remove_joint(&src->joints, j);
+      append_joint(&dst->joints, j);
+    } else {
+      /* this joint is useless, free it */
+      free_joint(j);
+    }
+    j = nextj;
+  }
+  /* free any leftover lists in src */
+  free_block_list(&src->level_blocks);
+  free_block_list(&src->player_blocks);
+  free_joint_list(&src->joints);
+
+  /* reset visited markers in dst */
+  clear_visited_blocks(dst);
+  clear_visited_joints(dst);
+
+  dst->modcount++;
+  recalculate_design_checksum(dst);
 }
 
 void free_design(struct design *design) {
