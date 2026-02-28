@@ -134,6 +134,7 @@ bool arena_compile_shaders(void) {
   return true;
 }
 
+int num_times_init_called = 0;
 void arena_init(struct arena *arena, float w, float h, char *xml, int len) {
   struct xml_level level;
 
@@ -191,6 +192,7 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len) {
 
   arena->design.expect_checksum = 0;
   arena->design.actual_checksum = 0;
+  num_times_init_called++;
 }
 
 /* TODO: dedupe */
