@@ -794,16 +794,19 @@ void merge_design(struct design *dst, struct design *src) {
     b = next;
   }
 
-  /* process joints: keep only those attached to moved blocks */
+  /* process joints: keep only those useful to moved blocks */
   struct joint *j = src->joints.head;
   while (j) {
     struct joint *nextj = j->next;
-    if (j->gen && j->gen->visited) {
-      clean_joint_attach_list(j);
+    /* first clean attachments to blocks that weren't moved */
+    clean_joint_attach_list(j);
+    
+    /* keep if: has moved generator block OR has remaining attachments */
+    if ((j->gen && j->gen->visited) || j->att.head) {
       remove_joint(&src->joints, j);
       append_joint(&dst->joints, j);
     } else {
-      /* this joint is useless, remove and free it */
+      /* useless joint with no generator and no attachments */
       remove_joint(&src->joints, j);
       free_joint(j);
     }
