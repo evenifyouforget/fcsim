@@ -727,7 +727,6 @@ static void free_block_list(struct block_list *list) {
   }
 }
 
-
 static bool is_design_piece(struct block *block) {
   if (block->goal)
     return false;
@@ -800,7 +799,7 @@ void merge_design(struct design *dst, struct design *src) {
     struct joint *nextj = j->next;
     /* first clean attachments to blocks that weren't moved */
     clean_joint_attach_list(j);
-    
+
     /* keep if: has moved generator block OR has remaining attachments */
     if ((j->gen && j->gen->visited) || j->att.head) {
       remove_joint(&src->joints, j);
