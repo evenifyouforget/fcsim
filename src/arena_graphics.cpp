@@ -951,13 +951,13 @@ void draw_tick_counter(struct arena *arena) {
   }
   x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
   x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-  x = draw_text_default(arena, std::to_string((int64_t)rint(fps_value)), x, 10);
+  x = draw_text_default(arena, std::to_string(fps_value), x, 10);
   x = draw_text_default(arena, "FPS", x, 10, 1);
   x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
   x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-  x = draw_text_default(
+    x = draw_text_default(
       arena,
-      tps_value >= 1e9 ? "Infinity" : std::to_string((int64_t)rint(tps_value)),
+      tps_value >= 1e9 ? "Infinity" : std::to_string(tps_value),
       x, 10);
   x = draw_text_default(
       arena, !tps_is_prediction ? "TPS average" : "TPS predicted", x, 10, 1);
