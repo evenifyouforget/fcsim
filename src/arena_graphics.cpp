@@ -827,7 +827,7 @@ void regenerate_ui_buttons(arena *arena) {
         {4, 5}, top_bar_x_offset + 120 + 55 * 3, vh - 30, 50, 50, 2};
     button.enabled = arena->ui_speedbar_opened;
     button.texts.push_back(ui_button_text{"4", 2, 0, 5});
-    button.texts.push_back(ui_button_text{"8x", 1, 0, -10});
+    button.texts.push_back(ui_button_text{"10x", 1, 0, -10});
     button.highlighted = _fcsim_speed_preset == 4;
     all_buttons->buttons.push_back(button);
   }
