@@ -67,6 +67,45 @@ std::string std::to_string(int64_t value) {
   return result;
 }
 
+std::string std::to_string(double value) {
+  if (value != value) // NaN
+    return "nan";
+  bool neg = value < 0.0;
+  double absval = neg ? -value : value;
+
+  int64_t intpart = (int64_t)absval;
+  double frac = absval - (double)intpart;
+
+  // round to 5 decimal places
+  int64_t frac5 = (int64_t)(frac * 100000.0 + 0.5);
+  if (frac5 >= 100000) {
+    intpart += 1;
+    frac5 = 0;
+  }
+
+  std::string result;
+  if (neg)
+    result.append('-');
+
+  std::string intstr = std::to_string(intpart);
+  for (size_t i = 0; i < intstr.size(); ++i)
+    result.append(intstr[i]);
+
+  result.append('.');
+
+  // fractional part with leading zeros to 5 digits
+  char buf[6];
+  buf[5] = 0;
+  for (int i = 4; i >= 0; --i) {
+    buf[i] = (char)('0' + (frac5 % 10));
+    frac5 /= 10;
+  }
+  for (int i = 0; i < 5; ++i)
+    result.append(buf[i]);
+
+  return result;
+}
+
 char *std::string::c_str() {
   if (_data._capacity == _length) {
     _data.push_back((char)0);
