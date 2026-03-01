@@ -280,6 +280,53 @@ extern "C" void tick_func(void *arg) {
         break;
     }
   }
+
+  // Dynamic frame pacing: adjust interval by ±1ms every frame to average to
+  // target FPS. Measure actual elapsed time since last tick, compare to ideal,
+  // and reschedule if accumulated error gets large enough.
+  double current_time = time_precise_ms();
+  if (the_arena->last_tick_time_ms > 0.001) {  // Skip first tick
+    double actual_interval = current_time - the_arena->last_tick_time_ms;
+    // The interval executes tick_multiply ticks, so ideal is per-tick target times tick_multiply
+    double ideal_mspt = (1000.0 / _fcsim_target_tps) * the_arena->tick_multiply;
+    double interval_error = actual_interval - ideal_mspt;
+
+    the_arena->accumulated_timing_error_ms += interval_error;
+
+    int next_interval = the_arena->tick_ms;
+    bool should_reschedule = false;
+
+    if (the_arena->accumulated_timing_error_ms > 0.5) {
+      // Accumulated error positive: intervals too long, reduce next one
+      next_interval--;
+      the_arena->accumulated_timing_error_ms -= 1.0;
+      should_reschedule = true;
+      // Don't go below MIN_MSPT
+      if (next_interval < MIN_MSPT) {
+        next_interval = the_arena->tick_ms;
+        the_arena->accumulated_timing_error_ms += 1.0;
+        should_reschedule = false;
+      }
+    } else if (the_arena->accumulated_timing_error_ms < -0.5) {
+      // Accumulated error negative: intervals too short, increase next one
+      next_interval++;
+      the_arena->accumulated_timing_error_ms += 1.0;
+      should_reschedule = true;
+    }
+
+    // Clamp accumulated error to prevent unbounded growth. This is especially
+    // important at high speeds where small errors compound quickly.
+    if (the_arena->accumulated_timing_error_ms > 2.0) {
+      the_arena->accumulated_timing_error_ms = 2.0;
+    } else if (the_arena->accumulated_timing_error_ms < -2.0) {
+      the_arena->accumulated_timing_error_ms = -2.0;
+    }
+
+    if (should_reschedule && is_running(the_arena)) {
+      change_speed(the_arena, next_interval, the_arena->tick_multiply);
+    }
+  }
+  the_arena->last_tick_time_ms = current_time;
 }
 
 bool multi_trail_t::accepting() {
