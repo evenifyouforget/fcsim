@@ -1,6 +1,6 @@
 # fcsim
 
-fcsim is the modern client for Fantastic Contraption.
+fcsim is the modern client for Fantastic Contraption. [Play it here!](https://ft.jtai.dev/)
 
 # Architecture
 
