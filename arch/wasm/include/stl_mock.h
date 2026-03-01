@@ -135,6 +135,7 @@ struct string {
   string &operator=(const string &other);
   string &operator=(const char *other);
   string &operator+=(char);
+  string &operator+=(const string &other);
   size_t size() const;
   char &operator[](size_t pos);
 };

@@ -46,6 +46,12 @@ std::string &std::string::operator+=(char c) {
   return *this;
 }
 
+std::string &std::string::operator+=(const std::string &other) {
+  for (size_t i = 0; i < other._length; ++i)
+    append(other._data[i]);
+  return *this;
+}
+
 // helper: convert unsigned 64-bit to decimal string
 static std::string uint64_to_string_impl(uint64_t value) {
   if (value == 0)
@@ -91,6 +97,26 @@ std::string std::to_string(size_t v) { return std::to_string((uint64_t)v); }
 // floating point forwarding
 std::string std::to_string(float v) { return std::to_string((double)v); }
 std::string std::to_string(long double v) { return std::to_string((double)v); }
+
+// concatenation helpers
+std::string operator+(const std::string &a, const std::string &b) {
+  std::string r = a;
+  r += b;
+  return r;
+}
+
+std::string operator+(const std::string &a, const char *b) {
+  std::string r = a;
+  for (const char *p = b; *p; ++p)
+    r += *p;
+  return r;
+}
+
+std::string operator+(const char *a, const std::string &b) {
+  std::string r(a);
+  r += b;
+  return r;
+}
 
 std::string std::to_string(double value) {
   if (value != value) // NaN
