@@ -151,7 +151,10 @@ string to_string(int16_t value);
 string to_string(uint16_t value);
 string to_string(int8_t value);
 string to_string(uint8_t value);
+
+#if SIZE_MAX != UINT64_MAX
 string to_string(size_t value);
+#endif
 
 // Floating-point forwarding
 string to_string(float value);

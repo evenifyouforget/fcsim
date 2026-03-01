@@ -94,33 +94,14 @@ std::string std::to_string(uint32_t v) { return std::to_string((uint64_t)v); }
 std::string std::to_string(int16_t v) { return std::to_string((int64_t)v); }
 std::string std::to_string(uint16_t v) { return std::to_string((uint64_t)v); }
 std::string std::to_string(int8_t v) { return std::to_string((int64_t)v); }
-std::string std::to_string(uint8_t v) { return std::to_string((uint64_t)v); }
-
+#if SIZE_MAX != UINT64_MAX
 std::string std::to_string(size_t v) { return std::to_string((uint64_t)v); }
+#endif
 
 // floating point forwarding
 std::string std::to_string(float v) { return std::to_string((double)v); }
 std::string std::to_string(long double v) { return std::to_string((double)v); }
 
-// concatenation helpers
-std::string operator+(const std::string &a, const std::string &b) {
-  std::string r = a;
-  r += b;
-  return r;
-}
-
-std::string operator+(const std::string &a, const char *b) {
-  std::string r = a;
-  for (const char *p = b; *p; ++p)
-    r += *p;
-  return r;
-}
-
-std::string operator+(const char *a, const std::string &b) {
-  std::string r(a);
-  r += b;
-  return r;
-}
 
 std::string std::to_string(double value) {
   if (value != value) // NaN
