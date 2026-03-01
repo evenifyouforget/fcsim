@@ -299,6 +299,9 @@ public:
   }
 };
 
+string to_string(int64_t value);
+string to_string(double value);
+
 } // namespace std
 
 #endif
