@@ -106,6 +106,47 @@ std::string std::to_string(double value) {
   return result;
 }
 
+std::string std::to_string(uint64_t value) {
+  if (value == 0)
+    return "0";
+  char buffer[21] = {0};
+  int i = 0;
+  while (value) {
+    buffer[i++] = (char)('0' + value % 10);
+    value /= 10;
+  }
+  std::string result;
+  for (int j = i - 1; j >= 0; --j) {
+    result.append(buffer[j]);
+  }
+  return result;
+}
+
+// forwarding overloads for other integer types
+std::string std::to_string(int32_t v) { return std::to_string((int64_t)v); }
+std::string std::to_string(uint32_t v) { return std::to_string((uint64_t)v); }
+std::string std::to_string(int16_t v) { return std::to_string((int64_t)v); }
+std::string std::to_string(uint16_t v) { return std::to_string((uint64_t)v); }
+std::string std::to_string(int8_t v) { return std::to_string((int64_t)v); }
+std::string std::to_string(uint8_t v) { return std::to_string((uint64_t)v); }
+std::string std::to_string(int v) { return std::to_string((int64_t)v); }
+std::string std::to_string(unsigned int v) {
+  return std::to_string((uint64_t)v);
+}
+std::string std::to_string(long v) { return std::to_string((int64_t)v); }
+std::string std::to_string(unsigned long v) {
+  return std::to_string((uint64_t)v);
+}
+std::string std::to_string(long long v) { return std::to_string((int64_t)v); }
+std::string std::to_string(unsigned long long v) {
+  return std::to_string((uint64_t)v);
+}
+std::string std::to_string(size_t v) { return std::to_string((uint64_t)v); }
+
+// floating point forwarding
+std::string std::to_string(float v) { return std::to_string((double)v); }
+std::string std::to_string(long double v) { return std::to_string((double)v); }
+
 char *std::string::c_str() {
   if (_data._capacity == _length) {
     _data.push_back((char)0);

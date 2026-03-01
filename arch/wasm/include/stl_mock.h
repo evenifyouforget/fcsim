@@ -139,7 +139,28 @@ struct string {
   char &operator[](size_t pos);
 };
 
-string to_string(int64_t);
+string to_string(int64_t value);
+string to_string(uint64_t value);
+string to_string(double value);
+
+// Forwarding overloads for other integer types
+string to_string(int32_t value);
+string to_string(uint32_t value);
+string to_string(int16_t value);
+string to_string(uint16_t value);
+string to_string(int8_t value);
+string to_string(uint8_t value);
+string to_string(int value);
+string to_string(unsigned int value);
+string to_string(long value);
+string to_string(unsigned long value);
+string to_string(long long value);
+string to_string(unsigned long long value);
+string to_string(size_t value);
+
+// Floating-point forwarding
+string to_string(float value);
+string to_string(long double value);
 
 template <typename A, typename B> struct pair {
   A first;
@@ -298,9 +319,6 @@ public:
     return dummy_value_for_not_found;
   }
 };
-
-string to_string(int64_t value);
-string to_string(double value);
 
 } // namespace std
 
