@@ -52,8 +52,7 @@ std::string &std::string::operator+=(const std::string &other) {
   return *this;
 }
 
-// helper: convert unsigned 64-bit to decimal string
-static std::string uint64_to_string_impl(uint64_t value) {
+std::string std::to_string(uint64_t value) {
   if (value == 0)
     return "0";
   char buffer[21];
@@ -69,16 +68,12 @@ static std::string uint64_to_string_impl(uint64_t value) {
   return result;
 }
 
-std::string std::to_string(uint64_t value) {
-  return uint64_to_string_impl(value);
-}
-
 std::string std::to_string(int64_t value) {
   if (value == 0)
     return "0";
   bool neg = value < 0;
   uint64_t u = neg ? -(uint64_t)value : (uint64_t)value;
-  std::string s = uint64_to_string_impl(u);
+  std::string s = std::to_string(u);
   if (neg) {
     std::string r;
     r.append('-');
@@ -100,7 +95,6 @@ std::string std::to_string(size_t v) { return std::to_string((uint64_t)v); }
 
 // floating point forwarding
 std::string std::to_string(float v) { return std::to_string((double)v); }
-std::string std::to_string(long double v) { return std::to_string((double)v); }
 
 std::string std::to_string(double value) {
   if (value != value) // NaN
@@ -122,7 +116,7 @@ std::string std::to_string(double value) {
   if (neg)
     result.append('-');
 
-  std::string intstr = uint64_to_string_impl(intpart);
+  std::string intstr = std::to_string(intpart);
   for (size_t i = 0; i < intstr.size(); ++i)
     result.append(intstr[i]);
 

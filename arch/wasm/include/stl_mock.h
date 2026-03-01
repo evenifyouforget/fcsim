@@ -158,7 +158,6 @@ string to_string(size_t value);
 
 // Floating-point forwarding
 string to_string(float value);
-string to_string(long double value);
 
 template <typename A, typename B> struct pair {
   A first;
