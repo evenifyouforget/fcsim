@@ -102,7 +102,6 @@ std::string std::to_string(size_t v) { return std::to_string((uint64_t)v); }
 std::string std::to_string(float v) { return std::to_string((double)v); }
 std::string std::to_string(long double v) { return std::to_string((double)v); }
 
-
 std::string std::to_string(double value) {
   if (value != value) // NaN
     return "nan";
