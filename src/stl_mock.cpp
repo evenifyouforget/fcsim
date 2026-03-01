@@ -67,6 +67,22 @@ std::string std::to_string(int64_t value) {
   return result;
 }
 
+std::string std::to_string(uint64_t value) {
+  if (value == 0)
+    return "0";
+  char buffer[21] = {0};
+  int i = 0;
+  while (value) {
+    buffer[i++] = (char)('0' + value % 10);
+    value /= 10;
+  }
+  std::string result;
+  for (int j = i - 1; j >= 0; --j) {
+    result.append(buffer[j]);
+  }
+  return result;
+}
+
 std::string std::to_string(double value) {
   if (value != value) // NaN
     return "nan";
@@ -103,22 +119,6 @@ std::string std::to_string(double value) {
   for (int i = 0; i < 5; ++i)
     result.append(buf[i]);
 
-  return result;
-}
-
-std::string std::to_string(uint64_t value) {
-  if (value == 0)
-    return "0";
-  char buffer[21] = {0};
-  int i = 0;
-  while (value) {
-    buffer[i++] = (char)('0' + value % 10);
-    value /= 10;
-  }
-  std::string result;
-  for (int j = i - 1; j >= 0; --j) {
-    result.append(buffer[j]);
-  }
   return result;
 }
 
