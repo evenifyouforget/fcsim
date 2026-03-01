@@ -79,8 +79,12 @@ std::string std::to_string(int64_t value) {
   bool neg = value < 0;
   uint64_t u = neg ? -(uint64_t)value : (uint64_t)value;
   std::string s = uint64_to_string_impl(u);
-  if (neg)
-    return std::string("-") + s;
+  if (neg) {
+    std::string r;
+    r.append('-');
+    r += s;
+    return r;
+  }
   return s;
 }
 
