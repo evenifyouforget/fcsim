@@ -143,19 +143,13 @@ string to_string(int64_t value);
 string to_string(uint64_t value);
 string to_string(double value);
 
-// Forwarding overloads for other integer types
+// Forwarding overloads for other fixed-width integer types
 string to_string(int32_t value);
 string to_string(uint32_t value);
 string to_string(int16_t value);
 string to_string(uint16_t value);
 string to_string(int8_t value);
 string to_string(uint8_t value);
-string to_string(int value);
-string to_string(unsigned int value);
-string to_string(long value);
-string to_string(unsigned long value);
-string to_string(long long value);
-string to_string(unsigned long long value);
 string to_string(size_t value);
 
 // Floating-point forwarding

@@ -46,21 +46,17 @@ std::string &std::string::operator+=(char c) {
   return *this;
 }
 
-std::string std::to_string(int64_t value) {
+// helper: convert unsigned 64-bit to decimal string
+static std::string uint64_to_string_impl(uint64_t value) {
   if (value == 0)
     return "0";
-  bool neg = value < 0;
-  if (neg)
-    value = -value;
-  char buffer[21] = {0};
-  int i;
-  for (i = 0; value; ++i) {
-    buffer[i] = (char)('0' + value % 10);
+  char buffer[21];
+  int i = 0;
+  while (value) {
+    buffer[i++] = (char)('0' + (value % 10));
     value /= 10;
   }
   std::string result;
-  if (neg)
-    result.append('-');
   for (int j = i - 1; j >= 0; --j) {
     result.append(buffer[j]);
   }
@@ -68,20 +64,33 @@ std::string std::to_string(int64_t value) {
 }
 
 std::string std::to_string(uint64_t value) {
+  return uint64_to_string_impl(value);
+}
+
+std::string std::to_string(int64_t value) {
   if (value == 0)
     return "0";
-  char buffer[21] = {0};
-  int i = 0;
-  while (value) {
-    buffer[i++] = (char)('0' + value % 10);
-    value /= 10;
-  }
-  std::string result;
-  for (int j = i - 1; j >= 0; --j) {
-    result.append(buffer[j]);
-  }
-  return result;
+  bool neg = value < 0;
+  uint64_t u = neg ? -(uint64_t)value : (uint64_t)value;
+  std::string s = uint64_to_string_impl(u);
+  if (neg)
+    return std::string("-") + s;
+  return s;
 }
+
+// forwarding overloads for other integer types
+std::string std::to_string(int32_t v) { return std::to_string((int64_t)v); }
+std::string std::to_string(uint32_t v) { return std::to_string((uint64_t)v); }
+std::string std::to_string(int16_t v) { return std::to_string((int64_t)v); }
+std::string std::to_string(uint16_t v) { return std::to_string((uint64_t)v); }
+std::string std::to_string(int8_t v) { return std::to_string((int64_t)v); }
+std::string std::to_string(uint8_t v) { return std::to_string((uint64_t)v); }
+
+std::string std::to_string(size_t v) { return std::to_string((uint64_t)v); }
+
+// floating point forwarding
+std::string std::to_string(float v) { return std::to_string((double)v); }
+std::string std::to_string(long double v) { return std::to_string((double)v); }
 
 std::string std::to_string(double value) {
   if (value != value) // NaN
@@ -89,7 +98,7 @@ std::string std::to_string(double value) {
   bool neg = value < 0.0;
   double absval = neg ? -value : value;
 
-  int64_t intpart = (int64_t)absval;
+  uint64_t intpart = (uint64_t)absval;
   double frac = absval - (double)intpart;
 
   // round to 5 decimal places
@@ -103,7 +112,7 @@ std::string std::to_string(double value) {
   if (neg)
     result.append('-');
 
-  std::string intstr = std::to_string(intpart);
+  std::string intstr = uint64_to_string_impl(intpart);
   for (size_t i = 0; i < intstr.size(); ++i)
     result.append(intstr[i]);
 
@@ -121,31 +130,6 @@ std::string std::to_string(double value) {
 
   return result;
 }
-
-// forwarding overloads for other integer types
-std::string std::to_string(int32_t v) { return std::to_string((int64_t)v); }
-std::string std::to_string(uint32_t v) { return std::to_string((uint64_t)v); }
-std::string std::to_string(int16_t v) { return std::to_string((int64_t)v); }
-std::string std::to_string(uint16_t v) { return std::to_string((uint64_t)v); }
-std::string std::to_string(int8_t v) { return std::to_string((int64_t)v); }
-std::string std::to_string(uint8_t v) { return std::to_string((uint64_t)v); }
-std::string std::to_string(int v) { return std::to_string((int64_t)v); }
-std::string std::to_string(unsigned int v) {
-  return std::to_string((uint64_t)v);
-}
-std::string std::to_string(long v) { return std::to_string((int64_t)v); }
-std::string std::to_string(unsigned long v) {
-  return std::to_string((uint64_t)v);
-}
-std::string std::to_string(long long v) { return std::to_string((int64_t)v); }
-std::string std::to_string(unsigned long long v) {
-  return std::to_string((uint64_t)v);
-}
-std::string std::to_string(size_t v) { return std::to_string((uint64_t)v); }
-
-// floating point forwarding
-std::string std::to_string(float v) { return std::to_string((double)v); }
-std::string std::to_string(long double v) { return std::to_string((double)v); }
 
 char *std::string::c_str() {
   if (_data._capacity == _length) {
