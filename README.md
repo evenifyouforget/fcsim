@@ -1,10 +1,18 @@
 # fcsim
 
-fcsim is the modern client for Fantastic Contraption.
+fcsim is the modern client for Fantastic Contraption. [Play it here!](https://ft.jtai.dev/)
+
+# Architecture
+
+There are some aspects that are unlikely to change for the forseeable future.
+
+* We assume GitHub; for GitHub Actions and for information to populate `version.js`.
+* C/C++ is our main language, chosen for speed, compatibility with box2d, and ease of low level development for functions such as `atan2` and `malloc`.
+* The web build (C/C++ to WASM) is our main product, and how most users will interact with fcsim. It has the most features. The native GUI still exists, though.
 
 # Build
 
-Currently, you can only build on Linux.
+Currently, you can only build on Linux. It is actively tested on Linux Mint and GitHub Actions (using Ubuntu). We use `apt` to install dependencies, so Ubuntu or any distro based on Ubuntu should work out of the box. Otherwise, you will need to obtain the dependencies on your own.
 
 ## Requirements
 
@@ -14,13 +22,21 @@ First install the system requirements:
 bash install_requirements.sh
 ```
 
-This uses `apt` to install everything listed in `requirements.system`, assuming you have `apt` available on your distro (we tested on Linux Mint).
+This uses `apt` to install everything listed in `requirements.system`.
 
 Before doing any work, you should switch to the venv:
 
 ```sh
 source .venv/bin/activate
 ```
+
+## Manually run linters
+
+```sh
+pre-commit run --all-files
+```
+
+This may cause some files to change.
 
 ## Actual build
 
@@ -38,7 +54,7 @@ scons -c
 
 If you are having any build issues, try cleaning and then building.
 
-The build system used to use `ninja`, but `ninja` has been deprecated in favour of `scons`.
+The build system used to use `ninja`, but `ninja` has been removed in favour of `scons`.
 
 ## Running the web build locally
 
@@ -53,7 +69,7 @@ Should get you a server at http://0.0.0.0:8000.
 
 If you are having issues with the web build, try clearing your browser cache.
 
-If you see a CORS issue, try enabling CORS everywhere.
+CORS issues should not occur anymore due to an update to FC's servers, but if you see a CORS issue, try enabling CORS everywhere.
 There are certain browser extensions for this.
 
 # `fcsim` vs `fcsim-fpatan` and others
