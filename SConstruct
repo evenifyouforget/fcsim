@@ -271,11 +271,46 @@ run_single_design_env = base_env.Clone(
 run_single_design_env.VariantDir("build/run_single_design", ".", False)
 
 test_env = base_env.Clone(
-    CCFLAGS=common_ccflags + test_ccflags,
-    CPPPATH=common_include + wasm_include,
-    CPPDEFINES=test_defines,
+    CCFLAGS=common_ccflags + test_ccflags + ["-fsanitize=address,undefined", "-g"],
+    LINKFLAGS=["-fsanitize=address,undefined"],
+    CPPPATH=common_include + wasm_include + ["third_party/cpputest/include"],
+    CPPDEFINES=test_defines + ["CPPUTEST_USE_STD_CPP_LIB=0"],
 )
 test_env.VariantDir("build/test", ".", False)
+
+# Build CppUTest library (without STL to avoid conflicts with mock STL)
+cpputest_env = base_env.Clone(
+    CCFLAGS=common_ccflags + test_ccflags + ["-fsanitize=address,undefined", "-g"],
+    LINKFLAGS=["-fsanitize=address,undefined"],
+    CPPPATH=["third_party/cpputest/include", "third_party/cpputest"],
+    CPPDEFINES=["CPPUTEST_USE_STD_CPP_LIB=0"],
+)
+
+cpputest_sources = [
+    "third_party/cpputest/src/CppUTest/CommandLineArguments.cpp",
+    "third_party/cpputest/src/CppUTest/CommandLineTestRunner.cpp",
+    "third_party/cpputest/src/CppUTest/JUnitTestOutput.cpp",
+    "third_party/cpputest/src/CppUTest/MemoryLeakDetector.cpp",
+    "third_party/cpputest/src/CppUTest/MemoryLeakWarningPlugin.cpp",
+    "third_party/cpputest/src/CppUTest/SimpleMutex.cpp",
+    "third_party/cpputest/src/CppUTest/SimpleString.cpp",
+    "third_party/cpputest/src/CppUTest/SimpleStringInternalCache.cpp",
+    "third_party/cpputest/src/CppUTest/TeamCityTestOutput.cpp",
+    "third_party/cpputest/src/CppUTest/TestFailure.cpp",
+    "third_party/cpputest/src/CppUTest/TestFilter.cpp",
+    "third_party/cpputest/src/CppUTest/TestHarness_c.cpp",
+    "third_party/cpputest/src/CppUTest/TestMemoryAllocator.cpp",
+    "third_party/cpputest/src/CppUTest/TestOutput.cpp",
+    "third_party/cpputest/src/CppUTest/TestPlugin.cpp",
+    "third_party/cpputest/src/CppUTest/TestRegistry.cpp",
+    "third_party/cpputest/src/CppUTest/TestResult.cpp",
+    "third_party/cpputest/src/CppUTest/TestTestingFixture.cpp",
+    "third_party/cpputest/src/CppUTest/Utest.cpp",
+    "third_party/cpputest/src/Platforms/Gcc/UtestPlatform.cpp",
+]
+
+cpputest_lib = cpputest_env.StaticLibrary("build/cpputest", cpputest_sources)
+test_env.Append(LIBS=[cpputest_lib])
 
 wasm_env = base_env.Clone(
     CCFLAGS=common_ccflags + wasm_ccflags,
@@ -315,7 +350,20 @@ build_with_variant(
     run_single_design_xml_sources_all,
     target="run_single_design_xml",
 )
-build_with_variant(test_env, "build/test/", test_sources_all, target="stl_test")
+
+# Build test executable with CppUTest
+test_sources_variant = ["build/test/" + src for src in test_sources_all]
+test_env.VariantDir("build/test", ".", True)
+test_executable = test_env.Program(
+    target="stl_test",
+    source=test_sources_variant,
+    LIBS=[cpputest_lib, "pthread"],
+)
+
+# Create a test run target
+test_target = test_env.Command("check", test_executable, "$SOURCE", LIBS=[cpputest_lib, "pthread"])
+test_env.AlwaysBuild(test_target)
+
 build_with_variant(wasm_env, "build/wasm/", wasm_sources_all, target="html/fcsim.wasm")
 
 # Automated version tagging - build html/version.js
