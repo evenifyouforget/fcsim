@@ -135,11 +135,29 @@ struct string {
   string &operator=(const string &other);
   string &operator=(const char *other);
   string &operator+=(char);
+  string &operator+=(const string &other);
   size_t size() const;
   char &operator[](size_t pos);
 };
 
-string to_string(int64_t);
+string to_string(int64_t value);
+string to_string(uint64_t value);
+string to_string(double value);
+
+// Forwarding overloads for other fixed-width integer types
+string to_string(int32_t value);
+string to_string(uint32_t value);
+string to_string(int16_t value);
+string to_string(uint16_t value);
+string to_string(int8_t value);
+string to_string(uint8_t value);
+
+#if SIZE_MAX != UINT64_MAX
+string to_string(size_t value);
+#endif
+
+// Floating-point forwarding
+string to_string(float value);
 
 template <typename A, typename B> struct pair {
   A first;
