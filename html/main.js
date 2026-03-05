@@ -699,16 +699,16 @@ if (!design_id && !level_id) {
 
     notification.appendChild(helpDiv);
   }
-
-  function openInSteam() {
-    let steamUrl =
-      "fantasticcontraption1:" +
-      (design_id ? "designId=" + design_id : "levelId=" + level_id);
-    window.location = steamUrl;
-  }
-
-  steam_button.addEventListener("click", openInSteam);
 }
+
+function openInSteam() {
+  let steamUrl =
+    "fantasticcontraption1:" +
+    (design_id ? "designId=" + design_id : "levelId=" + level_id);
+  window.location = steamUrl;
+}
+
+steam_button.addEventListener("click", openInSteam);
 
 let response_promise = fetch(FC_URL + "/retrieveLevel.php", {
   method: "POST",
