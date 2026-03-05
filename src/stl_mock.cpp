@@ -97,7 +97,8 @@ std::string std::to_string(size_t v) { return std::to_string((uint64_t)v); }
 std::string std::to_string(float v) { return std::to_string((double)v); }
 
 // crappy implementation that uses 5 fixed digits and works for most values
-// TODO get the actually good implementation from glib, as it is already used in ftlib
+// TODO get the actually good implementation from glib, as it is already used in
+// ftlib
 std::string std::to_string(double value) {
   if (value != value) // NaN
     return "nan";
