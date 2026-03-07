@@ -46,24 +46,95 @@ std::string &std::string::operator+=(char c) {
   return *this;
 }
 
+std::string &std::string::operator+=(const std::string &other) {
+  for (size_t i = 0; i < other._length; ++i)
+    append(other._data[i]);
+  return *this;
+}
+
+std::string std::to_string(uint64_t value) {
+  if (value == 0)
+    return "0";
+  char buffer[21];
+  int i = 0;
+  while (value) {
+    buffer[i++] = (char)('0' + (value % 10));
+    value /= 10;
+  }
+  std::string result;
+  for (int j = i - 1; j >= 0; --j) {
+    result.append(buffer[j]);
+  }
+  return result;
+}
+
 std::string std::to_string(int64_t value) {
   if (value == 0)
     return "0";
   bool neg = value < 0;
-  if (neg)
-    value = -value;
-  char buffer[21] = {0};
-  int i;
-  for (i = 0; value; ++i) {
-    buffer[i] = (char)('0' + value % 10);
-    value /= 10;
+  uint64_t u = neg ? -(uint64_t)value : (uint64_t)value;
+  std::string s = std::to_string(u);
+  if (neg) {
+    std::string r;
+    r.append('-');
+    r += s;
+    return r;
   }
+  return s;
+}
+
+// forwarding overloads for other integer types
+std::string std::to_string(int32_t v) { return std::to_string((int64_t)v); }
+std::string std::to_string(uint32_t v) { return std::to_string((uint64_t)v); }
+std::string std::to_string(int16_t v) { return std::to_string((int64_t)v); }
+std::string std::to_string(uint16_t v) { return std::to_string((uint64_t)v); }
+std::string std::to_string(int8_t v) { return std::to_string((int64_t)v); }
+#if SIZE_MAX != UINT64_MAX
+std::string std::to_string(size_t v) { return std::to_string((uint64_t)v); }
+#endif
+
+// floating point forwarding
+std::string std::to_string(float v) { return std::to_string((double)v); }
+
+// crappy implementation that uses 5 fixed digits and works for most values
+// TODO get the actually good implementation from glib, as it is already used in
+// ftlib
+std::string std::to_string(double value) {
+  if (value != value) // NaN
+    return "nan";
+  bool neg = value < 0.0;
+  double absval = neg ? -value : value;
+
+  uint64_t intpart = (uint64_t)absval;
+  double frac = absval - (double)intpart;
+
+  // round to 5 decimal places
+  int64_t frac5 = (int64_t)(frac * 100000.0 + 0.5);
+  if (frac5 >= 100000) {
+    intpart += 1;
+    frac5 = 0;
+  }
+
   std::string result;
   if (neg)
     result.append('-');
-  for (int j = i - 1; j >= 0; --j) {
-    result.append(buffer[j]);
+
+  std::string intstr = std::to_string(intpart);
+  for (size_t i = 0; i < intstr.size(); ++i)
+    result.append(intstr[i]);
+
+  result.append('.');
+
+  // fractional part with leading zeros to 5 digits
+  char buf[6];
+  buf[5] = 0;
+  for (int i = 4; i >= 0; --i) {
+    buf[i] = (char)('0' + (frac5 % 10));
+    frac5 /= 10;
   }
+  for (int i = 0; i < 5; ++i)
+    result.append(buf[i]);
+
   return result;
 }
 

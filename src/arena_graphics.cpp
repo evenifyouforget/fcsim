@@ -827,7 +827,7 @@ void regenerate_ui_buttons(arena *arena) {
         {4, 5}, top_bar_x_offset + 120 + 55 * 3, vh - 30, 50, 50, 2};
     button.enabled = arena->ui_speedbar_opened;
     button.texts.push_back(ui_button_text{"4", 2, 0, 5});
-    button.texts.push_back(ui_button_text{"8x", 1, 0, -10});
+    button.texts.push_back(ui_button_text{"10x", 1, 0, -10});
     button.highlighted = _fcsim_speed_preset == 4;
     all_buttons->buttons.push_back(button);
   }
@@ -951,14 +951,12 @@ void draw_tick_counter(struct arena *arena) {
   }
   x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
   x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-  x = draw_text_default(arena, std::to_string((int64_t)rint(fps_value)), x, 10);
+  x = draw_text_default(arena, std::to_string(fps_value), x, 10);
   x = draw_text_default(arena, "FPS", x, 10, 1);
   x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
   x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
   x = draw_text_default(
-      arena,
-      tps_value >= 1e9 ? "Infinity" : std::to_string((int64_t)rint(tps_value)),
-      x, 10);
+      arena, tps_value >= 1e9 ? "Infinity" : std::to_string(tps_value), x, 10);
   x = draw_text_default(
       arena, !tps_is_prediction ? "TPS average" : "TPS predicted", x, 10, 1);
 
