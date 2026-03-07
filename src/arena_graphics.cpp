@@ -1014,6 +1014,34 @@ void draw_tick_counter(struct arena *arena) {
     x = draw_text_default(arena, checksum_text, x, y);
     x = draw_text_default(arena, "checksum", x, y, 1);
   }
+
+  // third row and above: score metrics and goal piece locations
+  x = 10;
+  y = 10 + FONT_Y_INCREMENT * 2 * 2;
+  float yp = y;
+  double sum_x = 0;
+  double sum_y = 0;
+  for (block *b = arena->design.player_blocks.head; b; b = b->next) {
+    if (b->goal) {
+      const b2Vec2 position = b->body->m_position;
+      // add to the sum
+      sum_x += position.x;
+      sum_y += position.y;
+      // print its individual coordinates
+      yp += FONT_Y_INCREMENT * 2;
+      x = draw_text_default(arena, "(", x, yp);
+      x = draw_text_default(arena, std::to_string(position.x), x, yp);
+      x = draw_text_default(arena, ", ", x, yp);
+      x = draw_text_default(arena, std::to_string(position.y), x, yp);
+      x = draw_text_default(arena, ")", x, yp);
+      x = 10; // reset x for the next line
+    }
+  }
+  x = draw_text_default(arena, std::to_string(sum_x), x, y);
+  x = draw_text_default(arena, "SumX ", x, y, 1);
+  x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 12);
+  x = draw_text_default(arena, std::to_string(sum_y), x, y);
+  x = draw_text_default(arena, "SumY", x, y, 1);
 }
 
 void draw_ui(arena *arena) {
