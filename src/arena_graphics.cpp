@@ -1021,8 +1021,8 @@ void draw_tick_counter(struct arena *arena) {
   float yp = y;
   double sum_x = 0;
   double sum_y = 0;
-  for(block *b = arena->design.player_blocks.head; b; b = b->next) {
-    if(b->goal) {
+  for (block *b = arena->design.player_blocks.head; b; b = b->next) {
+    if (b->goal) {
       const b2Vec2 position = b->body->m_position;
       // add to the sum
       sum_x += position.x;
