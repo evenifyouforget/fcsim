@@ -118,6 +118,8 @@ struct arena {
   bool ui_speedbar_opened;
 };
 
+// used to detect design merges
+extern int num_times_init_called;
 bool arena_compile_shaders(void);
 void arena_init(struct arena *arena, float w, float h, char *xml, int len);
 
