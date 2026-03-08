@@ -64,6 +64,9 @@ jobs:
       - name: Install requirements
         run: bash install_requirements.sh
 
+      - name: Add venv to PATH
+        run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
+
       - name: Build with scons
         run: scons
 
@@ -96,6 +99,9 @@ jobs:
 
       - name: Install requirements
         run: bash install_requirements.sh
+
+      - name: Add venv to PATH
+        run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
       - name: Build with scons
         run: scons
