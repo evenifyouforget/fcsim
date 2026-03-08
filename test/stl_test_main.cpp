@@ -301,7 +301,7 @@ XFAIL_TEST(XfailTests, FalseCondition) {
   CHECK(vec.size() == 99);
 }
 
-XFAIL_TEST(XfailTests, HeapBufferOverflow) {
+ASAN_XFAIL_TEST(XfailTests, HeapBufferOverflow) {
   // deliberately wrong: write well past the end of a 4-byte allocation;
   // ASan catches this (a dead read would be optimized away, but a write cannot)
   int *p = (int *)__builtin_malloc(sizeof(int));
@@ -314,7 +314,7 @@ XFAIL_TEST(XfailTests, HeapBufferOverflow) {
 
 TEST_GROUP(AsanHeapTests){};
 
-XFAIL_TEST(AsanHeapTests, BufferOverflowRead) {
+ASAN_XFAIL_TEST(AsanHeapTests, BufferOverflowRead) {
   // volatile prevents the dead read from being eliminated by the optimiser
   int *p = (int *)__builtin_malloc(sizeof(int));
   volatile int v = p[4];
@@ -322,20 +322,20 @@ XFAIL_TEST(AsanHeapTests, BufferOverflowRead) {
   __builtin_free(p);
 }
 
-XFAIL_TEST(AsanHeapTests, BufferUnderflow) {
+ASAN_XFAIL_TEST(AsanHeapTests, BufferUnderflow) {
   int *p = (int *)__builtin_malloc(sizeof(int));
   p[-4] = 42;
   __builtin_free(p);
 }
 
-XFAIL_TEST(AsanHeapTests, UseAfterFreeWrite) {
+ASAN_XFAIL_TEST(AsanHeapTests, UseAfterFreeWrite) {
   int *p = (int *)__builtin_malloc(sizeof(int));
   *p = 42;
   __builtin_free(p);
   *p = 99;
 }
 
-XFAIL_TEST(AsanHeapTests, UseAfterFreeRead) {
+ASAN_XFAIL_TEST(AsanHeapTests, UseAfterFreeRead) {
   // volatile prevents the dead read from being eliminated by the optimiser
   int *p = (int *)__builtin_malloc(sizeof(int));
   *p = 42;
@@ -344,7 +344,7 @@ XFAIL_TEST(AsanHeapTests, UseAfterFreeRead) {
   (void)v;
 }
 
-XFAIL_TEST(AsanHeapTests, DoubleFree) {
+ASAN_XFAIL_TEST(AsanHeapTests, DoubleFree) {
   // the write prevents LLVM from eliminating the malloc+free pair as a no-op
   int *p = (int *)__builtin_malloc(sizeof(int));
   *p = 42;
@@ -352,13 +352,13 @@ XFAIL_TEST(AsanHeapTests, DoubleFree) {
   __builtin_free(p);
 }
 
-XFAIL_TEST(AsanHeapTests, InvalidFree) {
+ASAN_XFAIL_TEST(AsanHeapTests, InvalidFree) {
   // free() of a stack address
   int x = 42;
   __builtin_free((void *)&x);
 }
 
-XFAIL_TEST(AsanHeapTests, MemoryLeak) {
+ASAN_XFAIL_TEST(AsanHeapTests, MemoryLeak) {
   // p goes out of scope without being freed; LSan detects it at subprocess exit
   int *p = (int *)__builtin_malloc(sizeof(int) * 64);
   *p = 42;
@@ -369,13 +369,13 @@ XFAIL_TEST(AsanHeapTests, MemoryLeak) {
 
 TEST_GROUP(AsanStackTests){};
 
-XFAIL_TEST(AsanStackTests, StackBufferOverflow) {
+ASAN_XFAIL_TEST(AsanStackTests, StackBufferOverflow) {
   // valgrind cannot catch stack overflows; ASan can
   volatile int a[4];
   a[10] = 42;
 }
 
-XFAIL_TEST(AsanStackTests, StackBufferUnderflow) {
+ASAN_XFAIL_TEST(AsanStackTests, StackBufferUnderflow) {
   volatile int a[4];
   volatile int *p = a;
   *(p - 4) = 42;
@@ -386,7 +386,7 @@ XFAIL_TEST(AsanStackTests, StackBufferUnderflow) {
 
 TEST_GROUP(AsanGlobalTests){};
 
-XFAIL_TEST(AsanGlobalTests, GlobalBufferOverflow) {
+ASAN_XFAIL_TEST(AsanGlobalTests, GlobalBufferOverflow) {
   // valgrind cannot catch global overflows; ASan can
   static int g[4];
   volatile int *p = g;
@@ -423,8 +423,10 @@ XFAIL_TEST(UbsanTests, NullPointerDereference) {
   (void)v;
 }
 
-XFAIL_TEST(UbsanTests, MisalignedAccess) {
-  // x86 tolerates misaligned reads in hardware; UBSan surfaces the UB
+ASAN_XFAIL_TEST(UbsanTests, MisalignedAccess) {
+  // x86 tolerates misaligned reads in hardware; UBSan surfaces the UB.
+  // MSan's instrumentation suppresses UBSan's alignment check, so this
+  // only fires under the ASan build.
   char buf[sizeof(int) + 1] = {};
   int *p = (int *)(buf + 1);
   volatile int v = *p;
@@ -447,6 +449,8 @@ int main(int argc, char **argv) {
     return list_tests();
   if (argc == 2 && __builtin_strcmp(argv[1], "--list-xfail") == 0)
     return list_xfail_tests();
+  if (argc == 2 && __builtin_strcmp(argv[1], "--list-skip") == 0)
+    return list_skip_tests();
   if (argc == 3 && __builtin_strcmp(argv[1], "--run") == 0)
     return run_single_test(argv[2]);
   return run_all_tests();

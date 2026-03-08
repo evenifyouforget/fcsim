@@ -6,6 +6,8 @@ run_single_design_xml
 fcsim*
 html/fcsim.wasm
 stl_test
+stl_test_asan
+stl_test_msan
 tags
 .ninja_log
 .ninja_deps
