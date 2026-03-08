@@ -309,6 +309,133 @@ XFAIL_TEST(XfailTests, HeapBufferOverflow) {
   __builtin_free(p);
 }
 
+// ── ASan heap tests ───────────────────────────────────────────────────────────
+
+TEST_GROUP(AsanHeapTests){};
+
+XFAIL_TEST(AsanHeapTests, BufferOverflowRead) {
+  // volatile prevents the dead read from being eliminated by the optimiser
+  int *p = (int *)__builtin_malloc(sizeof(int));
+  volatile int v = p[4];
+  (void)v;
+  __builtin_free(p);
+}
+
+XFAIL_TEST(AsanHeapTests, BufferUnderflow) {
+  int *p = (int *)__builtin_malloc(sizeof(int));
+  p[-4] = 42;
+  __builtin_free(p);
+}
+
+XFAIL_TEST(AsanHeapTests, UseAfterFreeWrite) {
+  int *p = (int *)__builtin_malloc(sizeof(int));
+  *p = 42;
+  __builtin_free(p);
+  *p = 99;
+}
+
+XFAIL_TEST(AsanHeapTests, UseAfterFreeRead) {
+  // volatile prevents the dead read from being eliminated by the optimiser
+  int *p = (int *)__builtin_malloc(sizeof(int));
+  *p = 42;
+  __builtin_free(p);
+  volatile int v = *p;
+  (void)v;
+}
+
+XFAIL_TEST(AsanHeapTests, DoubleFree) {
+  // the write prevents LLVM from eliminating the malloc+free pair as a no-op
+  int *p = (int *)__builtin_malloc(sizeof(int));
+  *p = 42;
+  __builtin_free(p);
+  __builtin_free(p);
+}
+
+XFAIL_TEST(AsanHeapTests, InvalidFree) {
+  // free() of a stack address
+  int x = 42;
+  __builtin_free((void *)&x);
+}
+
+XFAIL_TEST(AsanHeapTests, MemoryLeak) {
+  // p goes out of scope without being freed; LSan detects it at subprocess exit
+  int *p = (int *)__builtin_malloc(sizeof(int) * 64);
+  *p = 42;
+}
+
+// ── ASan stack tests ──────────────────────────────────────────────────────────
+
+TEST_GROUP(AsanStackTests){};
+
+XFAIL_TEST(AsanStackTests, StackBufferOverflow) {
+  // valgrind cannot catch stack overflows; ASan can
+  volatile int a[4];
+  a[10] = 42;
+}
+
+XFAIL_TEST(AsanStackTests, StackBufferUnderflow) {
+  volatile int a[4];
+  volatile int *p = a;
+  *(p - 4) = 42;
+}
+
+// ── ASan global tests ─────────────────────────────────────────────────────────
+
+TEST_GROUP(AsanGlobalTests){};
+
+XFAIL_TEST(AsanGlobalTests, GlobalBufferOverflow) {
+  // valgrind cannot catch global overflows; ASan can
+  static int g[4];
+  volatile int *p = g;
+  p[10] = 42;
+}
+
+// ── UBSan tests ───────────────────────────────────────────────────────────────
+
+TEST_GROUP(UbsanTests){};
+
+XFAIL_TEST(UbsanTests, SignedIntegerOverflow) {
+  volatile int x = __INT_MAX__;
+  volatile int y = x + 1;
+  (void)y;
+}
+
+XFAIL_TEST(UbsanTests, DivideByZero) {
+  volatile int x = 1;
+  volatile int y = 0;
+  volatile int z = x / y;
+  (void)z;
+}
+
+XFAIL_TEST(UbsanTests, ShiftPastBitwidth) {
+  volatile int x = 1;
+  volatile int y = x << 32;
+  (void)y;
+}
+
+XFAIL_TEST(UbsanTests, NullPointerDereference) {
+  int *p = nullptr;
+  volatile int v = *p;
+  (void)v;
+}
+
+XFAIL_TEST(UbsanTests, MisalignedAccess) {
+  // x86 tolerates misaligned reads in hardware; UBSan surfaces the UB
+  char buf[sizeof(int) + 1] = {};
+  int *p = (int *)(buf + 1);
+  volatile int v = *p;
+  (void)v;
+}
+
+XFAIL_TEST(UbsanTests, PointerOverflow) {
+  // p - PTRDIFF_MAX underflows for any small heap address:
+  // result > p even though we subtracted a positive offset
+  char *p = (char *)__builtin_malloc(1);
+  char *volatile q = p - __PTRDIFF_MAX__;
+  (void)q;
+  __builtin_free(p);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 int main(int argc, char **argv) {
