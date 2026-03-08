@@ -59,18 +59,24 @@ SOURCES = sorted(glob.glob("src/stl_mock*.cpp"))
 
 
 def _get_real_tests():
-    all_tests = subprocess.run(
-        [BINARY, "--list"], capture_output=True, text=True, check=True
-    ).stdout.strip().splitlines()
+    all_tests = (
+        subprocess.run([BINARY, "--list"], capture_output=True, text=True, check=True)
+        .stdout.strip()
+        .splitlines()
+    )
     xfail = set(
         subprocess.run(
             [BINARY, "--list-xfail"], capture_output=True, text=True, check=True
-        ).stdout.strip().splitlines()
+        )
+        .stdout.strip()
+        .splitlines()
     )
     skip = set(
         subprocess.run(
             [BINARY, "--list-skip"], capture_output=True, text=True, check=True
-        ).stdout.strip().splitlines()
+        )
+        .stdout.strip()
+        .splitlines()
     )
     return [n for n in all_tests if n not in xfail and n not in skip]
 
@@ -96,7 +102,9 @@ def coverage_report():
     shutil.rmtree(REPORT_DIR, ignore_errors=True)
     subprocess.run(
         [
-            LLVM_COV, "show", BINARY,
+            LLVM_COV,
+            "show",
+            BINARY,
             f"-instr-profile={PROFDATA}",
             "-format=html",
             f"-output-dir={REPORT_DIR}",
