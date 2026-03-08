@@ -8,12 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
-    - name: Install pre-commit
-      run: pip install pre-commit
+    - name: Install system dependencies
+      run: bash install_requirements.sh
+    - name: Add venv to PATH
+      run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
     - name: Run pre-commit
       # This runs all hooks against all files.
       # It will fail if any hook makes a change or finds an error.

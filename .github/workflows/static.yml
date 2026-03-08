@@ -62,7 +62,10 @@ jobs:
           git merge ${{ github.event.pull_request.head.sha }} --no-edit -Xtheirs --allow-unrelated-histories
 
       - name: Install requirements
-        run: sh install_requirements.sh
+        run: bash install_requirements.sh
+
+      - name: Add venv to PATH
+        run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
       - name: Build with scons
         run: scons
@@ -95,7 +98,10 @@ jobs:
           git merge origin/${{ env.BUILD_BRANCH }} --no-edit -Xtheirs --allow-unrelated-histories
 
       - name: Install requirements
-        run: sh install_requirements.sh
+        run: bash install_requirements.sh
+
+      - name: Add venv to PATH
+        run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
       - name: Build with scons
         run: scons
