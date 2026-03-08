@@ -8,6 +8,11 @@ html/fcsim.wasm
 stl_test
 stl_test_asan
 stl_test_msan
+stl_test_cov
+coverage_profiles/
+coverage_html/
+*.profraw
+*.profdata
 tags
 .ninja_log
 .ninja_deps
