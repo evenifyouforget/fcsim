@@ -98,10 +98,10 @@ The mock STL comes with basic tests.
 
 The regular build will produce the executable `stl_test`.
 
-To see that the data structures are working correctly, you can use `valgrind` to check for memory leaks and other memory issues:
+To run the tests with memory error detection (ASan/UBSan are baked into the binary):
 
 ```sh
-valgrind ./stl_test
+pytest test/test_stl.py
 ```
 
 ## Memory
