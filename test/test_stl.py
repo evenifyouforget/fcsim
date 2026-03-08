@@ -29,9 +29,13 @@ def get_params():
     params = []
     for san, cfg in SANITIZERS.items():
         binary = cfg["binary"]
-        all_tests = subprocess.run(
-            [binary, "--list"], capture_output=True, text=True, check=True
-        ).stdout.strip().splitlines()
+        all_tests = (
+            subprocess.run(
+                [binary, "--list"], capture_output=True, text=True, check=True
+            )
+            .stdout.strip()
+            .splitlines()
+        )
         xfail = _query(binary, "--list-xfail")
         skip = _query(binary, "--list-skip")
         for name in all_tests:
