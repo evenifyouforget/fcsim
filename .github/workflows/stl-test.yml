@@ -1,4 +1,4 @@
-name: STL Test (Valgrind)
+name: STL Test (ASan/UBSan)
 
 on:
   pull_request:
@@ -19,11 +19,15 @@ jobs:
     - name: Add venv to PATH
       run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
-    - name: Install valgrind
-      run: sudo apt-get install -y valgrind
-
     - name: Build stl_test
       run: scons stl_test
 
-    - name: Run stl_test under valgrind
-      run: valgrind --error-exitcode=1 --leak-check=full ./stl_test
+    - name: Run stl_test via pytest
+      run: pytest test/test_stl.py -n auto --junitxml=results.xml -v
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: stl-test-results
+        path: results.xml

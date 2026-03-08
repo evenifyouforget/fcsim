@@ -226,8 +226,13 @@ linux_ccflags = [
     "-flto",
 ]
 test_ccflags = [
-    "-O3",
-    "-flto",
+    "-O1",
+    "-g",
+    "-fno-omit-frame-pointer",
+    "-fsanitize=address,undefined",
+]
+test_linkflags = [
+    "-fsanitize=address,undefined",
 ]
 wasm_ccflags = [
     "-O2",
@@ -271,9 +276,12 @@ run_single_design_env = base_env.Clone(
 run_single_design_env.VariantDir("build/run_single_design", ".", False)
 
 test_env = base_env.Clone(
+    CC="clang",
+    CXX="clang++",
     CCFLAGS=common_ccflags + test_ccflags,
     CPPPATH=common_include + wasm_include,
     CPPDEFINES=test_defines,
+    LINKFLAGS=test_linkflags,
 )
 test_env.VariantDir("build/test", ".", False)
 
