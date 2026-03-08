@@ -309,7 +309,8 @@ XFAIL_TEST(XfailTests, HeapBufferOverflow) {
   __builtin_free(p);
 }
 
-// ── ASan heap tests ───────────────────────────────────────────────────────────
+// ── ASan heap tests
+// ───────────────────────────────────────────────────────────
 
 TEST_GROUP(AsanHeapTests){};
 
@@ -363,7 +364,8 @@ XFAIL_TEST(AsanHeapTests, MemoryLeak) {
   *p = 42;
 }
 
-// ── ASan stack tests ──────────────────────────────────────────────────────────
+// ── ASan stack tests
+// ──────────────────────────────────────────────────────────
 
 TEST_GROUP(AsanStackTests){};
 
@@ -379,7 +381,8 @@ XFAIL_TEST(AsanStackTests, StackBufferUnderflow) {
   *(p - 4) = 42;
 }
 
-// ── ASan global tests ─────────────────────────────────────────────────────────
+// ── ASan global tests
+// ─────────────────────────────────────────────────────────
 
 TEST_GROUP(AsanGlobalTests){};
 
@@ -390,7 +393,8 @@ XFAIL_TEST(AsanGlobalTests, GlobalBufferOverflow) {
   p[10] = 42;
 }
 
-// ── UBSan tests ───────────────────────────────────────────────────────────────
+// ── UBSan tests
+// ───────────────────────────────────────────────────────────────
 
 TEST_GROUP(UbsanTests){};
 

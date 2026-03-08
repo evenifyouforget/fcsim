@@ -14,7 +14,9 @@ def get_tests():
     xfail = set(
         subprocess.run(
             [BINARY, "--list-xfail"], capture_output=True, text=True, check=True
-        ).stdout.strip().splitlines()
+        )
+        .stdout.strip()
+        .splitlines()
     )
     return [
         pytest.param(name, marks=pytest.mark.xfail) if name in xfail else name
