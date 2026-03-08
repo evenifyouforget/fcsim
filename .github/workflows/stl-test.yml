@@ -1,4 +1,4 @@
-name: STL Test (ASan/UBSan)
+name: STL Test (ASan/UBSan + MSan/UBSan)
 
 on:
   pull_request:
@@ -17,8 +17,8 @@ jobs:
     - name: Add venv to PATH
       run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
-    - name: Build stl_test
-      run: scons stl_test
+    - name: Build stl_test_asan and stl_test_msan
+      run: scons stl_test_asan stl_test_msan
 
     - name: Run stl_test via pytest
       run: pytest test/test_stl.py -n auto --junitxml=results.xml -v
