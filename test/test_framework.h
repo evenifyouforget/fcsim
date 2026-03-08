@@ -35,9 +35,8 @@ inline void fail_at(const char *file, int line, const char *expr) {
 
 // ─── public API ──────────────────────────────────────────────────────────────
 
-inline int run_all_tests() {
+inline void _reverse_list() {
     using namespace _testfw;
-    // reverse list to restore declaration order
     Entry *prev = nullptr, *cur = list_head;
     while (cur) {
         Entry *next = cur->next;
@@ -46,7 +45,11 @@ inline int run_all_tests() {
         cur = next;
     }
     list_head = prev;
+}
 
+inline int run_all_tests() {
+    using namespace _testfw;
+    _reverse_list();
     for (Entry *e = list_head; e; e = e->next) {
         test_ok = true;
         e->fn();
@@ -60,6 +63,26 @@ inline int run_all_tests() {
     }
     printf("\n%d passed, %d failed\n", passed, failed);
     return failed > 0 ? 1 : 0;
+}
+
+inline int list_tests() {
+    _reverse_list();
+    for (_testfw::Entry *e = _testfw::list_head; e; e = e->next)
+        printf("%s\n", e->name);
+    return 0;
+}
+
+inline int run_single_test(const char *name) {
+    _reverse_list();
+    for (_testfw::Entry *e = _testfw::list_head; e; e = e->next) {
+        if (__builtin_strcmp(e->name, name) == 0) {
+            _testfw::test_ok = true;
+            e->fn();
+            return _testfw::test_ok ? 0 : 1;
+        }
+    }
+    fprintf(stderr, "unknown test: %s\n", name);
+    return 2;
 }
 
 // ─── macros ──────────────────────────────────────────────────────────────────

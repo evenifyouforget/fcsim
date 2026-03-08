@@ -22,5 +22,12 @@ jobs:
     - name: Build stl_test
       run: scons stl_test
 
-    - name: Run stl_test
-      run: ./stl_test
+    - name: Run stl_test via pytest
+      run: pytest test/test_stl.py -n auto --junitxml=results.xml -v
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: stl-test-results
+        path: results.xml
