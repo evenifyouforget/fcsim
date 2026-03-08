@@ -1,0 +1,47 @@
+name: STL Test Suite
+
+on:
+  pull_request:
+    branches:
+      - main # Or your default branch, e.g., master, develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # You can also use windows-latest or macos-latest if needed
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        # Fetch all history for all tags and branches, which can be useful for SCons if it relies on git history
+        fetch-depth: 0
+
+    - name: Install system dependencies
+      run: |
+        bash install_requirements.sh
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10' # Using a specific, commonly supported Python version
+
+    - name: Install SCons
+      run: |
+        python -m pip install --upgrade pip
+        pip install scons
+
+    - name: Run SCons Build
+      run: |
+        scons
+
+    - name: Run STL Tests Normally
+      run: |
+        ./stl_test
+
+    - name: Run STL Tests with valgrind
+      run: |
+        valgrind --leak-check=full --track-origins=yes --error-exitcode=1 ./stl_test
+
+    - name: All Tests Passed
+      run: |
+        echo "SCons build completed successfully! 🎉"
