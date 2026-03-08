@@ -286,9 +286,36 @@ TEST(UnorderedMapTests, LargerDataUnevenlyDistributed) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ── xfail demos ──────────────────────────────────────────────────────────────
+
+TEST_GROUP(XfailTests){};
+
+XFAIL_TEST(XfailTests, WrongExpectedValue) {
+  // deliberately wrong: 2 + 2 is not 99
+  CHECK_EQUAL(99, 2 + 2);
+}
+
+XFAIL_TEST(XfailTests, FalseCondition) {
+  // deliberately wrong: an empty vector does not have size 99
+  std::vector<int> vec;
+  CHECK(vec.size() == 99);
+}
+
+XFAIL_TEST(XfailTests, HeapBufferOverflow) {
+  // deliberately wrong: write well past the end of a 4-byte allocation;
+  // ASan catches this (a dead read would be optimized away, but a write cannot)
+  int *p = (int *)__builtin_malloc(sizeof(int));
+  p[16] = 42;
+  __builtin_free(p);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 int main(int argc, char **argv) {
   if (argc == 2 && __builtin_strcmp(argv[1], "--list") == 0)
     return list_tests();
+  if (argc == 2 && __builtin_strcmp(argv[1], "--list-xfail") == 0)
+    return list_xfail_tests();
   if (argc == 3 && __builtin_strcmp(argv[1], "--run") == 0)
     return run_single_test(argv[2]);
   return run_all_tests();
