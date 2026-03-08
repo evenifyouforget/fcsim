@@ -442,6 +442,60 @@ XFAIL_TEST(UbsanTests, PointerOverflow) {
   __builtin_free(p);
 }
 
+// ── MSan uninitialized read tests ────────────────────────────────────────────
+// These only fire under MSan. ASan does not detect uninitialized reads.
+
+TEST_GROUP(MsanTests){};
+
+// At -O1, MSan's shadow checks survive only when the uninitialized value flows
+// into a genuinely observable side effect. volatile+(void) is eliminated;
+// passing the value to printf is not. All MSan tests use __builtin_printf to
+// force the uninitialized value into an observable argument.
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wuninitialized"
+
+MSAN_XFAIL_TEST(MsanTests, UninitStack) {
+  int x;
+  __builtin_printf("%d\n", x);
+}
+
+MSAN_XFAIL_TEST(MsanTests, UninitPartialStruct) {
+  // MSan tracks initialization per byte: writing field a does not mark field b
+  struct {
+    int a;
+    int b;
+  } s;
+  s.a = 42;
+  __builtin_printf("%d\n", s.b);
+}
+
+MSAN_XFAIL_TEST(MsanTests, UninitBranchCondition) {
+  // classic MSan pattern: uninitialized value controls a branch
+  int x;
+  if (x)
+    __builtin_printf("a\n");
+  else
+    __builtin_printf("b\n");
+}
+
+#pragma clang diagnostic pop
+
+MSAN_XFAIL_TEST(MsanTests, UninitHeap) {
+  // malloc does not initialize memory; calloc does
+  int *p = (int *)__builtin_malloc(sizeof(int));
+  __builtin_printf("%d\n", *p);
+  __builtin_free(p);
+}
+
+TEST(MsanTests, CallocIsClean) {
+  // calloc zero-initializes: MSan should NOT fire here; this is a negative
+  // case verifying MSan distinguishes calloc from malloc
+  int *p = (int *)__builtin_calloc(1, sizeof(int));
+  __builtin_printf("%d\n", *p);
+  __builtin_free(p);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 
 int main(int argc, char **argv) {
