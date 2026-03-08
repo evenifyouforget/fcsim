@@ -207,7 +207,8 @@ TEST(StringTests, TwoDMemoryOverwrite) {
   }
 }
 
-// ── unordered_map ─────────────────────────────────────────────────────────────
+// ── unordered_map
+// ─────────────────────────────────────────────────────────────
 
 TEST_GROUP(UnorderedMapTests){};
 
@@ -286,9 +287,9 @@ TEST(UnorderedMapTests, LargerDataUnevenlyDistributed) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 int main(int argc, char **argv) {
-    if (argc == 2 && __builtin_strcmp(argv[1], "--list") == 0)
-        return list_tests();
-    if (argc == 3 && __builtin_strcmp(argv[1], "--run") == 0)
-        return run_single_test(argv[2]);
-    return run_all_tests();
+  if (argc == 2 && __builtin_strcmp(argv[1], "--list") == 0)
+    return list_tests();
+  if (argc == 3 && __builtin_strcmp(argv[1], "--run") == 0)
+    return run_single_test(argv[2]);
+  return run_all_tests();
 }

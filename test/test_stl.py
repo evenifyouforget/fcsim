@@ -9,9 +9,7 @@ ASAN_ENV = {
 
 
 def get_tests():
-    r = subprocess.run(
-        [BINARY, "--list"], capture_output=True, text=True, check=True
-    )
+    r = subprocess.run([BINARY, "--list"], capture_output=True, text=True, check=True)
     return r.stdout.strip().splitlines()
 
 
