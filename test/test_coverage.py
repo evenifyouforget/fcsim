@@ -13,18 +13,19 @@ before flushing complete profile data. All other registered tests are
 exercised automatically — no manual count to keep up to date.
 """
 
-import glob
 import os
 import re
 import shutil
 import subprocess
+from pathlib import Path
 
 import pytest
 
 BINARY = "./stl_test_cov"
-PROFDIR = "coverage_profiles"
-PROFDATA = "coverage_profiles/merged.profdata"
-REPORT_DIR = "coverage_html"
+PROFDIR = Path("coverage_profiles")
+PROFDATA = PROFDIR / "merged.profdata"
+REPORT_DIR = Path("coverage_html")
+SOURCES = sorted(Path("src").glob("stl_mock*.cpp"))
 
 
 def _find_llvm_tool(name):
@@ -52,44 +53,32 @@ def _find_llvm_tool(name):
 LLVM_PROFDATA = _find_llvm_tool("llvm-profdata")
 LLVM_COV = _find_llvm_tool("llvm-cov")
 
-# Glob all stl_mock source files so new files are picked up automatically.
-# Test harness files (stl_test_main.cpp, test_framework.h) are excluded
-# because they are not part of the code under test.
-SOURCES = sorted(glob.glob("src/stl_mock*.cpp"))
+
+def _query(flag):
+    return set(
+        subprocess.run(
+            [BINARY, flag], capture_output=True, text=True, check=True
+        ).stdout.splitlines()
+    )
 
 
 def _get_real_tests():
-    all_tests = (
-        subprocess.run([BINARY, "--list"], capture_output=True, text=True, check=True)
-        .stdout.strip()
-        .splitlines()
-    )
-    xfail = set(
-        subprocess.run(
-            [BINARY, "--list-xfail"], capture_output=True, text=True, check=True
-        )
-        .stdout.strip()
-        .splitlines()
-    )
-    skip = set(
-        subprocess.run(
-            [BINARY, "--list-skip"], capture_output=True, text=True, check=True
-        )
-        .stdout.strip()
-        .splitlines()
-    )
-    return [n for n in all_tests if n not in xfail and n not in skip]
+    all_tests = subprocess.run(
+        [BINARY, "--list"], capture_output=True, text=True, check=True
+    ).stdout.splitlines()
+    excluded = _query("--list-xfail") | _query("--list-skip")
+    return [n for n in all_tests if n not in excluded]
 
 
 @pytest.fixture(scope="session", autouse=True)
 def coverage_report():
-    os.makedirs(PROFDIR, exist_ok=True)
-    for f in glob.glob(f"{PROFDIR}/*.profraw"):
-        os.remove(f)
+    PROFDIR.mkdir(exist_ok=True)
+    for f in PROFDIR.glob("*.profraw"):
+        f.unlink()
 
     yield  # tests run here
 
-    profraw = glob.glob(f"{PROFDIR}/*.profraw")
+    profraw = list(PROFDIR.glob("*.profraw"))
     if not profraw:
         print("\nNo profile data collected.")
         return
@@ -102,9 +91,7 @@ def coverage_report():
     shutil.rmtree(REPORT_DIR, ignore_errors=True)
     subprocess.run(
         [
-            LLVM_COV,
-            "show",
-            BINARY,
+            LLVM_COV, "show", BINARY,
             f"-instr-profile={PROFDATA}",
             "-format=html",
             f"-output-dir={REPORT_DIR}",
@@ -113,21 +100,20 @@ def coverage_report():
         check=True,
     )
 
-    print(f"\nHTML report: {REPORT_DIR}/index.html\n")
+    print(f"\nHTML report: {REPORT_DIR / 'index.html'}\n")
     summary = subprocess.run(
         [LLVM_COV, "report", BINARY, f"-instr-profile={PROFDATA}", *SOURCES],
         capture_output=True,
         text=True,
     ).stdout
     # Write for CI to use in the PR comment; also print for local runs.
-    with open(f"{PROFDIR}/summary.txt", "w") as f:
-        f.write(summary)
+    (PROFDIR / "summary.txt").write_text(summary)
     print(summary)
 
 
 @pytest.mark.parametrize("name", _get_real_tests())
 def test_coverage(name):
-    env = {**os.environ, "LLVM_PROFILE_FILE": f"{PROFDIR}/%p.profraw"}
+    env = {**os.environ, "LLVM_PROFILE_FILE": str(PROFDIR / "%p.profraw")}
     r = subprocess.run(
         [BINARY, "--run", name],
         capture_output=True,
