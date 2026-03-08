@@ -18,7 +18,7 @@ jobs:
 
     - name: Install system dependencies
       run: |
-        bash install-dependencies.sh
+        bash install_requirements.sh
 
     - name: Set up Python
       uses: actions/setup-python@v5

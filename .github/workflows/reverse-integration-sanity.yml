@@ -28,7 +28,7 @@ jobs:
 
       - name: Install system dependencies
         run: |
-          bash install-dependencies.sh
+          bash install_requirements.sh
 
       - name: Install ftlib dependencies
         run: |
