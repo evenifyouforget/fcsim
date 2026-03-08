@@ -2,8 +2,6 @@ name: STL Test (ASan/UBSan)
 
 on:
   pull_request:
-    branches:
-      - main
 
 jobs:
   stl-test:

@@ -9,6 +9,7 @@ struct Entry {
   const char *name;
   void (*fn)();
   Entry *next;
+  bool xfail;
 };
 
 static Entry *list_head = nullptr;
@@ -18,9 +19,10 @@ static bool test_ok = true;
 
 struct Reg {
   Entry e;
-  Reg(const char *name, void (*fn)()) {
+  Reg(const char *name, void (*fn)(), bool xfail = false) {
     e.name = name;
     e.fn = fn;
+    e.xfail = xfail;
     e.next = list_head;
     list_head = &e;
   }
@@ -72,6 +74,14 @@ inline int list_tests() {
   return 0;
 }
 
+inline int list_xfail_tests() {
+  _reverse_list();
+  for (_testfw::Entry *e = _testfw::list_head; e; e = e->next)
+    if (e->xfail)
+      printf("%s\n", e->name);
+  return 0;
+}
+
 inline int run_single_test(const char *name) {
   _reverse_list();
   for (_testfw::Entry *e = _testfw::list_head; e; e = e->next) {
@@ -93,6 +103,12 @@ inline int run_single_test(const char *name) {
   static void _test_impl_##group##_##name();                                   \
   static _testfw::Reg _test_reg_##group##_##name(#group "::" #name,            \
                                                  _test_impl_##group##_##name); \
+  static void _test_impl_##group##_##name()
+
+#define XFAIL_TEST(group, name)                                                \
+  static void _test_impl_##group##_##name();                                   \
+  static _testfw::Reg _test_reg_##group##_##name(                              \
+      #group "::" #name, _test_impl_##group##_##name, true);                   \
   static void _test_impl_##group##_##name()
 
 #define CHECK(cond)                                                            \

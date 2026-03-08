@@ -1,3 +1,4 @@
+import os
 import subprocess
 import pytest
 
@@ -10,7 +11,17 @@ ASAN_ENV = {
 
 def get_tests():
     r = subprocess.run([BINARY, "--list"], capture_output=True, text=True, check=True)
-    return r.stdout.strip().splitlines()
+    xfail = set(
+        subprocess.run(
+            [BINARY, "--list-xfail"], capture_output=True, text=True, check=True
+        )
+        .stdout.strip()
+        .splitlines()
+    )
+    return [
+        pytest.param(name, marks=pytest.mark.xfail) if name in xfail else name
+        for name in r.stdout.strip().splitlines()
+    ]
 
 
 @pytest.mark.parametrize("name", get_tests())
@@ -19,6 +30,6 @@ def test_stl(name):
         [BINARY, "--run", name],
         capture_output=True,
         text=True,
-        env={**__import__("os").environ, **ASAN_ENV},
+        env={**os.environ, **ASAN_ENV},
     )
     assert r.returncode == 0, r.stderr + r.stdout
