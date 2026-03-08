@@ -114,9 +114,15 @@ def coverage_report():
     )
 
     print(f"\nHTML report: {REPORT_DIR}/index.html\n")
-    subprocess.run(
+    summary = subprocess.run(
         [LLVM_COV, "report", BINARY, f"-instr-profile={PROFDATA}", *SOURCES],
-    )
+        capture_output=True,
+        text=True,
+    ).stdout
+    # Write for CI to use in the PR comment; also print for local runs.
+    with open(f"{PROFDIR}/summary.txt", "w") as f:
+        f.write(summary)
+    print(summary)
 
 
 @pytest.mark.parametrize("name", _get_real_tests())
