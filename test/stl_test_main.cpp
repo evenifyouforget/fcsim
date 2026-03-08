@@ -367,6 +367,18 @@ ASAN_XFAIL_TEST(AsanHeapTests, MemoryLeak) {
 // ── ASan stack tests
 // ──────────────────────────────────────────────────────────
 
+// noinline helper for UseAfterReturn: returns a pointer to a local variable.
+// The caller then writes through it after the callee's stack frame is gone.
+// Note: use-after-scope (escape within the same function's inner block) cannot
+// be reliably triggered at -O1 because the optimizer promotes the variable out
+// of its block when it detects the pointer escaping — making it
+// indistinguishable from a normal stack variable. UseAfterReturn covers the
+// closely related pattern via a function boundary instead.
+static int *__attribute__((noinline)) _make_local_addr() {
+  int x = 42;
+  return &x;
+}
+
 TEST_GROUP(AsanStackTests){};
 
 ASAN_XFAIL_TEST(AsanStackTests, StackBufferOverflow) {
@@ -379,6 +391,12 @@ ASAN_XFAIL_TEST(AsanStackTests, StackBufferUnderflow) {
   volatile int a[4];
   volatile int *p = a;
   *(p - 4) = 42;
+}
+
+ASAN_XFAIL_TEST(AsanStackTests, UseAfterReturn) {
+  // fires on clang 18 without any extra ASAN_OPTIONS flags
+  int *p = _make_local_addr();
+  *p = 99;
 }
 
 // ── ASan global tests
