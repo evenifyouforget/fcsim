@@ -1,6 +1,5 @@
 bc
 clang
-libcpputest-dev
 clang-format
 libgl-dev
 libx11-dev

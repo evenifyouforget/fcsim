@@ -1,6 +1,5 @@
-#include "CppUTest/CommandLineTestRunner.h"
-#include "CppUTest/TestHarness.h"
 #include "stl_mock.h"
+#include "test_framework.h"
 
 // ── _new ─────────────────────────────────────────────────────────────────────
 
@@ -145,8 +144,8 @@ TEST(StringTests, ToStringNegative) {
 }
 
 TEST(StringTests, ToStringLargeValue) {
-  std::to_string(9223372036854000000LL);
-  std::to_string(-9223372036854000000LL);
+  std::to_string((int64_t)9223372036854000000LL);
+  std::to_string((int64_t)-9223372036854000000LL);
 }
 
 TEST(StringTests, AssignByStringLiteral) {
@@ -271,10 +270,13 @@ TEST(UnorderedMapTests, LargerDataEvenlyDistributed) {
 
 TEST(UnorderedMapTests, LargerDataUnevenlyDistributed) {
   std::unordered_map<int, int> map;
-  for (int i = 0; i < 250; ++i)
-    map.insert(std::make_pair(i * i * i * i, i * 2));
   for (int i = 0; i < 250; ++i) {
-    int key = i * i * i * i;
+    unsigned u = (unsigned)i;
+    map.insert(std::make_pair((int)(u * u * u * u), i * 2));
+  }
+  for (int i = 0; i < 250; ++i) {
+    unsigned u = (unsigned)i;
+    int key = (int)(u * u * u * u);
     CHECK_EQUAL(i * 2, map.at(key));
     CHECK_EQUAL(1, (int)map.count(key));
     CHECK_EQUAL(0, (int)map.count(key + 2));
@@ -283,6 +285,4 @@ TEST(UnorderedMapTests, LargerDataUnevenlyDistributed) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-int main(int argc, char **argv) {
-  return CommandLineTestRunner::RunAllTests(argc, argv);
-}
+int main(int, char **) { return run_all_tests(); }

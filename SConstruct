@@ -281,7 +281,6 @@ test_env = base_env.Clone(
     CCFLAGS=common_ccflags + test_ccflags,
     CPPPATH=common_include + wasm_include,
     CPPDEFINES=test_defines,
-    LIBS=["CppUTest"],
     LINKFLAGS=test_linkflags,
 )
 test_env.VariantDir("build/test", ".", False)
