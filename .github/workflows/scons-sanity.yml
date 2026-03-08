@@ -16,10 +16,9 @@ jobs:
         # Fetch all history for all tags and branches, which can be useful for SCons if it relies on git history
         fetch-depth: 0
 
-    - name: Install System Dependencies
+    - name: Install system dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y clang libx11-dev libgl-dev lld
+        bash install-dependencies.sh
 
     - name: Set up Python
       uses: actions/setup-python@v5

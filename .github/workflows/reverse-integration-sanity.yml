@@ -28,8 +28,7 @@ jobs:
 
       - name: Install system dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y scons clang libx11-dev libgl-dev lld valgrind
+          bash install-dependencies.sh
 
       - name: Install ftlib dependencies
         run: |
