@@ -91,7 +91,9 @@ def coverage_report():
     shutil.rmtree(REPORT_DIR, ignore_errors=True)
     subprocess.run(
         [
-            LLVM_COV, "show", BINARY,
+            LLVM_COV,
+            "show",
+            BINARY,
             f"-instr-profile={PROFDATA}",
             "-format=html",
             f"-output-dir={REPORT_DIR}",
