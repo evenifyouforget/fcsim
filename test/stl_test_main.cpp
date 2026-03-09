@@ -122,6 +122,24 @@ TEST(VectorTests, ResizeDefaultElements) {
     CHECK_EQUAL(default_value, vec[i]);
 }
 
+TEST(VectorTests, LargeResize) {
+  // jumps from default capacity (8) to 1000 in one call — exposes the
+  // _ensure_capacity if-instead-of-while bug: a single doubling is not enough
+  std::vector<int> vec;
+  vec.resize(1000);
+  CHECK_EQUAL(1000, (int)vec.size());
+  vec[999] = 42;
+  CHECK_EQUAL(42, vec[999]);
+}
+
+TEST(VectorTests, ConstSize) {
+  // size() must be const so it can be called on a const reference
+  std::vector<int> vec;
+  vec.push_back(1);
+  const std::vector<int> &cvec = vec;
+  CHECK_EQUAL(1, (int)cvec.size());
+}
+
 // ── string ───────────────────────────────────────────────────────────────────
 
 TEST_GROUP(StringTests){};
