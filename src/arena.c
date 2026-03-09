@@ -412,6 +412,11 @@ void start_stop(struct arena *arena) {
   arena->single_ticks_remaining = -1;
 }
 
+/*
+ * The convention for key codes used here is X11, due to X11 key codes being
+ * passed directly in the native build. The web build could technically be anything,
+ * but since the native build is constrained to X11, we use the same for web as well.
+ */
 void arena_key_down_event(struct arena *arena, int key) {
   switch (key) {
   case 65: /* space */

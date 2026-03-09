@@ -516,6 +516,11 @@ function canvas_draw(timestamp) {
   window.requestAnimationFrame(canvas_draw);
 }
 
+/*
+ * The convention for key codes used here is X11, due to X11 key codes being
+ * passed directly in the native build. The web build could technically be anything,
+ * but since the native build is constrained to X11, we use the same for web as well.
+ */
 function to_key(code) {
   if (code == "Space") return 65;
   if (code == "KeyR") return 27;
