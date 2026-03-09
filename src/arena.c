@@ -414,8 +414,9 @@ void start_stop(struct arena *arena) {
 
 /*
  * The convention for key codes used here is X11, due to X11 key codes being
- * passed directly in the native build. The web build could technically be anything,
- * but since the native build is constrained to X11, we use the same for web as well.
+ * passed directly in the native build. The web build could technically be
+ * anything, but since the native build is constrained to X11, we use the same
+ * for web as well.
  */
 void arena_key_down_event(struct arena *arena, int key) {
   switch (key) {
