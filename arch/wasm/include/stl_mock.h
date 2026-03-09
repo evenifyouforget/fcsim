@@ -55,7 +55,7 @@ template <typename T> struct vector {
     }
     free(_storage);
   }
-  size_t size() { return _size; }
+  size_t size() const { return _size; }
   void _expand() {
     size_t _new_capacity = _capacity << 1;
     T *_new_storage = (T *)malloc(_new_capacity * sizeof(T));
@@ -69,7 +69,7 @@ template <typename T> struct vector {
     _capacity = _new_capacity;
   }
   void _ensure_capacity(size_t _new_size) {
-    if (_new_size > _capacity) {
+    while (_new_size > _capacity) {
       _expand();
     }
   }
