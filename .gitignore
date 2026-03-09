@@ -18,6 +18,10 @@ tags
 .ninja_deps
 .vscode
 
+# local working documents
+pr_draft.md
+experiment_log.md
+
 # SCons files
 .sconsign*
 build/
