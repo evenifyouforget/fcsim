@@ -31,10 +31,10 @@ SOURCES = sorted(Path("src").glob("stl_mock*.cpp"))
 # CI fails if any metric drops below these values.
 # When coverage genuinely improves, raise the floor here to lock it in.
 THRESHOLDS = {
-    "region":   56.34,
+    "region": 56.34,
     "function": 61.90,
-    "line":     58.62,
-    "branch":   50.00,
+    "line": 58.62,
+    "branch": 50.00,
 }
 
 
