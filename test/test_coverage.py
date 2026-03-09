@@ -25,19 +25,21 @@ BINARY = "./stl_test_cov"
 PROFDIR = Path("coverage_profiles")
 PROFDATA = PROFDIR / "merged.profdata"
 REPORT_DIR = Path("coverage_html")
-SOURCES = sorted([
-    *Path("src").glob("stl_mock*.cpp"),
-    *Path("arch/wasm/include").glob("stl_mock*.h"),
-])
+SOURCES = sorted(
+    [
+        *Path("src").glob("stl_mock*.cpp"),
+        *Path("arch/wasm/include").glob("stl_mock*.h"),
+    ]
+)
 
 # Coverage thresholds — baseline measured 2026-03-08 (src/stl_mock.cpp +
 # arch/wasm/include/stl_mock.h). CI fails if any metric drops below these
 # values. When coverage genuinely improves, raise the floor here to lock it in.
 THRESHOLDS = {
-    "region":   78.80,
+    "region": 78.80,
     "function": 79.55,
-    "line":     79.39,
-    "branch":   73.00,
+    "line": 79.39,
+    "branch": 73.00,
 }
 
 
