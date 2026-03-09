@@ -27,6 +27,16 @@ PROFDATA = PROFDIR / "merged.profdata"
 REPORT_DIR = Path("coverage_html")
 SOURCES = sorted(Path("src").glob("stl_mock*.cpp"))
 
+# Coverage thresholds — baseline measured 2026-03-08.
+# CI fails if any metric drops below these values.
+# When coverage genuinely improves, raise the floor here to lock it in.
+THRESHOLDS = {
+    "region":   56.34,
+    "function": 61.90,
+    "line":     58.62,
+    "branch":   50.00,
+}
+
 
 def _find_llvm_tool(name):
     """Return the llvm tool that matches the clang version in use.
@@ -70,6 +80,29 @@ def _get_real_tests():
     return [n for n in all_tests if n not in excluded]
 
 
+def _check_thresholds(summary):
+    total_line = next(
+        (line for line in summary.splitlines() if line.startswith("TOTAL")), None
+    )
+    if not total_line:
+        raise AssertionError("Could not find TOTAL line in coverage report")
+
+    # llvm-cov report columns: Regions, Missed, Region%, Functions, Missed,
+    # Function%, Lines, Missed, Line%, Branches, Missed, Branch%
+    pcts = [float(x) for x in re.findall(r"(\d+\.\d+)%", total_line)]
+    if len(pcts) < 4:
+        raise AssertionError(f"Could not parse coverage percentages from: {total_line}")
+
+    measured = dict(zip(("region", "function", "line", "branch"), pcts))
+    failures = [
+        f"  {metric}: {measured[metric]:.2f}% < threshold {THRESHOLDS[metric]:.2f}%"
+        for metric in THRESHOLDS
+        if measured[metric] < THRESHOLDS[metric]
+    ]
+    if failures:
+        raise AssertionError("Coverage regression:\n" + "\n".join(failures))
+
+
 @pytest.fixture(scope="session", autouse=True)
 def coverage_report():
     PROFDIR.mkdir(exist_ok=True)
@@ -111,6 +144,8 @@ def coverage_report():
     # Write for CI to use in the PR comment; also print for local runs.
     (PROFDIR / "summary.txt").write_text(summary)
     print(summary)
+
+    _check_thresholds(summary)
 
 
 @pytest.mark.parametrize("name", _get_real_tests())
