@@ -113,6 +113,16 @@ The web build also uses a custom `malloc`.
 You can also check the memory usage using your browser developer tools.
 This can be useful to diagnose memory leaks.
 
+## Key Codes
+
+Key event handlers use X11 key codes. You can find the code for a given key using `xev`:
+
+```sh
+xev
+```
+
+These scancodes (keycodes) are not to be confused with keysyms which appear as `XK_*` constants in X11 headers.
+
 # Performance
 
 fcsim promised to be fast. So how fast is it?
