@@ -1,3 +1,41 @@
+/*
+ * IBM Accurate Mathematical Library
+ * written by International Business Machines Corp.
+ * Copyright (C) 2001-2018 Free Software Foundation, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
+ */
+/************************************************************************/
+/*  MODULE_NAME: atnat2.c                                               */
+/*                                                                      */
+/*  FUNCTIONS: uatan2                                                   */
+/*             atan2Mp                                                  */
+/*             signArctan2                                              */
+/*             normalized                                               */
+/*                                                                      */
+/*  FILES NEEDED: dla.h endian.h mpa.h mydefs.h atnat2.h                */
+/*                mpatan.c mpatan2.c mpsqrt.c                           */
+/*                uatan.tbl                                             */
+/*                                                                      */
+/* An ultimate atan2() routine. Given two IEEE double machine numbers y,*/
+/* x it computes the correctly rounded (to nearest) value of atan2(y,x).*/
+/*                                                                      */
+/* Assumption: Machine arithmetic operations are performed in           */
+/* round to nearest mode of IEEE 754 standard.                          */
+/*                                                                      */
+/************************************************************************/
+
 #include <float.h>
 #include <fpmath/fpmath.h>
 #include <math.h>
