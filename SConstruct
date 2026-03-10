@@ -202,6 +202,9 @@ fpatan_defines = [
 run_single_defines = [
     "CLI",
 ]
+msan_defines = [
+    "SANITIZER_MSAN",
+]
 
 werror_ccflags = [
     # preemptively catch some other common errors
@@ -240,7 +243,6 @@ msan_ccflags = [
     "-fno-omit-frame-pointer",
     "-fsanitize=memory,undefined",
     "-fsanitize-memory-track-origins",
-    "-DSANITIZER_MSAN",
 ]
 msan_linkflags = [
     "-fsanitize=memory,undefined",
@@ -310,7 +312,7 @@ msan_env = base_env.Clone(
     CXX="clang++",
     CCFLAGS=common_ccflags + msan_ccflags,
     CPPPATH=common_include + wasm_include,
-    CPPDEFINES=test_defines,
+    CPPDEFINES=test_defines + msan_defines,
     LINKFLAGS=msan_linkflags,
 )
 msan_env.VariantDir("build/msan", ".", False)
