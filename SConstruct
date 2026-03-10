@@ -225,9 +225,34 @@ linux_ccflags = [
     "-O3",
     "-flto",
 ]
-test_ccflags = [
-    "-O3",
-    "-flto",
+asan_ccflags = [
+    "-O1",
+    "-g",
+    "-fno-omit-frame-pointer",
+    "-fsanitize=address,undefined",
+]
+asan_linkflags = [
+    "-fsanitize=address,undefined",
+]
+msan_ccflags = [
+    "-O1",
+    "-g",
+    "-fno-omit-frame-pointer",
+    "-fsanitize=memory,undefined",
+    "-fsanitize-memory-track-origins",
+    "-DSANITIZER_MSAN",
+]
+msan_linkflags = [
+    "-fsanitize=memory,undefined",
+]
+cov_ccflags = [
+    "-O1",
+    "-g",
+    "-fprofile-instr-generate",
+    "-fcoverage-mapping",
+]
+cov_linkflags = [
+    "-fprofile-instr-generate",
 ]
 wasm_ccflags = [
     "-O2",
@@ -270,12 +295,35 @@ run_single_design_env = base_env.Clone(
 )
 run_single_design_env.VariantDir("build/run_single_design", ".", False)
 
-test_env = base_env.Clone(
-    CCFLAGS=common_ccflags + test_ccflags,
+asan_env = base_env.Clone(
+    CC="clang",
+    CXX="clang++",
+    CCFLAGS=common_ccflags + asan_ccflags,
     CPPPATH=common_include + wasm_include,
     CPPDEFINES=test_defines,
+    LINKFLAGS=asan_linkflags,
 )
-test_env.VariantDir("build/test", ".", False)
+asan_env.VariantDir("build/asan", ".", False)
+
+msan_env = base_env.Clone(
+    CC="clang",
+    CXX="clang++",
+    CCFLAGS=common_ccflags + msan_ccflags,
+    CPPPATH=common_include + wasm_include,
+    CPPDEFINES=test_defines,
+    LINKFLAGS=msan_linkflags,
+)
+msan_env.VariantDir("build/msan", ".", False)
+
+cov_env = base_env.Clone(
+    CC="clang",
+    CXX="clang++",
+    CCFLAGS=common_ccflags + cov_ccflags,
+    CPPPATH=common_include + wasm_include,
+    CPPDEFINES=test_defines,
+    LINKFLAGS=cov_linkflags,
+)
+cov_env.VariantDir("build/cov", ".", False)
 
 wasm_env = base_env.Clone(
     CCFLAGS=common_ccflags + wasm_ccflags,
@@ -315,7 +363,9 @@ build_with_variant(
     run_single_design_xml_sources_all,
     target="run_single_design_xml",
 )
-build_with_variant(test_env, "build/test/", test_sources_all, target="stl_test")
+build_with_variant(asan_env, "build/asan/", test_sources_all, target="stl_test_asan")
+build_with_variant(msan_env, "build/msan/", test_sources_all, target="stl_test_msan")
+build_with_variant(cov_env, "build/cov/", test_sources_all, target="stl_test_cov")
 build_with_variant(wasm_env, "build/wasm/", wasm_sources_all, target="html/fcsim.wasm")
 
 # Automated version tagging - build html/version.js

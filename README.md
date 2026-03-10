@@ -96,12 +96,13 @@ Hopefully at some point we can fully reverse engineer these specialized instruct
 The web build does not support STL, so we need a mock STL.
 The mock STL comes with basic tests.
 
-The regular build will produce the executable `stl_test`.
+The regular build will produce two test executables: `stl_test_asan`
+(AddressSanitizer + UBSan) and `stl_test_msan` (MemorySanitizer + UBSan).
 
-To see that the data structures are working correctly, you can use `valgrind` to check for memory leaks and other memory issues:
+To run the full test suite covering both sanitizers:
 
 ```sh
-valgrind ./stl_test
+pytest test/test_stl.py
 ```
 
 ## Memory

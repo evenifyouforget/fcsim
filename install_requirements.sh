@@ -6,4 +6,4 @@ sudo npm install --global prettier
 # Many OS's forbid touching the global python, so we use venv
 python3 -m venv .venv
 source .venv/bin/activate
-python3 -m pip install ruff pre-commit scons
+python3 -m pip install ruff pre-commit scons pytest pytest-xdist
