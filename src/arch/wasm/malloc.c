@@ -6,18 +6,6 @@
 // https://github.com/miguelperes/custom-malloc
 // block layout: [size][next][prev]
 
-// about the pad space:
-// before this variable was introduced, the game crashes
-// (try setting it to 0, see for yourself)
-// small values also don't work
-// I suspect it has to do with the memory taken by the program itself
-// at the time of writing, that is around 160 KB
-// so I set the pad space accordingly
-// and the game does not crash.
-// in the future, if the game is crashing, try setting the pad space higher.
-#ifndef MALLOC_PAD_SPACE
-#define MALLOC_PAD_SPACE 180000
-#endif
 #ifndef MALLOC_MIN_BLOCK
 #define MALLOC_MIN_BLOCK 4
 #endif
@@ -27,7 +15,6 @@
 
 #define SIZE_SIZE_T 4
 const size_t __min_block_size = 1 << MALLOC_MIN_BLOCK;
-const size_t __pad_space = MALLOC_PAD_SPACE;
 
 extern unsigned char __heap_base;
 size_t __first_free = (size_t)&__heap_base;
@@ -39,7 +26,7 @@ size_t memory_size(void) { return __builtin_wasm_memory_size(0); }
 size_t memory_grow(int delta) { return __builtin_wasm_memory_grow(0, delta); }
 
 void _ensure_root_size(size_t total) {
-  total += __pad_space;
+  total += (size_t)&__heap_base;
   size_t size = memory_size() << 16;
   if (total > size) {
     // no checking return code. assume it succeeds :)
