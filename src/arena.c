@@ -1051,6 +1051,10 @@ void detach_new_rod(struct design *design, struct block *block, double x,
 
   remove_attach_node(&rod->to->att, rod->to_att);
   free(rod->to_att);
+  if (!rod->to->att.head && !rod->to->gen) {
+    remove_joint(&design->joints, rod->to);
+    free(rod->to);
+  }
 
   rod->to = new_joint(NULL, x, y);
   append_joint(&design->joints, rod->to);
@@ -1065,6 +1069,10 @@ void detach_new_wheel(struct arena *arena, struct block *block, double x,
 
   remove_attach_node(&wheel->center->att, wheel->center_att);
   free(wheel->center_att);
+  if (!wheel->center->att.head && !wheel->center->gen) {
+    remove_joint(&design->joints, wheel->center);
+    free(wheel->center);
+  }
 
   wheel->center = new_joint(NULL, x, y);
   append_joint(&design->joints, wheel->center);
