@@ -19,9 +19,9 @@
 //     malloc immediately writes the request size into BLKHDR_PAYLOAD before
 //     returning — so free() can always recover the original size from there
 
-#define BLKHDR_SIZE(b)    (((size_t*)(b))[0])
-#define BLKHDR_NEXT(b)    (((size_t*)(b))[1])
-#define BLKHDR_PAYLOAD(b) (((size_t*)(b))[2])
+#define BLKHDR_SIZE(b) (((size_t *)(b))[0])
+#define BLKHDR_NEXT(b) (((size_t *)(b))[1])
+#define BLKHDR_PAYLOAD(b) (((size_t *)(b))[2])
 
 #ifndef MALLOC_MIN_BLOCK
 #define MALLOC_MIN_BLOCK 4
@@ -38,9 +38,9 @@ size_t __first_free = (size_t)&__heap_base;
 size_t __root_size = 1 << MALLOC_INITIAL_ROOT;
 int __memory_status = 0;
 
-static size_t _live_alloc_count  = 0;
+static size_t _live_alloc_count = 0;
 static size_t _live_useful_bytes = 0;
-static size_t _live_block_bytes  = 0;
+static size_t _live_block_bytes = 0;
 
 size_t memory_size(void) { return __builtin_wasm_memory_size(0); }
 
@@ -56,14 +56,14 @@ void _ensure_root_size(size_t total) {
 }
 
 void _link_block(size_t before, size_t after) {
-  BLKHDR_NEXT(before)    = after;
-  BLKHDR_PAYLOAD(after)  = before;
+  BLKHDR_NEXT(before) = after;
+  BLKHDR_PAYLOAD(after) = before;
 }
 
 void _remove_block(size_t block) {
   // fix before and after
   size_t before = BLKHDR_PAYLOAD(block);
-  size_t after  = BLKHDR_NEXT(block);
+  size_t after = BLKHDR_NEXT(block);
   _link_block(before, after);
   // fix first
   if (__first_free == block) {
@@ -97,7 +97,7 @@ void *_malloc_search_block(size_t n) {
   size_t cur_block = __first_free;
   do {
     size_t cur_block_size = BLKHDR_SIZE(cur_block);
-    size_t next_block     = BLKHDR_NEXT(cur_block);
+    size_t next_block = BLKHDR_NEXT(cur_block);
     if (cur_block_size < n) {
       cur_block = next_block;
       continue;
@@ -123,7 +123,7 @@ static void _track_alloc(void *result, size_t useful_n) {
   size_t block = (size_t)result - SIZE_SIZE_T * 3;
   BLKHDR_PAYLOAD(block) = useful_n;
   _live_useful_bytes += useful_n;
-  _live_block_bytes  += BLKHDR_SIZE(block);
+  _live_block_bytes += BLKHDR_SIZE(block);
   _live_alloc_count++;
 }
 
@@ -192,7 +192,7 @@ void free(void *p) {
   size_t r = (size_t)p - SIZE_SIZE_T * 3;
   // update live trackers before the merge loop changes BLKHDR_SIZE(r)
   _live_useful_bytes -= BLKHDR_PAYLOAD(r);
-  _live_block_bytes  -= BLKHDR_SIZE(r);
+  _live_block_bytes -= BLKHDR_SIZE(r);
   _live_alloc_count--;
   // try to merge siblings
   size_t r_size = BLKHDR_SIZE(r);
@@ -234,6 +234,6 @@ size_t total_memory_used_bytes() {
   return memory_size() << 16;
 }
 
-size_t malloc_live_alloc_count()  { return _live_alloc_count;  }
+size_t malloc_live_alloc_count() { return _live_alloc_count; }
 size_t malloc_live_useful_bytes() { return _live_useful_bytes; }
-size_t malloc_live_block_bytes()  { return _live_block_bytes;  }
+size_t malloc_live_block_bytes() { return _live_block_bytes; }

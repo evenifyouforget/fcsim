@@ -975,10 +975,10 @@ void draw_tick_counter(struct arena *arena) {
 #ifdef __wasm__
   // Snapshot all stats before any malloc-touching operations (to_string and
   // draw_text_default both call malloc, which would mutate the live counters).
-  size_t snapshot_allocs  = malloc_live_alloc_count();
-  size_t snapshot_useful  = malloc_live_useful_bytes();
-  size_t snapshot_heap    = malloc_live_block_bytes();
-  size_t snapshot_paged   = total_memory_used_bytes();
+  size_t snapshot_allocs = malloc_live_alloc_count();
+  size_t snapshot_useful = malloc_live_useful_bytes();
+  size_t snapshot_heap = malloc_live_block_bytes();
+  size_t snapshot_paged = total_memory_used_bytes();
 
   // Anchor the group past the widest possible piece-counter, then pin each
   // subsequent value so the layout stays stable as digit counts change.
@@ -989,7 +989,8 @@ void draw_tick_counter(struct arena *arena) {
 
   x = std::max(x, 10.0f + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 64);
   x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-  x = draw_text_default(arena, std::to_string(snapshot_useful / 1000000), x, 10);
+  x = draw_text_default(arena, std::to_string(snapshot_useful / 1000000), x,
+                        10);
   x = draw_text_default(arena, "MB useful", x, 10, 1);
 
   x = std::max(x, 10.0f + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 72);
