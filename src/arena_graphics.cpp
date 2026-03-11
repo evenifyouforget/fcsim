@@ -949,11 +949,11 @@ void draw_tick_counter(struct arena *arena) {
     // if not running, or not enough data, show a static prediction
     tps_value = _fcsim_target_tps;
   }
-  x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
+  x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 18);
   x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
   x = draw_text_default(arena, std::to_string(fps_value), x, 10);
   x = draw_text_default(arena, "FPS", x, 10, 1);
-  x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 8);
+  x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 30);
   x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
   x = draw_text_default(
       arena, tps_value >= 1e9 ? "Infinity" : std::to_string(tps_value), x, 10);
@@ -961,6 +961,7 @@ void draw_tick_counter(struct arena *arena) {
       arena, !tps_is_prediction ? "TPS average" : "TPS predicted", x, 10, 1);
 
   // piece counter
+  x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 48);
   x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
   int design_pieces = design_piece_count(&arena->design.player_blocks);
   int total_pieces = block_list_len(&arena->design.player_blocks);
@@ -981,22 +982,22 @@ void draw_tick_counter(struct arena *arena) {
 
   // Anchor the group past the widest possible piece-counter, then pin each
   // subsequent value so the layout stays stable as digit counts change.
-  x = std::max(x, 10.0f + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 42);
+  x = std::max(x, 10.0f + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 56);
   x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
   x = draw_text_default(arena, std::to_string(snapshot_allocs), x, 10);
   x = draw_text_default(arena, "allocs", x, 10, 1);
 
-  x = std::max(x, 10.0f + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 51);
+  x = std::max(x, 10.0f + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 64);
   x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
   x = draw_text_default(arena, std::to_string(snapshot_useful / 1000000), x, 10);
   x = draw_text_default(arena, "MB useful", x, 10, 1);
 
-  x = std::max(x, 10.0f + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 59);
+  x = std::max(x, 10.0f + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 72);
   x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
   x = draw_text_default(arena, std::to_string(snapshot_heap / 1000000), x, 10);
   x = draw_text_default(arena, "MB heap", x, 10, 1);
 
-  x = std::max(x, 10.0f + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 67);
+  x = std::max(x, 10.0f + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 78);
   x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
   x = draw_text_default(arena, std::to_string(snapshot_paged / 1000000), x, 10);
   x = draw_text_default(arena, "MB paged", x, 10, 1);
