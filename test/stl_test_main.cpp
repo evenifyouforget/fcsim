@@ -215,6 +215,12 @@ TEST(StringTests, TwoDMemory) {
   }
 }
 
+TEST(StringTests, ToStringDouble) {
+  std::string s = std::to_string(1.5);
+  CHECK_EQUAL('1', s[0]);
+  CHECK_EQUAL('.', s[1]);
+}
+
 TEST(StringTests, TwoDMemoryOverwrite) {
   for (int i = 0; i < 100; ++i) {
     std::vector<std::string> vec;
