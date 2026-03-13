@@ -4,7 +4,24 @@
 // cell bisecting implementation of malloc
 // as described in
 // https://github.com/miguelperes/custom-malloc
-// block layout: [size][next][prev]
+//
+// Block header layout — three size_t words immediately before the pointer
+// returned to the caller:
+//
+//   BLKHDR_SIZE    [ptr-3]  buddy block size (power of 2); valid in both states
+//   BLKHDR_NEXT    [ptr-2]  next-free pointer when FREE; 0 when ALLOCATED
+//   BLKHDR_PAYLOAD [ptr-1]  prev-free pointer when FREE;
+//                           caller's original request size when ALLOCATED
+//
+// Slot [ptr-1] (BLKHDR_PAYLOAD) is safely reused because:
+//   - when a block is on the free list, it holds the prev pointer
+//   - when a block is allocated, _remove_block sets BLKHDR_NEXT to 0 and
+//     malloc immediately writes the request size into BLKHDR_PAYLOAD before
+//     returning — so free() can always recover the original size from there
+
+#define BLKHDR_SIZE(b) (((size_t *)(b))[0])
+#define BLKHDR_NEXT(b) (((size_t *)(b))[1])
+#define BLKHDR_PAYLOAD(b) (((size_t *)(b))[2])
 
 #ifndef MALLOC_MIN_BLOCK
 #define MALLOC_MIN_BLOCK 4
@@ -21,6 +38,10 @@ size_t __first_free = (size_t)&__heap_base;
 size_t __root_size = 1 << MALLOC_INITIAL_ROOT;
 int __memory_status = 0;
 
+static size_t _live_alloc_count = 0;
+static size_t _live_useful_bytes = 0;
+static size_t _live_block_bytes = 0;
+
 size_t memory_size(void) { return __builtin_wasm_memory_size(0); }
 
 size_t memory_grow(int delta) { return __builtin_wasm_memory_grow(0, delta); }
@@ -35,27 +56,27 @@ void _ensure_root_size(size_t total) {
 }
 
 void _link_block(size_t before, size_t after) {
-  ((size_t *)before)[1] = after;
-  ((size_t *)after)[2] = before;
+  BLKHDR_NEXT(before) = after;
+  BLKHDR_PAYLOAD(after) = before;
 }
 
 void _remove_block(size_t block) {
   // fix before and after
-  size_t before = ((size_t *)block)[2];
-  size_t after = ((size_t *)block)[1];
+  size_t before = BLKHDR_PAYLOAD(block);
+  size_t after = BLKHDR_NEXT(block);
   _link_block(before, after);
   // fix first
   if (__first_free == block) {
     // set to something else
-    __first_free = ((size_t *)block)[1];
+    __first_free = BLKHDR_NEXT(block);
     // if it was the only block
     if (__first_free == block) {
       // indicate with a status
       __memory_status = 2;
     }
   }
-  // mark used
-  ((void **)block)[1] = NULL;
+  // mark used (BLKHDR_NEXT == 0 is the "allocated" sentinel)
+  BLKHDR_NEXT(block) = 0;
 }
 
 void _append_tail(size_t r) {
@@ -66,7 +87,7 @@ void _append_tail(size_t r) {
     return;
   }
   // add block back to list
-  size_t second_free = ((size_t *)__first_free)[1];
+  size_t second_free = BLKHDR_NEXT(__first_free);
   _link_block(__first_free, r);
   _link_block(r, second_free);
 }
@@ -75,8 +96,8 @@ void *_malloc_search_block(size_t n) {
   // search for suitable block
   size_t cur_block = __first_free;
   do {
-    size_t cur_block_size = ((size_t *)cur_block)[0];
-    size_t next_block = ((size_t *)cur_block)[1];
+    size_t cur_block_size = BLKHDR_SIZE(cur_block);
+    size_t next_block = BLKHDR_NEXT(cur_block);
     if (cur_block_size < n) {
       cur_block = next_block;
       continue;
@@ -88,7 +109,7 @@ void *_malloc_search_block(size_t n) {
       // mitosis
       cur_block_size >>= 1;
       size_t sibling_block = cur_block + cur_block_size;
-      ((size_t *)sibling_block)[0] = ((size_t *)cur_block)[0] = cur_block_size;
+      BLKHDR_SIZE(sibling_block) = BLKHDR_SIZE(cur_block) = cur_block_size;
       _append_tail(sibling_block);
     }
     _remove_block(cur_block);
@@ -98,6 +119,14 @@ void *_malloc_search_block(size_t n) {
   return NULL;
 }
 
+static void _track_alloc(void *result, size_t useful_n) {
+  size_t block = (size_t)result - SIZE_SIZE_T * 3;
+  BLKHDR_PAYLOAD(block) = useful_n;
+  _live_useful_bytes += useful_n;
+  _live_block_bytes += BLKHDR_SIZE(block);
+  _live_alloc_count++;
+}
+
 void *malloc(size_t n) {
   // word size assumptions
   _Static_assert(sizeof(size_t) == SIZE_SIZE_T,
@@ -105,6 +134,8 @@ void *malloc(size_t n) {
   // 0 case
   if (n == 0)
     return NULL;
+  // save caller's request before any transforms
+  size_t useful_n = n;
   // alignment
   n = -((-n) & ~(SIZE_SIZE_T - 1));
   // account for header size
@@ -113,7 +144,7 @@ void *malloc(size_t n) {
   if (__memory_status == 0) {
     __memory_status = 1;
     _ensure_root_size(__root_size);
-    ((size_t *)__first_free)[0] = __root_size;
+    BLKHDR_SIZE(__first_free) = __root_size;
     _link_block(__first_free, __first_free);
   }
   // all memory used: expand
@@ -121,24 +152,29 @@ void *malloc(size_t n) {
     __memory_status = 1;
     _ensure_root_size(__root_size << 1);
     __first_free = ((size_t)&__heap_base) + __root_size;
-    ((size_t *)__first_free)[0] = __root_size;
+    BLKHDR_SIZE(__first_free) = __root_size;
     _link_block(__first_free, __first_free);
     __root_size <<= 1;
   }
   // search for suitable block
   void *result = _malloc_search_block(n);
-  if (result != NULL)
+  if (result != NULL) {
+    _track_alloc(result, useful_n);
     return result;
+  }
   // memory available, but no blocks large enough: expand
   do {
     _ensure_root_size(__root_size << 1);
     size_t big_block = ((size_t)&__heap_base) + __root_size;
-    ((size_t *)big_block)[0] = __root_size;
+    BLKHDR_SIZE(big_block) = __root_size;
     _append_tail(big_block);
     __root_size <<= 1;
   } while ((__root_size >> 1) < n);
   // there will definitely be a block available this time
-  return _malloc_search_block(n);
+  result = _malloc_search_block(n);
+  if (result != NULL)
+    _track_alloc(result, useful_n);
+  return result;
 }
 
 void *calloc(size_t nmemb, size_t size) {
@@ -153,10 +189,13 @@ void free(void *p) {
   // null case
   if (p == NULL)
     return;
-  size_t r = (size_t)p;
-  r -= SIZE_SIZE_T * 3;
+  size_t r = (size_t)p - SIZE_SIZE_T * 3;
+  // update live trackers before the merge loop changes BLKHDR_SIZE(r)
+  _live_useful_bytes -= BLKHDR_PAYLOAD(r);
+  _live_block_bytes -= BLKHDR_SIZE(r);
+  _live_alloc_count--;
   // try to merge siblings
-  size_t r_size = ((size_t *)r)[0];
+  size_t r_size = BLKHDR_SIZE(r);
   while (1) {
     if (r_size >= __root_size) {
       // already the largest
@@ -171,12 +210,11 @@ void free(void *p) {
       // sibling on left
       sibling_block = r - r_size;
     }
-    size_t sibling_block_next = ((size_t *)sibling_block)[1];
-    if (sibling_block_next == (size_t)NULL) {
-      // sibling is in use, can't merge further
+    // BLKHDR_NEXT == 0 means the sibling is allocated; can't merge
+    if (BLKHDR_NEXT(sibling_block) == 0) {
       break;
     }
-    size_t sibling_block_size = ((size_t *)sibling_block)[0];
+    size_t sibling_block_size = BLKHDR_SIZE(sibling_block);
     if (sibling_block_size != r_size) {
       // sibling has wrong size (possibly split), can't merge further
       break;
@@ -185,13 +223,17 @@ void free(void *p) {
     if (!is_on_right) {
       r = sibling_block;
     }
-    ((size_t *)r)[0] = r_size = r_size << 1;
+    BLKHDR_SIZE(r) = r_size = r_size << 1;
   }
   // add block back to free list
   _append_tail(r);
 }
 
 size_t total_memory_used_bytes() {
-  // each page is 64 KiB
+  // each page is 64 KiB — high-water mark, never decreases
   return memory_size() << 16;
 }
+
+size_t malloc_live_alloc_count() { return _live_alloc_count; }
+size_t malloc_live_useful_bytes() { return _live_useful_bytes; }
+size_t malloc_live_block_bytes() { return _live_block_bytes; }
