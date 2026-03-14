@@ -238,6 +238,13 @@ TEST(StringTests, CStrMethod) {
   CHECK_EQUAL('\0', str.c_str()[11]);
 }
 
+TEST(StringTests, PlusEqualsChar) {
+  std::string str = "AB";
+  str += 'C';
+  CHECK_EQUAL(3, (int)str.size());
+  CHECK_EQUAL('C', str[2]);
+}
+
 // ── unordered_map
 // ─────────────────────────────────────────────────────────────
 
