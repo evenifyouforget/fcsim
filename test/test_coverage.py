@@ -36,9 +36,9 @@ SOURCES = sorted(
 # arch/wasm/include/stl_mock.h). CI fails if any metric drops below these
 # values. When coverage genuinely improves, raise the floor here to lock it in.
 THRESHOLDS = {
-    "region": 89.13,
-    "function": 86.36,
-    "line": 90.54,
+    "region": 89.67,
+    "function": 88.64,
+    "line": 90.88,
     "branch": 84.00,
 }
 

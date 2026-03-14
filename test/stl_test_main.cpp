@@ -245,6 +245,13 @@ TEST(StringTests, PlusEqualsChar) {
   CHECK_EQUAL('C', str[2]);
 }
 
+TEST(StringTests, ToStringUInt32) {
+  std::string str = std::to_string((uint32_t)1234567890);
+  CHECK_EQUAL(10, (int)str.size());
+  CHECK_EQUAL('1', str[0]);
+  CHECK_EQUAL('0', str[9]);
+}
+
 // ── unordered_map
 // ─────────────────────────────────────────────────────────────
 
