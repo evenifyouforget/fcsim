@@ -99,7 +99,7 @@ def _measure():
 
 def _parse_summary():
     text = SUMMARY_TXT.read_text()
-    total = next(l for l in text.splitlines() if l.startswith("TOTAL"))
+    total = next(line for line in text.splitlines() if line.startswith("TOTAL"))
     pcts = [float(x) for x in re.findall(r"(\d+\.\d+)%", total)]
     if len(pcts) < 4:
         sys.exit("Could not parse coverage percentages from summary.txt.")
@@ -127,7 +127,9 @@ def _write_baseline(numbers):
 def _read_log():
     if not LOG_FILE.exists():
         return []
-    return [json.loads(l) for l in LOG_FILE.read_text().splitlines() if l.strip()]
+    return [
+        json.loads(line) for line in LOG_FILE.read_text().splitlines() if line.strip()
+    ]
 
 
 def _append_log(entry):
