@@ -45,14 +45,17 @@ PROFDATA = ROOT / "coverage_profiles" / "merged.profdata"
 SUMMARY_TXT = ROOT / "coverage_profiles" / "summary.txt"
 BINARY = ROOT / "stl_test_cov"
 
-SOURCES = sorted([
-    *ROOT.glob("src/stl_mock*.cpp"),
-    *ROOT.glob("arch/wasm/include/stl_mock*.h"),
-])
+SOURCES = sorted(
+    [
+        *ROOT.glob("src/stl_mock*.cpp"),
+        *ROOT.glob("arch/wasm/include/stl_mock*.h"),
+    ]
+)
 
 METRICS = ("region", "function", "line", "branch")
 
 # ── llvm tool discovery ────────────────────────────────────────────────────────
+
 
 def _find_llvm_tool(name):
     r = subprocess.run(["clang", "--version"], capture_output=True, text=True)
@@ -69,7 +72,9 @@ def _find_llvm_tool(name):
             return versioned
     raise RuntimeError(f"Could not find {name} or any versioned variant")
 
+
 # ── build / test ───────────────────────────────────────────────────────────────
+
 
 def _build():
     print("── building stl_test_cov ─────────────────────────────────────────────")
@@ -77,17 +82,20 @@ def _build():
     if r.returncode != 0:
         sys.exit("Build failed.")
 
+
 def _run_coverage_tests():
     print("── running coverage tests ────────────────────────────────────────────")
     r = subprocess.run(["pytest", "test/test_coverage.py", "-v"], cwd=ROOT)
     if r.returncode != 0:
         sys.exit("Coverage tests failed.")
 
+
 def _measure():
     """Build, run tests, return parsed coverage numbers."""
     _build()
     _run_coverage_tests()
     return _parse_summary()
+
 
 def _parse_summary():
     text = SUMMARY_TXT.read_text()
@@ -97,40 +105,50 @@ def _parse_summary():
         sys.exit("Could not parse coverage percentages from summary.txt.")
     return dict(zip(METRICS, pcts))
 
+
 # ── state helpers ──────────────────────────────────────────────────────────────
+
 
 def _ensure_state_dir():
     STATE_DIR.mkdir(exist_ok=True)
+
 
 def _read_baseline():
     if not BASELINE_FILE.exists():
         sys.exit("No session baseline found. Run `clear` first.")
     return json.loads(BASELINE_FILE.read_text())
 
+
 def _write_baseline(numbers):
     _ensure_state_dir()
     BASELINE_FILE.write_text(json.dumps(numbers, indent=2) + "\n")
+
 
 def _read_log():
     if not LOG_FILE.exists():
         return []
     return [json.loads(l) for l in LOG_FILE.read_text().splitlines() if l.strip()]
 
+
 def _append_log(entry):
     _ensure_state_dir()
     with LOG_FILE.open("a") as f:
         f.write(json.dumps(entry) + "\n")
+
 
 def _read_picked():
     if not PICKED_FILE.exists():
         return []
     return json.loads(PICKED_FILE.read_text())
 
+
 def _write_picked(picked):
     _ensure_state_dir()
     PICKED_FILE.write_text(json.dumps(picked, indent=2) + "\n")
 
+
 # ── threshold editing ──────────────────────────────────────────────────────────
+
 
 def _bump_thresholds(numbers):
     """Rewrite the THRESHOLDS dict in test_coverage.py to match numbers."""
@@ -138,21 +156,26 @@ def _bump_thresholds(numbers):
     for metric, value in numbers.items():
         text = re.sub(
             rf'("{metric}":\s*)[\d.]+',
-            rf'\g<1>{value:.2f}',
+            rf"\g<1>{value:.2f}",
             text,
         )
     TEST_COV_PY.write_text(text)
 
+
 # ── coverage number utilities ──────────────────────────────────────────────────
+
 
 def _delta(old, new):
     return {m: round(new[m] - old[m], 2) for m in METRICS}
 
+
 def _is_nondecreasing(baseline, current):
     return all(current[m] >= baseline[m] for m in METRICS)
 
+
 def _fmt_numbers(numbers):
     return "  ".join(f"{m}: {numbers[m]:.2f}%" for m in METRICS)
+
 
 def _fmt_delta(d):
     parts = []
@@ -161,10 +184,12 @@ def _fmt_delta(d):
         parts.append(f"{m}: {sign}{d[m]:.2f}pp")
     return "  ".join(parts)
 
+
 # ── uncovered block discovery ──────────────────────────────────────────────────
 
 # Lines within this many covered lines of each other are merged into one block.
 _BLOCK_GAP = 3
+
 
 def _get_uncovered_blocks():
     """
@@ -223,20 +248,25 @@ def _get_uncovered_blocks():
         blocks.append(cur)
 
         for block in blocks:
-            all_blocks.append({
-                "file": rel,
-                "start": block[0][0],
-                "end": block[-1][0],
-                "lines": block,
-            })
+            all_blocks.append(
+                {
+                    "file": rel,
+                    "start": block[0][0],
+                    "end": block[-1][0],
+                    "lines": block,
+                }
+            )
 
     all_blocks.sort(key=lambda b: len(b["lines"]), reverse=True)
     return all_blocks
 
+
 # ── git helpers ────────────────────────────────────────────────────────────────
+
 
 def _git(*args, **kwargs):
     return subprocess.run(["git", *args], cwd=ROOT, **kwargs)
+
 
 def _git_is_dirty():
     # Only check tracked file modifications; untracked files are unaffected by
@@ -245,11 +275,14 @@ def _git_is_dirty():
     unstaged = _git("diff", "--quiet", capture_output=True)
     return staged.returncode != 0 or unstaged.returncode != 0
 
+
 def _git_head_sha():
     r = _git("rev-parse", "HEAD", capture_output=True, text=True)
     return r.stdout.strip() if r.returncode == 0 else None
 
+
 # ── commands ───────────────────────────────────────────────────────────────────
+
 
 def cmd_clear(args):
     if _git_is_dirty() and not args.force:
@@ -288,9 +321,11 @@ def cmd_pick(args):
     _write_picked(picked)
 
     n_uncovered = len(choice["lines"])
-    print(f"\n── pick ──────────────────────────────────────────────────────────────")
+    print("\n── pick ──────────────────────────────────────────────────────────────")
     print(f"File:   {choice['file']}")
-    print(f"Region: lines {choice['start']}–{choice['end']} ({n_uncovered} uncovered)\n")
+    print(
+        f"Region: lines {choice['start']}–{choice['end']} ({n_uncovered} uncovered)\n"
+    )
 
     source_lines = (ROOT / choice["file"]).read_text().splitlines()
     ctx_start = max(1, choice["start"] - 3)
@@ -341,9 +376,7 @@ def cmd_snapshot(args):
         sys.exit("No improvement over baseline. Nothing to snapshot.")
 
     # Compute a delta string for the commit message.
-    delta_str = ", ".join(
-        f"+{d[m]:.2f}pp {m}" for m in METRICS if d[m] > 0
-    )
+    delta_str = ", ".join(f"+{d[m]:.2f}pp {m}" for m in METRICS if d[m] > 0)
     message = args.message or delta_str
     commit_msg = f"Coverage: {message}"
 
@@ -438,7 +471,9 @@ def cmd_export(args):
     else:
         print(output)
 
+
 # ── CLI ────────────────────────────────────────────────────────────────────────
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -466,7 +501,9 @@ def main():
         help="Optional commit message (default: auto-generated from delta).",
     )
 
-    sub.add_parser("revert", help="Discard uncommitted changes, return to last snapshot.")
+    sub.add_parser(
+        "revert", help="Discard uncommitted changes, return to last snapshot."
+    )
 
     p_export = sub.add_parser("export", help="Print GitHub Markdown audit log.")
     p_export.add_argument(
