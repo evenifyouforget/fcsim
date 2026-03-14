@@ -231,6 +231,13 @@ TEST(StringTests, TwoDMemoryOverwrite) {
   }
 }
 
+TEST(StringTests, CStrMethod) {
+  std::string str = "Hello world";
+  CHECK_EQUAL('H', str.c_str()[0]);
+  CHECK_EQUAL('d', str.c_str()[10]);
+  CHECK_EQUAL('\0', str.c_str()[11]);
+}
+
 // ── unordered_map
 // ─────────────────────────────────────────────────────────────
 
