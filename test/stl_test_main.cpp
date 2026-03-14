@@ -231,6 +231,60 @@ TEST(StringTests, TwoDMemoryOverwrite) {
   }
 }
 
+TEST(StringTests, CStrMethod) {
+  std::string str = "Hello world";
+  CHECK_EQUAL('H', str.c_str()[0]);
+  CHECK_EQUAL('d', str.c_str()[10]);
+  CHECK_EQUAL('\0', str.c_str()[11]);
+}
+
+TEST(StringTests, PlusEqualsChar) {
+  std::string str = "AB";
+  str += 'C';
+  CHECK_EQUAL(3, (int)str.size());
+  CHECK_EQUAL('C', str[2]);
+}
+
+TEST(StringTests, ToStringUInt32) {
+  std::string str = std::to_string((uint32_t)1234567890);
+  CHECK_EQUAL(10, (int)str.size());
+  CHECK_EQUAL('1', str[0]);
+  CHECK_EQUAL('0', str[9]);
+}
+
+TEST(StringTests, ToStringInt16) {
+  std::string str = std::to_string((int16_t)-12345);
+  CHECK_EQUAL(6, (int)str.size());
+  CHECK_EQUAL('-', str[0]);
+  CHECK_EQUAL('1', str[1]);
+  CHECK_EQUAL('5', str[5]);
+}
+
+TEST(StringTests, ToStringUInt16) {
+  std::string str = std::to_string((uint16_t)54321);
+  CHECK_EQUAL(5, (int)str.size());
+  CHECK_EQUAL('5', str[0]);
+  CHECK_EQUAL('1', str[4]);
+}
+
+TEST(StringTests, OneMinusEpsilon) {
+  // TODO change this expected result when to_string is not using a crappy
+  // fixed-5-digit implementation Expected: 1.00000
+  std::string str = std::to_string(0.99999999999999);
+  CHECK_EQUAL(7, (int)str.size());
+  CHECK_EQUAL('1', str[0]);
+  CHECK_EQUAL('.', str[1]);
+  CHECK_EQUAL('0', str[2]);
+}
+
+TEST(StringTests, NegativeDouble) {
+  std::string str = std::to_string(-1.5);
+  CHECK_EQUAL('-', str[0]);
+  CHECK_EQUAL('1', str[1]);
+  CHECK_EQUAL('.', str[2]);
+  CHECK_EQUAL('5', str[3]);
+}
+
 // ── unordered_map
 // ─────────────────────────────────────────────────────────────
 
