@@ -22,7 +22,7 @@ tags
 .cov-state/
 
 # local working documents
-pr_draft.md
+pr_draft*.md
 experiment_log.md
 
 # SCons files
