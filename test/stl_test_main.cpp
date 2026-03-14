@@ -260,6 +260,13 @@ TEST(StringTests, ToStringInt16) {
   CHECK_EQUAL('5', str[5]);
 }
 
+TEST(StringTests, ToStringUInt16) {
+  std::string str = std::to_string((uint16_t)54321);
+  CHECK_EQUAL(5, (int)str.size());
+  CHECK_EQUAL('5', str[0]);
+  CHECK_EQUAL('1', str[4]);
+}
+
 // ── unordered_map
 // ─────────────────────────────────────────────────────────────
 
