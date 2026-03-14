@@ -252,6 +252,14 @@ TEST(StringTests, ToStringUInt32) {
   CHECK_EQUAL('0', str[9]);
 }
 
+TEST(StringTests, ToStringInt16) {
+  std::string str = std::to_string((int16_t)-12345);
+  CHECK_EQUAL(6, (int)str.size());
+  CHECK_EQUAL('-', str[0]);
+  CHECK_EQUAL('1', str[1]);
+  CHECK_EQUAL('5', str[5]);
+}
+
 // ── unordered_map
 // ─────────────────────────────────────────────────────────────
 
