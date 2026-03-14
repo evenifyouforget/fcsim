@@ -277,6 +277,14 @@ TEST(StringTests, OneMinusEpsilon) {
   CHECK_EQUAL('0', str[2]);
 }
 
+TEST(StringTests, NegativeDouble) {
+  std::string str = std::to_string(-1.5);
+  CHECK_EQUAL('-', str[0]);
+  CHECK_EQUAL('1', str[1]);
+  CHECK_EQUAL('.', str[2]);
+  CHECK_EQUAL('5', str[3]);
+}
+
 // ── unordered_map
 // ─────────────────────────────────────────────────────────────
 
