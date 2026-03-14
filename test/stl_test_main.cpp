@@ -268,8 +268,8 @@ TEST(StringTests, ToStringUInt16) {
 }
 
 TEST(StringTests, OneMinusEpsilon) {
-  // TODO change this expected result when to_string is not using a crappy fixed-5-digit implementation
-  // Expected: 1.00000
+  // TODO change this expected result when to_string is not using a crappy
+  // fixed-5-digit implementation Expected: 1.00000
   std::string str = std::to_string(0.99999999999999);
   CHECK_EQUAL(7, (int)str.size());
   CHECK_EQUAL('1', str[0]);
