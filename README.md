@@ -72,6 +72,16 @@ If you are having issues with the web build, try clearing your browser cache.
 CORS issues should not occur anymore due to an update to FC's servers, but if you see a CORS issue, try enabling CORS everywhere.
 There are certain browser extensions for this.
 
+## Multi-branch build
+
+This is separate from the normal build, as it also builds other feature branches (meaning it is multiple times as expensive as the normal build). The actual web deployment uses this to populate the subdirectories.
+
+```sh
+bash build_subdirs.sh
+```
+
+To change the feature branches that will be built, or the directory names they will map to, edit `deploy.json`. If you are adding frozen build artifacts, you will need to add the files as well to the `v6-deploy` branch.
+
 # `fcsim` vs `fcsim-fpatan` and others
 
 The spectre level does not test `atan2`, so it is possible `794` (the target spectre) is actually several different spectres.
