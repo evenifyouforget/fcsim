@@ -1243,14 +1243,6 @@ void mouse_up_move(struct arena *arena) {
   MoveState *ms = static_cast<MoveState *>(arena->move_state);
   bool overlap = false;
 
-  if (arena->move_orig_joint)
-    joint_dfs(arena, arena->move_orig_joint, false, true);
-  else
-    block_dfs(arena, arena->move_orig_block, false, true);
-
-  arena->move_orig_joint = NULL;
-  arena->move_orig_block = NULL;
-
   for (struct block *b : ms->blocks) {
     if (b->overlap) {
       overlap = true;
@@ -1260,6 +1252,14 @@ void mouse_up_move(struct arena *arena) {
 
   if (overlap)
     update_move(arena, 0.0, 0.0);
+
+  if (arena->move_orig_joint)
+    joint_dfs(arena, arena->move_orig_joint, false, true);
+  else
+    block_dfs(arena, arena->move_orig_block, false, true);
+
+  arena->move_orig_joint = NULL;
+  arena->move_orig_block = NULL;
 
   ms->blocks.clear();
   ms->root_blocks.clear();
