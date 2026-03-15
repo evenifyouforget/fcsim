@@ -1,18 +1,66 @@
-#include <box2d/b2Body.h>
-#include <box2d/b2CMath.h>
-#include <box2d/b2World.h>
-#include <math.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
+#ifdef __wasm__
+#include "stl_mock.h"
+#else
+#include "stl_compat.h"
+#include <vector>
+#endif
 
 #define ARENA_C
+extern "C" {
 #include "arena.h"
+#include "gen.h"
 #include "gl.h"
 #include "graph.h"
 #include "interval.h"
 #include "text.h"
 #include "xml.h"
+#include <box2d/b2Body.h>
+#include <box2d/b2CMath.h>
+#include <box2d/b2World.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+}
+
+/*
+ * MoveState is a snapshot of the connected component being dragged, captured
+ * at mousedown. orig_x/orig_y in each entry store the pre-drag position so
+ * that the component can be snapped back if released in an invalid position.
+ *
+ *   blocks       — every block in the component; iterated to drive physics
+ *                  body updates and to check for overlaps on mouseup.
+ *   root_blocks  — boxes and circles, which own their own position and drive
+ *                  the positions of everything connected to them. orig_x/orig_y
+ *                  here are the reset targets for block-grabbed moves.
+ *   root_joints  — free joints (joints with no gen block), which own their
+ *                  own position independently of any block. orig_x/orig_y
+ *                  here are the reset targets for joint-grabbed moves.
+ *
+ * All three vectors are populated by block_dfs/joint_dfs during mousedown and
+ * cleared at the end of mouse_up_move. See mouse_up_move for an important note
+ * on ordering.
+ */
+struct BlockMoveEntry {
+  struct block *block;
+  double orig_x;
+  double orig_y;
+};
+
+struct JointMoveEntry {
+  struct joint *joint;
+  double orig_x;
+  double orig_y;
+};
+
+struct MoveState {
+  std::vector<struct block *> blocks;
+  std::vector<BlockMoveEntry> root_blocks;
+  std::vector<JointMoveEntry> root_joints;
+};
+
+void arena_move_init(struct arena *arena) {
+  arena->move_state = _new<MoveState>();
+}
 
 #define MAX_RENDER_TEXT_LENGTH 1000
 
@@ -178,9 +226,7 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len) {
     arena->hover_joint = NULL;
     arena->hover_block = NULL;
 
-    arena->root_joints_moving = NULL;
-    arena->root_blocks_moving = NULL;
-    arena->blocks_moving = NULL;
+    arena_move_init(arena);
 
     /* first design replaces arena->design entirely */
     arena->design = tmp;
@@ -692,9 +738,6 @@ static int block_inside_area(struct block *block, struct area *area) {
          bb.y + bb.h / 2 <= area->y + modified_h / 2;
 }
 
-void gen_block(b2World *world, struct block *block);
-void b2World_CleanBodyList(b2World *world);
-
 void mark_overlaps(struct arena *arena) {
   b2Contact *contact;
   struct block *block;
@@ -957,30 +1000,21 @@ void move_root_block(struct block *block, double x, double y) {
 }
 
 void update_move(struct arena *arena, double dx, double dy) {
-  struct joint_head *joint_head;
-  struct block_head *block_head;
+  MoveState *ms = static_cast<MoveState *>(arena->move_state);
 
-  for (joint_head = arena->root_joints_moving; joint_head;
-       joint_head = joint_head->next) {
-    joint_head->joint->x = joint_head->orig_x + dx;
-    joint_head->joint->y = joint_head->orig_y + dy;
+  for (JointMoveEntry &e : ms->root_joints) {
+    e.joint->x = e.orig_x + dx;
+    e.joint->y = e.orig_y + dy;
   }
 
-  for (block_head = arena->root_blocks_moving; block_head;
-       block_head = block_head->next) {
-    move_root_block(block_head->block, block_head->orig_x + dx,
-                    block_head->orig_y + dy);
-  }
+  for (BlockMoveEntry &e : ms->root_blocks)
+    move_root_block(e.block, e.orig_x + dx, e.orig_y + dy);
 
-  for (block_head = arena->blocks_moving; block_head;
-       block_head = block_head->next) {
-    update_joints2(block_head->block);
-  }
+  for (struct block *b : ms->blocks)
+    update_joints2(b);
 
-  for (block_head = arena->blocks_moving; block_head;
-       block_head = block_head->next) {
-    update_body(arena, block_head->block);
-  }
+  for (struct block *b : ms->blocks)
+    update_body(arena, b);
 
   mark_overlaps(arena);
 
@@ -1222,20 +1256,11 @@ void joint_dfs(struct arena *arena, struct joint *joint, bool value, bool all);
 void block_dfs(struct arena *arena, struct block *block, bool value, bool all);
 
 void mouse_up_move(struct arena *arena) {
-  struct block_head *block_head;
+  MoveState *ms = static_cast<MoveState *>(arena->move_state);
   bool overlap = false;
 
-  if (arena->move_orig_joint)
-    joint_dfs(arena, arena->move_orig_joint, false, true);
-  else
-    block_dfs(arena, arena->move_orig_block, false, true);
-
-  arena->move_orig_joint = NULL;
-  arena->move_orig_block = NULL;
-
-  for (block_head = arena->blocks_moving; block_head;
-       block_head = block_head->next) {
-    if (block_head->block->overlap) {
+  for (struct block *b : ms->blocks) {
+    if (b->overlap) {
       overlap = true;
       break;
     }
@@ -1244,9 +1269,26 @@ void mouse_up_move(struct arena *arena) {
   if (overlap)
     update_move(arena, 0.0, 0.0);
 
-  arena->root_joints_moving = NULL;
-  arena->root_blocks_moving = NULL;
-  arena->blocks_moving = NULL;
+  /* Reset visited flags on all blocks and joints in the component so that
+   * future DFS traversals work correctly.
+   *
+   * Ordering note: this must come AFTER the overlap check and update_move
+   * above. block_dfs/joint_dfs unconditionally push_back into MoveState on
+   * every node they visit, so calling them here repopulates the vectors with
+   * the current positions as new orig_x/orig_y values. If update_move(0,0)
+   * were called after this point, it would "reset" each piece to wherever it
+   * already is — a no-op — leaving an illegally placed piece in place. */
+  if (arena->move_orig_joint)
+    joint_dfs(arena, arena->move_orig_joint, false, true);
+  else
+    block_dfs(arena, arena->move_orig_block, false, true);
+
+  arena->move_orig_joint = NULL;
+  arena->move_orig_block = NULL;
+
+  ms->blocks.clear();
+  ms->root_blocks.clear();
+  ms->root_joints.clear();
 }
 
 void mouse_up_new_block(struct arena *arena) {
@@ -1279,52 +1321,35 @@ void arena_mouse_button_up_event(struct arena *arena, int button) {
   }
 }
 
-struct joint_head *append_joint_head(struct joint_head *head,
-                                     struct joint *joint) {
-  struct joint_head *new_head;
-
-  new_head = malloc(sizeof(*new_head));
-  new_head->next = head;
-  new_head->joint = joint;
-  new_head->orig_x = joint->x;
-  new_head->orig_y = joint->y;
-
-  return new_head;
-}
-
-struct block_head *append_block_head(struct block_head *head,
-                                     struct block *block) {
-  struct block_head *new_head;
-
-  new_head = malloc(sizeof(*new_head));
-  new_head->next = head;
-  new_head->block = block;
-  if (block->shape.type == SHAPE_BOX) {
-    new_head->orig_x = block->shape.box.x;
-    new_head->orig_y = block->shape.box.y;
-  }
-
-  return new_head;
-}
-
+/* block_dfs and joint_dfs traverse the connected component reachable from the
+ * given block/joint, visiting each node exactly once (guarded by the visited
+ * flag). On every visited node they push into MoveState unconditionally —
+ * meaning they populate MoveState both when called with value=true (mousedown,
+ * building the snapshot) and when called with value=false (mouseup, resetting
+ * visited flags). See mouse_up_move for why this matters for ordering. */
 void block_dfs(struct arena *arena, struct block *block, bool value, bool all) {
   struct shape *shape = &block->shape;
+  MoveState *ms = static_cast<MoveState *>(arena->move_state);
   int i;
 
   if (block->visited == value)
     return;
   block->visited = value;
 
-  arena->blocks_moving = append_block_head(arena->blocks_moving, block);
+  ms->blocks.push_back(block);
 
   switch (shape->type) {
-  case SHAPE_BOX:
-    arena->root_blocks_moving =
-        append_block_head(arena->root_blocks_moving, block);
+  case SHAPE_BOX: {
+    BlockMoveEntry e;
+    e.block = block;
+    e.orig_x = block->shape.box.x;
+    e.orig_y = block->shape.box.y;
+    ms->root_blocks.push_back(e);
     joint_dfs(arena, shape->box.center, value, all);
     for (i = 0; i < 4; i++)
       joint_dfs(arena, shape->box.corners[i], value, all);
     break;
+  }
   case SHAPE_ROD:
     if (all) {
       joint_dfs(arena, shape->rod.from, value, all);
@@ -1344,14 +1369,18 @@ void block_dfs(struct arena *arena, struct block *block, bool value, bool all) {
 
 void joint_dfs(struct arena *arena, struct joint *joint, bool value, bool all) {
   struct attach_node *node;
+  MoveState *ms = static_cast<MoveState *>(arena->move_state);
 
   if (joint->visited == value)
     return;
   joint->visited = value;
 
   if (!joint->gen) {
-    arena->root_joints_moving =
-        append_joint_head(arena->root_joints_moving, joint);
+    JointMoveEntry e;
+    e.joint = joint;
+    e.orig_x = joint->x;
+    e.orig_y = joint->y;
+    ms->root_joints.push_back(e);
   }
 
   if (all && joint->gen)
@@ -1410,7 +1439,7 @@ void mouse_down_rod(struct arena *arena, float x, float y) {
   struct attach_node *att0, *att1;
   bool solid = arena->tool == TOOL_SOLID_ROD;
 
-  block = malloc(sizeof(*block));
+  block = (struct block *)malloc(sizeof(*block));
   block->prev = NULL;
   block->next = NULL;
 
@@ -1462,7 +1491,7 @@ void mouse_down_wheel(struct arena *arena, float x, float y) {
   struct joint *j0;
   struct attach_node *att0;
 
-  block = malloc(sizeof(*block));
+  block = (struct block *)malloc(sizeof(*block));
   block->prev = NULL;
   block->next = NULL;
 
