@@ -110,7 +110,7 @@ def generate_version_js(target, source, env):
 
 # source files
 common_sources = [
-    "src/arena.c",
+    "src/arena.cpp",
     "src/arena_algorithm.cpp",
     "src/arena_graphics.cpp",
     "src/button.c",

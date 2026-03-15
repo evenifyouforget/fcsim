@@ -173,8 +173,7 @@ int main(int argc, char *argv[]) {
   arena_ptr->state = STATE_NORMAL;
   arena_ptr->hover_joint = NULL;
   arena_ptr->hover_block = NULL;
-  arena_ptr->root_blocks_moving = NULL;
-  arena_ptr->blocks_moving = NULL;
+  arena_move_init(arena_ptr);
   arena_ptr->move_orig_block = NULL;
   arena_ptr->single_ticks_remaining = -1; // Default for normal playback
   arena_ptr->autostop_on_solve = false;

@@ -44,20 +44,6 @@ enum tool {
   TOOL_DELETE,
 };
 
-struct block_head {
-  struct block_head *next;
-  struct block *block;
-  double orig_x;
-  double orig_y;
-};
-
-struct joint_head {
-  struct joint_head *next;
-  struct joint *joint;
-  double orig_x;
-  double orig_y;
-};
-
 struct arena {
   struct design design;
   b2World *world;
@@ -80,9 +66,10 @@ struct arena {
   struct joint *hover_joint;
   struct block *hover_block;
 
-  struct joint_head *root_joints_moving;
-  struct block_head *root_blocks_moving;
-  struct block_head *blocks_moving;
+  /* MoveState* — C++-only type, stored as void* so this header stays valid C.
+   * Follows the same pattern as block_graphics_v2. Initialised by
+   * arena_move_init(); defined in arena.cpp. */
+  void *move_state;
   float move_orig_x;
   float move_orig_y;
   struct joint *move_orig_joint;
@@ -163,6 +150,7 @@ extern GLuint joint_program_coord_attrib;
 
 // c++ compat
 void block_graphics_init(struct arena *ar);
+void arena_move_init(struct arena *arena);
 #ifndef ARENA_C
 extern int _fcsim_base_fps_mod;
 extern double _fcsim_target_tps;
