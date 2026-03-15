@@ -63,7 +63,7 @@ jobs:
       - name: Build feature branches
         env:
           VENV_CACHE_DIR: ${{ github.workspace }}/.venv-cache
-        run: bash scripts/build_subdirs.sh html
+        run: bash ./build_subdirs.sh html
 
       # ── Upload and deploy ────────────────────────────────────────────────────
       - name: Setup Pages
