@@ -14,6 +14,7 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 #include "arena.h"
+#include "gen.h"
 #include "gl.h"
 #include "graph.h"
 #include "interval.h"
@@ -718,8 +719,6 @@ static int block_inside_area(struct block *block, struct area *area) {
          bb.y - bb.h / 2 >= area->y - modified_h / 2 &&
          bb.y + bb.h / 2 <= area->y + modified_h / 2;
 }
-
-#include "gen.h"
 
 void mark_overlaps(struct arena *arena) {
   b2Contact *contact;
