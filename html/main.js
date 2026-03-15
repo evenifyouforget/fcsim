@@ -108,7 +108,8 @@ function showVersionMenu() {
     const target = document.getElementById("version-target") || version_menu;
     target.innerHTML = getVersionHtml();
   } else {
-    console.error("version.js not loaded or getVersionHtml missing.");
+    const target = document.getElementById("version-target") || version_menu;
+    target.textContent = "Version info unavailable (version.js not loaded).";
   }
 }
 
@@ -750,4 +751,13 @@ additional_design_ids.forEach((i_design_id) => {
 
 let module_buffer_promise = Promise.all(module_buffer_promise_list);
 
-module_buffer_promise.then(init_module);
+module_buffer_promise.then(init_module).catch((err) => {
+  const notification = document.getElementById("notification");
+  if (notification) {
+    const errDiv = document.createElement("div");
+    errDiv.appendChild(chainElement(["p", "b"], "Failed to load fcsim.wasm"));
+    errDiv.appendChild(chainElement(["p"], String(err)));
+    notification.appendChild(errDiv);
+  }
+  console.error("Failed to initialise fcsim module:", err);
+});

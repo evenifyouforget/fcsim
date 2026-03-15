@@ -2,22 +2,11 @@
 name: CI/CD Pipeline for Pages
 
 on:
-  # Runs the entire workflow (build and deploy) on pushes to the main branch
   push:
-    branches: ["main", "v2.0-beta-build"]
-
-  # Runs only the CI checks on pull requests
-  pull_request:
+    branches: ["main", "v6-deploy"]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-
-# Centralized configuration for branch names
-env:
-  MAIN_BRANCH: "main"
-  # This branch contains specialized web artifacts and release configs
-  # that are excluded from the main source tree.
-  BUILD_BRANCH: "v2.0-beta-build"
 
 permissions:
   contents: read
@@ -31,87 +20,58 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # CI Sanity Check job for pull requests
-  ci-check:
-    # This job runs only on pull_request events
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Main (Base for Versioning)
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ env.MAIN_BRANCH }}
-          fetch-depth: 0 # Full history for correct git versioning
-
-      - name: Fetch all tags
-        run: git fetch --force --tags
-
-      # Merge PR branch into the deploy branch, keeping PR's version on conflicts
-      - name: Merge PR branch
-        run: |
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions Bot"
-
-          # Pull in artifacts/configs specifically for the web release
-          git fetch origin ${{ env.BUILD_BRANCH }}
-          git merge origin/${{ env.BUILD_BRANCH }} --no-edit -Xtheirs
-
-          # Merge the PR head
-          git fetch origin ${{ github.event.pull_request.head.sha }}
-          git merge ${{ github.event.pull_request.head.sha }} --no-edit -Xtheirs --allow-unrelated-histories
-
-      - name: Install requirements
-        run: bash install_requirements.sh
-
-      - name: Add venv to PATH
-        run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
-
-      - name: Build with scons
-        run: scons
-
-  # Deployment job that runs only on push events to the main branch or workflow dispatch
   deploy:
-    # This job runs only on push to main or manual dispatch
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Main (Base for Versioning)
+      # ── Checkout v6-deploy (frozen artifacts) and merge main on top ──────────
+      - name: Checkout v6-deploy
         uses: actions/checkout@v4
         with:
-          ref: ${{ env.MAIN_BRANCH }}
+          ref: v6-deploy
           fetch-depth: 0
 
       - name: Fetch all tags
         run: git fetch --force --tags
 
-      - name: Merge Web Artifacts into Main
+      - name: Merge main into v6-deploy
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions Bot"
+          git fetch origin main
+          git merge origin/main --no-edit -Xtheirs
 
-          # Pull in the specialized web-only artifacts from branch B
-          git fetch origin ${{ env.BUILD_BRANCH }}
-          git merge origin/${{ env.BUILD_BRANCH }} --no-edit -Xtheirs --allow-unrelated-histories
+      # ── Build main (the merged checkout above) ──────────────────────────────
+      - name: Cache venv for main
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-main-${{ hashFiles('requirements*.txt', 'install_requirements.sh') }}
 
-      - name: Install requirements
+      - name: Install requirements (main)
         run: bash install_requirements.sh
 
       - name: Add venv to PATH
         run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
-      - name: Build with scons
+      - name: Build main with scons
         run: scons
 
+      # ── Build each feature branch listed in deploy.json ─────────────────────
+      - name: Build feature branches
+        env:
+          VENV_CACHE_DIR: ${{ github.workspace }}/.venv-cache
+        run: bash ./build_subdirs.sh html
+
+      # ── Upload and deploy ────────────────────────────────────────────────────
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
           path: 'html/'
 
       - name: Deploy to GitHub Pages
