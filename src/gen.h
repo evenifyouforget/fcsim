@@ -1,8 +1,8 @@
 #ifndef GEN_H
 #define GEN_H
 
-#include <box2d/b2World.h>
 #include "graph.h"
+#include <box2d/b2World.h>
 
 #ifdef __cplusplus
 extern "C" {

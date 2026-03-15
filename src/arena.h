@@ -44,7 +44,6 @@ enum tool {
   TOOL_DELETE,
 };
 
-
 struct arena {
   struct design design;
   b2World *world;

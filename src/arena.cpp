@@ -1,18 +1,12 @@
 #ifdef __wasm__
 #include "stl_mock.h"
 #else
-#include <vector>
 #include "stl_compat.h"
+#include <vector>
 #endif
 
 #define ARENA_C
 extern "C" {
-#include <box2d/b2Body.h>
-#include <box2d/b2CMath.h>
-#include <box2d/b2World.h>
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
 #include "arena.h"
 #include "gen.h"
 #include "gl.h"
@@ -20,6 +14,12 @@ extern "C" {
 #include "interval.h"
 #include "text.h"
 #include "xml.h"
+#include <box2d/b2Body.h>
+#include <box2d/b2CMath.h>
+#include <box2d/b2World.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
 }
 
 struct BlockMoveEntry {
