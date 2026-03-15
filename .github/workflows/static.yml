@@ -61,64 +61,9 @@ jobs:
 
       # ── Build each feature branch listed in deploy.json ─────────────────────
       - name: Build feature branches
-        run: |
-          set -euo pipefail
-
-          DEPLOY_JSON="deploy.json"
-
-          # Parse deploy.json: iterate over key/value pairs.
-          # Keys are subdirectory names; values are branch names (string) or null (frozen artifact).
-          while IFS="=" read -r dir branch; do
-            if [ "$branch" = "null" ]; then
-              echo "Skipping $dir: frozen artifact (null branch)"
-              continue
-            fi
-
-            echo "=== Building feature branch '$branch' into html/$dir/ ==="
-
-            WORK_DIR="$(mktemp -d)"
-            git clone --local --no-hardlinks --branch "$branch" . "$WORK_DIR"
-
-            (
-              cd "$WORK_DIR"
-
-              # Separate cached venv keyed on branch + requirements hash
-              REQ_HASH=$(sha256sum requirements*.txt install_requirements.sh 2>/dev/null | sha256sum | cut -c1-16 || echo "nohash")
-              CACHE_KEY="venv-${branch//\//-}-${REQ_HASH}"
-
-              # Restore venv from cache directory if available
-              CACHE_DIR="$GITHUB_WORKSPACE/.venv-cache/$CACHE_KEY"
-              if [ -d "$CACHE_DIR" ]; then
-                echo "Restoring venv from cache: $CACHE_KEY"
-                cp -a "$CACHE_DIR" .venv
-              fi
-
-              bash install_requirements.sh
-              export PATH="$PWD/.venv/bin:$PATH"
-
-              # Save venv back to cache
-              mkdir -p "$CACHE_DIR"
-              cp -a .venv "$CACHE_DIR"
-
-              scons || true
-            ) || true
-
-            # Copy html/ into the subdir regardless of build success
-            mkdir -p "html/$dir"
-            if [ -d "$WORK_DIR/html" ]; then
-              cp -r "$WORK_DIR/html/." "html/$dir/"
-              echo "Copied html/ for $dir"
-            else
-              echo "WARNING: $WORK_DIR/html does not exist for branch $branch; subdir will be empty"
-            fi
-
-            rm -rf "$WORK_DIR"
-          done < <(python3 -c "
-          import json, sys
-          data = json.load(open('$DEPLOY_JSON'))
-          for k, v in data.items():
-              print(f'{k}={v}')
-          ")
+        env:
+          VENV_CACHE_DIR: ${{ github.workspace }}/.venv-cache
+        run: bash scripts/build_subdirs.sh html
 
       # ── Upload and deploy ────────────────────────────────────────────────────
       - name: Setup Pages
