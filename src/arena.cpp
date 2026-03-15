@@ -719,8 +719,7 @@ static int block_inside_area(struct block *block, struct area *area) {
          bb.y + bb.h / 2 <= area->y + modified_h / 2;
 }
 
-extern "C" void gen_block(b2World *world, struct block *block);
-extern "C" void b2World_CleanBodyList(b2World *world);
+#include "gen.h"
 
 void mark_overlaps(struct arena *arena) {
   b2Contact *contact;

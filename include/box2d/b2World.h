@@ -102,6 +102,8 @@ void b2World_DestroyJoint(b2World *world, b2Joint *joint);
 
 void b2World_Step(b2World *world, float64 timeStep, int32 iterations);
 
+void b2World_CleanBodyList(b2World *world);
+
 static inline b2Joint *b2World_GetJointList(b2World *world) {
   return world->m_jointList;
 }
