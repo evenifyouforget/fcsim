@@ -42,6 +42,13 @@ while IFS="=" read -r dir branch; do
 
   echo "=== Building branch '$branch' -> $HTML_OUT/$dir/ ==="
 
+  # Ensure the branch exists as a local ref so git-clone --local can find it.
+  # In CI only the checked-out branch is local; feature branches must be fetched.
+  # +refs/heads/...:refs/heads/... force-updates the local ref if it already
+  # exists, which is safe here because we never check these branches out in the
+  # parent repo (we're on v6-deploy/main).
+  git fetch origin "+refs/heads/${branch}:refs/heads/${branch}"
+
   WORK_DIR="$(mktemp -d)"
   # --local avoids copying object files; --no-hardlinks ensures the clone is
   # fully independent so scons doesn't clobber the parent repo's build dir.
