@@ -8,6 +8,7 @@
 extern "C" {
 #endif
 
+/* Initialise the physics body for a block and register it with the world. */
 void gen_block(b2World *world, struct block *block);
 
 #ifdef __cplusplus

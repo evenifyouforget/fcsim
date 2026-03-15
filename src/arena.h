@@ -66,7 +66,10 @@ struct arena {
   struct joint *hover_joint;
   struct block *hover_block;
 
-  void *move_state; /* actual type: MoveState* */
+  /* MoveState* — C++-only type, stored as void* so this header stays valid C.
+   * Follows the same pattern as block_graphics_v2. Initialised by
+   * arena_move_init(); defined in arena.cpp. */
+  void *move_state;
   float move_orig_x;
   float move_orig_y;
   struct joint *move_orig_joint;

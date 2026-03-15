@@ -102,6 +102,10 @@ void b2World_DestroyJoint(b2World *world, b2Joint *joint);
 
 void b2World_Step(b2World *world, float64 timeStep, int32 iterations);
 
+// Process the deferred body destruction list (m_bodyDestroyList). Bodies
+// passed to b2World_DestroyBody are queued rather than destroyed immediately
+// so that callers can safely iterate the contact list. Call this before
+// collision detection when a full Step is not being performed.
 void b2World_CleanBodyList(b2World *world);
 
 static inline b2Joint *b2World_GetJointList(b2World *world) {

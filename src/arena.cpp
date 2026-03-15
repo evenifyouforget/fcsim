@@ -22,6 +22,24 @@ extern "C" {
 #include <string.h>
 }
 
+/*
+ * MoveState is a snapshot of the connected component being dragged, captured
+ * at mousedown. orig_x/orig_y in each entry store the pre-drag position so
+ * that the component can be snapped back if released in an invalid position.
+ *
+ *   blocks       — every block in the component; iterated to drive physics
+ *                  body updates and to check for overlaps on mouseup.
+ *   root_blocks  — boxes and circles, which own their own position and drive
+ *                  the positions of everything connected to them. orig_x/orig_y
+ *                  here are the reset targets for block-grabbed moves.
+ *   root_joints  — free joints (joints with no gen block), which own their
+ *                  own position independently of any block. orig_x/orig_y
+ *                  here are the reset targets for joint-grabbed moves.
+ *
+ * All three vectors are populated by block_dfs/joint_dfs during mousedown and
+ * cleared at the end of mouse_up_move. See mouse_up_move for an important note
+ * on ordering.
+ */
 struct BlockMoveEntry {
   struct block *block;
   double orig_x;
@@ -1251,6 +1269,15 @@ void mouse_up_move(struct arena *arena) {
   if (overlap)
     update_move(arena, 0.0, 0.0);
 
+  /* Reset visited flags on all blocks and joints in the component so that
+   * future DFS traversals work correctly.
+   *
+   * Ordering note: this must come AFTER the overlap check and update_move
+   * above. block_dfs/joint_dfs unconditionally push_back into MoveState on
+   * every node they visit, so calling them here repopulates the vectors with
+   * the current positions as new orig_x/orig_y values. If update_move(0,0)
+   * were called after this point, it would "reset" each piece to wherever it
+   * already is — a no-op — leaving an illegally placed piece in place. */
   if (arena->move_orig_joint)
     joint_dfs(arena, arena->move_orig_joint, false, true);
   else
@@ -1294,6 +1321,12 @@ void arena_mouse_button_up_event(struct arena *arena, int button) {
   }
 }
 
+/* block_dfs and joint_dfs traverse the connected component reachable from the
+ * given block/joint, visiting each node exactly once (guarded by the visited
+ * flag). On every visited node they push into MoveState unconditionally —
+ * meaning they populate MoveState both when called with value=true (mousedown,
+ * building the snapshot) and when called with value=false (mouseup, resetting
+ * visited flags). See mouse_up_move for why this matters for ordering. */
 void block_dfs(struct arena *arena, struct block *block, bool value, bool all) {
   struct shape *shape = &block->shape;
   MoveState *ms = static_cast<MoveState *>(arena->move_state);
