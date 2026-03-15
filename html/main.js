@@ -755,9 +755,7 @@ module_buffer_promise.then(init_module).catch((err) => {
   const notification = document.getElementById("notification");
   if (notification) {
     const errDiv = document.createElement("div");
-    errDiv.appendChild(
-      chainElement(["p", "b"], "Failed to load fcsim.wasm"),
-    );
+    errDiv.appendChild(chainElement(["p", "b"], "Failed to load fcsim.wasm"));
     errDiv.appendChild(chainElement(["p"], String(err)));
     notification.appendChild(errDiv);
   }
