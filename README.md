@@ -157,6 +157,12 @@ A design contains:
 * 0 or more blocks
 * An optional name (string) and description (string)
 
+Internally, used during a session and never exported, it is also useful to have:
+
+* Modcount (int)
+
+Modcount is only used to invalidate caches, such as the preview trails. It is not used for race condition safety, nor is it guaranteed to accurately count how many "modifications" have been performed.
+
 A level is just a design with the restriction that it cannot contain rods.
 
 A blueprint additionally has an optional field for the level it is based on. How this works at the upper layer is that when a player opens a level A, and saves a blueprint B, B references A. This level field is preserved even if blueprint B is then resaved as design C - C will still reference A.
@@ -332,9 +338,38 @@ The rigid set contains all blocks and joints which will be translated by (dx, dy
 
 The affected set is the union of the rigid set, and all blocks owning a joint which is in the rigid set. Alternatively, the affected set is, in the general case, the set of all blocks and joints whose position, size, or angle may need to be recalculated as a result of the movement.
 
+There are two variations of the move operation: moving a joint, and moving a connected component. Moving a joint sets a single joint (and its associated closure) as the rigid set. Moving a connected component sets a block or a joint, and the closure of all connected blocks or joints (including rods), as the rigid set.
+
+#### Create Block Operation
+
+In the case of creating a block, the correct order of operations is:
+
+1. Add the block
+2. In the case of rods, attempt to attach the left joint (to the nearest joint stack, if it is within a certain radius)
+3. Move the target joint (right side joint for rods, center for all other design block types)
+4. Attempt to attach the target joint
+
+Note that dragging the target joint over a joint stack, and then away from the joint stack, should not "pick up" the joint stack and take it with us. To do this correctly, recalculating all 4 steps with every mouse update is one option, but there may be mathematically equivalent options.
+
+### Augmented Design
+
+Currently doesn't exist as an explicit struct type, but it really should since it's such a common association.
+
+* Design
+* Its box2d world
+* Tick count
+
 ### Context
 
-The global context contains a main design, its box2d world, the move operation state, the camera X/Y/scale, and many other UI-relevant variables. It is the fattest object.
+The global context is currently typed as `struct arena`, and contains:
+
+* A main design as an augmented design
+* A copy of the main design, used to calculate the preview trails
+* The move operation state
+* The camera X/Y/scale
+* Many other UI-relevant variables.
+
+It is the fattest object.
 
 # Performance
 
