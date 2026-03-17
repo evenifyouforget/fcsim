@@ -192,7 +192,13 @@ Internally, used during a session and never exported, it is also useful to have:
 
 While all of this works without the unique ID, it helps performance if we don't need to constantly rename blocks (recalculate indices). Unique IDs have the invariant that higher IDs are newer - or in the case of loading XML, higher IDs correspond to blocks that appear later in the file. Unique ID ordering is a stricter version of index ordering, and there will never be a case where index_i < index_j and uid_i > uid_j. Furthermore, internally, it is helpful to not store indices, and only calculate indices on export.
 
-Blocks are also referred to as pieces, though pieces can also mean player blocks specifically.
+Blocks are also referred to as pieces, though pieces can also mean player blocks specifically. This is relevant for the piece limit. Traditionally, this limit is imposed on all design blocks, and is a limit of 120, though the UI counter only shows player blocks. There is no equivalent limit on level blocks.
+
+Notably, "material" is excluded here, as it is entirely redundant. All "material" properties can be derived by knowing only the type ID. Partition flags such as "goal" are also excluded for being redundant.
+
+XML has some different names for these type IDs. In some cases, our block type ID is a combination of multiple values in the XML - this is most notable for goal circles, which are a combination of an unpowered wheel and setting the goal flag to true.
+
+Clockwise goal circles and counterclockwise goal circles are legal in the XML, and original FC supports them, but we do not yet.
 
 Type IDs have some notable partitions.
 
@@ -325,6 +331,10 @@ The rigid set contains all blocks and joints which will be translated by (dx, dy
 * Adding all joints owned by a block already in the set
 
 The affected set is the union of the rigid set, and all blocks owning a joint which is in the rigid set. Alternatively, the affected set is, in the general case, the set of all blocks and joints whose position, size, or angle may need to be recalculated as a result of the movement.
+
+### Context
+
+The global context contains a main design, its box2d world, the move operation state, the camera X/Y/scale, and many other UI-relevant variables. It is the fattest object.
 
 # Performance
 
