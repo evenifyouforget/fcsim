@@ -104,10 +104,10 @@ void update_block_ids(struct design *design) {
   int cnt = 1;
 
   for (block = design->level_blocks.head; block; block = block->next)
-    block->id = -1;
+    block->uid = -1;
 
-  for (block = design->player_blocks.head; block; block = block->next)
-    block->id = cnt++;
+  for (block = design->design_blocks.head; block; block = block->next)
+    block->uid = cnt++;
 }
 
 char *get_block_name(struct block *block) {
@@ -154,11 +154,11 @@ void append_jointed_to(struct str *str, struct block *block,
 
   if (other == block)
     return;
-  if (other->id == -1) /* just in case */
+  if (other->uid == -1) /* just in case */
     return;
 
   append_str(str, "<jointedTo>");
-  append_int(str, other->id);
+  append_int(str, other->uid);
   append_str(str, "</jointedTo>");
 }
 
@@ -191,9 +191,9 @@ void _append_block(struct str *str, struct block *block) {
 
   append_str(str, "<");
   append_str(str, name);
-  if (block->id != -1) {
+  if (block->uid != -1) {
     append_str(str, " id=\"");
-    append_int(str, block->id);
+    append_int(str, block->uid);
     append_str(str, "\"");
   }
   append_str(str, ">");
@@ -308,7 +308,7 @@ char *export_design(struct design *design, char *user, char *name, char *desc) {
   append_str(&str, "<isSolution>0</isSolution>");
   append_str(&str, "<level>");
   append_block_list(&str, &design->level_blocks, "levelBlocks");
-  append_block_list(&str, &design->player_blocks, "playerBlocks");
+  append_block_list(&str, &design->design_blocks, "playerBlocks");
   append_area(&str, &design->build_area, "start");
   append_area(&str, &design->goal_area, "end");
   append_str(&str, "</level>");

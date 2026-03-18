@@ -482,7 +482,7 @@ static void block_graphics_add_block(struct block_graphics *graphics,
 
   if (block->overlap) {
     overlay = {1, 1, 0, 0};
-  } else if (block->visited) {
+  } else if (block->in_drag_set) {
     overlay = {0.25, 1, 1, 1};
   } else {
     overlay = {0, 0, 0, 0};
@@ -531,7 +531,7 @@ void block_graphics_reset(arena *arena, struct design *design) {
   for (block = design->level_blocks.head; block; block = block->next)
     block_graphics_add_block(graphics, block);
 
-  for (block = design->player_blocks.head; block; block = block->next)
+  for (block = design->design_blocks.head; block; block = block->next)
     block_graphics_add_block(graphics, block);
 }
 
@@ -656,7 +656,7 @@ void on_button_clicked(arena *arena, ui_button_single &button) {
                         (_fcsim_base_fps_mod + 1) % BASE_FPS_TABLE_SIZE);
   }
   if (button.id == ui_button_id{5, 0}) {
-    arena->preview_gp_trajectory ^= 1; // toggle
+    arena->preview_goal_piece_trajectory ^= 1; // toggle
   }
   if (button.id == ui_button_id{9, 0}) {
     arena->lock_if_preview_solves ^= 1; // toggle
@@ -889,7 +889,7 @@ void regenerate_ui_buttons(arena *arena) {
     ui_button_single button{{5, 0}, vw - 30, vh - 30, 70, 50, 2};
     button.texts.push_back(ui_button_text{"Preview", 1, 0, 10});
     button.texts.push_back(
-        ui_button_text{arena->preview_gp_trajectory ? "ON" : "OFF", 1, 0, -10});
+        ui_button_text{arena->preview_goal_piece_trajectory ? "ON" : "OFF", 1, 0, -10});
     all_buttons->buttons.push_back(button);
   }
   {
@@ -963,8 +963,8 @@ void draw_tick_counter(struct arena *arena) {
   // piece counter
   x = std::max(x, 10 + FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 48);
   x += FONT_X_INCREMENT * FONT_SCALE_DEFAULT * 1;
-  int design_pieces = design_piece_count(&arena->design.player_blocks);
-  int total_pieces = block_list_len(&arena->design.player_blocks);
+  int design_pieces = design_piece_count(&arena->design.design_blocks);
+  int total_pieces = block_list_len(&arena->design.design_blocks);
   int goal_pieces = total_pieces - design_pieces;
   int available_limit = 120 - goal_pieces;
   x = draw_text_default(arena, std::to_string(design_pieces), x, 10);
@@ -1046,7 +1046,7 @@ void draw_tick_counter(struct arena *arena) {
   float yp = y;
   double sum_x = 0;
   double sum_y = 0;
-  for (block *b = arena->design.player_blocks.head; b; b = b->next) {
+  for (block *b = arena->design.design_blocks.head; b; b = b->next) {
     if (b->goal) {
       const b2Vec2 position = b->body->m_position;
       // add to the sum
@@ -1132,7 +1132,7 @@ void arena_draw(struct arena *arena) {
   glClear(GL_COLOR_BUFFER_BIT);
 
   block_graphics_reset(arena, &arena->design);
-  if (arena->preview_gp_trajectory && arena->preview_trail) {
+  if (arena->preview_goal_piece_trajectory && arena->preview_trail) {
     preview_trail_draw(arena);
   }
   block_graphics_draw((block_graphics *)arena->block_graphics_v2, &arena->view);

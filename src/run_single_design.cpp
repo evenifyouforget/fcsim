@@ -186,7 +186,7 @@ int main(int argc, char *argv[]) {
   // Continue arena initialization (from arena_init)
   arena_ptr->world = gen_world(&arena_ptr->design);
   arena_ptr->tick = 0;
-  arena_ptr->preview_gp_trajectory = false;
+  arena_ptr->preview_goal_piece_trajectory = false;
   arena_ptr->preview_design = NULL;
   arena_ptr->preview_world = NULL;
   arena_ptr->preview_has_won = false;

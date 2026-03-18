@@ -32,14 +32,17 @@ struct attach_list {
 void append_attach_node(struct attach_list *list, struct attach_node *node);
 void remove_attach_node(struct attach_list *list, struct attach_node *node);
 
+/* One element of a joint stack. See README §Joints and §Joint Stack.
+ * Note: struct joint maps to a single point; the user-visible "joint"
+ * is a joint stack (all joints connected by joint edges at the same location). */
 struct joint {
   struct joint *prev;
   struct joint *next;
-  struct block *gen;
+  struct block *gen; /* generating block: the block whose position drives this joint's position. NULL for free joints (wheel centres, rod endpoints). Will be removed when blocks own their joints. */
   double x, y;
-  struct attach_list att;
-  bool visited;
-  uint64_t _checksum_uid;
+  struct attach_list att; /* blocks that use this joint as a non-gen attachment point (e.g. rods, wheel body for spokes) */
+  bool in_drag_set; /* true while this joint is in the affected set of an in-progress move operation; see README §Move Operation State */
+  uint64_t _checksum_uid; /* TODO: document purpose */
 };
 
 struct joint *new_joint(struct block *gen, double x, double y);
@@ -73,19 +76,19 @@ struct box {
 };
 
 struct rod {
-  struct joint *from;
+  struct joint *from; /* left-side joint (see README §Joints) */
   struct attach_node *from_att;
-  struct joint *to;
+  struct joint *to; /* right-side joint */
   struct attach_node *to_att;
-  double width;
+  double width; /* cross-section thickness (not length): 4.0 for water rods, 8.0 for solid rods */
 };
 
 struct wheel {
-  struct joint *center;
+  struct joint *center; /* centre joint; gen=NULL (free joint) — the wheel's positional anchor */
   struct attach_node *center_att;
   double radius;
   double angle;
-  int spin;
+  int spin; /* 0 = no spin, 5 = clockwise, -5 = counter-clockwise */
 
   struct joint *spokes[4];
 };
@@ -93,7 +96,7 @@ struct wheel {
 enum shape_type {
   SHAPE_RECT,
   SHAPE_CIRC,
-  SHAPE_BOX,
+  SHAPE_BOX,    /* goal rectangle — see README §Blocks */
   SHAPE_ROD,
   SHAPE_WHEEL,
 };
@@ -163,15 +166,16 @@ extern uint32_t piece_color_palette_offset;
 // does the host user prefer dark mode?
 int is_dark_mode();
 
+/* See README §Blocks. */
 struct block {
   struct block *prev;
   struct block *next;
   struct shape shape;
   struct material *material;
   bool goal;
-  bool overlap;
-  bool visited;
-  int id;
+  bool overlap; /* true if this block currently intersects another block (set by mark_overlaps) */
+  bool in_drag_set; /* true while this block is in the affected set of an in-progress move operation; see README §Move Operation State */
+  int uid; /* unique ID; see README §Blocks. NOTE: not initialised for interactively created blocks — TODO known bug, may violate ordering invariant if merge_design is called before export reassigns UIDs */
   uint8_t type_id;
   b2Body *body;
 };
@@ -187,22 +191,25 @@ struct block_list {
 void append_block(struct block_list *list, struct block *block);
 void remove_block(struct block_list *list, struct block *block);
 
+/* See README §Areas. */
 struct area {
   double x, y;
   double w, h;
   double expand; // added to both w and h, but only for geometry checks
+  /* TODO: document what expand means */
 };
 
+/* See README §Designs. */
 struct design {
   struct joint_list joints;
   struct block_list level_blocks;
-  struct block_list player_blocks;
+  struct block_list design_blocks; /* all design blocks (both player blocks and goal blocks, distinguished by block->goal); corresponds to <playerBlocks> in XML */
   struct area build_area;
   struct area goal_area;
-  int level_id;
-  int modcount;        // increments whenever any change is made
-  int expect_checksum; // 0 means unknown
-  int actual_checksum;
+  int level_id; /* TODO: document purpose */
+  int modcount;        /* cache invalidation counter; see README §Designs (Modcount) */
+  int expect_checksum; /* TODO: document purpose */
+  int actual_checksum; /* TODO: document purpose */
 };
 
 enum shell_type {

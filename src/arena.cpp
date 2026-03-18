@@ -249,7 +249,7 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len) {
   /* reset gameplay state (tick, win flag, preview flags) */
   arena->tick = 0;
   arena->has_won = false;
-  arena->preview_gp_trajectory = false;
+  arena->preview_goal_piece_trajectory = false;
   arena->preview_design = NULL;
   arena->preview_world = NULL;
   arena->preview_has_won = false;
@@ -308,7 +308,7 @@ bool goal_blocks_inside_goal_area(struct design *design) {
   struct block *block;
   bool any = false;
 
-  for (block = design->player_blocks.head; block; block = block->next) {
+  for (block = design->design_blocks.head; block; block = block->next) {
     if (block->goal) {
       any = true;
       if (!block_inside_area(block, &design->goal_area))
@@ -667,7 +667,7 @@ struct block *block_hit_test(struct arena *arena, float x, float y) {
   struct design *design = &arena->design;
   struct block *block;
 
-  for (block = design->player_blocks.tail; block; block = block->prev) {
+  for (block = design->design_blocks.tail; block; block = block->prev) {
     if (block_is_hit(block, x, y))
       return block;
   }
@@ -746,7 +746,7 @@ void mark_overlaps(struct arena *arena) {
   b2World_CleanBodyList(arena->world);
   b2ContactManager_Collide(&arena->world->m_contactManager);
 
-  for (block = arena->design.player_blocks.head; block; block = block->next) {
+  for (block = arena->design.design_blocks.head; block; block = block->next) {
     block->overlap = false;
     if (!block_inside_area(block, &arena->design.build_area))
       block->overlap = true;
@@ -762,8 +762,8 @@ void mark_overlaps(struct arena *arena) {
     }
   }
 
-  for (block = arena->design.player_blocks.head; block; block = block->next) {
-    if (!block->visited && block != arena->new_block)
+  for (block = arena->design.design_blocks.head; block; block = block->next) {
+    if (!block->in_drag_set && block != arena->new_block)
       block->overlap = false;
   }
 
@@ -820,7 +820,7 @@ void delete_block(struct arena *arena, struct block *block) {
   }
 
   b2World_DestroyBody(arena->world, block->body);
-  remove_block(&design->player_blocks, block);
+  remove_block(&design->design_blocks, block);
   free(block);
 
   mark_overlaps(arena);
@@ -833,7 +833,7 @@ void delete_block(struct arena *arena, struct block *block) {
 bool is_design_legal(struct design *design) {
   struct block *block;
   // Check all player blocks for overlap or being outside build area
-  for (block = design->player_blocks.head; block; block = block->next) {
+  for (block = design->design_blocks.head; block; block = block->next) {
     if (block->overlap) {
       return false;
     }
@@ -1332,9 +1332,9 @@ void block_dfs(struct arena *arena, struct block *block, bool value, bool all) {
   MoveState *ms = static_cast<MoveState *>(arena->move_state);
   int i;
 
-  if (block->visited == value)
+  if (block->in_drag_set == value)
     return;
-  block->visited = value;
+  block->in_drag_set = value;
 
   ms->blocks.push_back(block);
 
@@ -1371,9 +1371,9 @@ void joint_dfs(struct arena *arena, struct joint *joint, bool value, bool all) {
   struct attach_node *node;
   MoveState *ms = static_cast<MoveState *>(arena->move_state);
 
-  if (joint->visited == value)
+  if (joint->in_drag_set == value)
     return;
-  joint->visited = value;
+  joint->in_drag_set = value;
 
   if (!joint->gen) {
     JointMoveEntry e;
@@ -1440,6 +1440,8 @@ void mouse_down_rod(struct arena *arena, float x, float y) {
   bool solid = arena->tool == TOOL_SOLID_ROD;
 
   block = (struct block *)malloc(sizeof(*block));
+  /* TODO: block->uid not initialised here; known bug — may violate UID ordering
+   * invariant if merge_design is called on this design before export reassigns UIDs */
   block->prev = NULL;
   block->next = NULL;
 
@@ -1468,13 +1470,13 @@ void mouse_down_rod(struct arena *arena, float x, float y) {
   block->type_id = solid ? FCSIM_SOLID_ROD : FCSIM_ROD;
   block->goal = false;
   block->overlap = false;
-  block->visited = false;
+  block->in_drag_set = false;
 
   arena->new_block = block;
 
   gen_block(arena->world, block);
 
-  append_block(&design->player_blocks, block);
+  append_block(&design->design_blocks, block);
 
   arena->hover_joint = j0;
 
@@ -1492,6 +1494,8 @@ void mouse_down_wheel(struct arena *arena, float x, float y) {
   struct attach_node *att0;
 
   block = (struct block *)malloc(sizeof(*block));
+  /* TODO: block->uid not initialised here; known bug — may violate UID ordering
+   * invariant if merge_design is called on this design before export reassigns UIDs */
   block->prev = NULL;
   block->next = NULL;
 
@@ -1540,7 +1544,7 @@ void mouse_down_wheel(struct arena *arena, float x, float y) {
   block->material = &solid_material;
   block->goal = false;
   block->overlap = false;
-  block->visited = false;
+  block->in_drag_set = false;
 
   switch (arena->tool) {
   case TOOL_WHEEL:
@@ -1558,7 +1562,7 @@ void mouse_down_wheel(struct arena *arena, float x, float y) {
 
   gen_block(arena->world, block);
 
-  append_block(&design->player_blocks, block);
+  append_block(&design->design_blocks, block);
 
   arena->hover_joint = j0;
 
@@ -1610,7 +1614,7 @@ void mouse_down_tool(struct arena *arena, float x, float y) {
     return;
   }
 
-  if (block_list_len(&arena->design.player_blocks) >= MAX_PIECES_HARD_CAP)
+  if (block_list_len(&arena->design.design_blocks) >= MAX_PIECES_HARD_CAP)
     return;
 
   if (arena->tool == TOOL_ROD || arena->tool == TOOL_SOLID_ROD) {
