@@ -1441,7 +1441,8 @@ void mouse_down_rod(struct arena *arena, float x, float y) {
 
   block = (struct block *)malloc(sizeof(*block));
   /* TODO: block->uid not initialised here; known bug — may violate UID ordering
-   * invariant if merge_design is called on this design before export reassigns UIDs */
+   * invariant if merge_design is called on this design before export reassigns
+   * UIDs */
   block->prev = NULL;
   block->next = NULL;
 
@@ -1495,7 +1496,8 @@ void mouse_down_wheel(struct arena *arena, float x, float y) {
 
   block = (struct block *)malloc(sizeof(*block));
   /* TODO: block->uid not initialised here; known bug — may violate UID ordering
-   * invariant if merge_design is called on this design before export reassigns UIDs */
+   * invariant if merge_design is called on this design before export reassigns
+   * UIDs */
   block->prev = NULL;
   block->next = NULL;
 

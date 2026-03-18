@@ -34,14 +34,21 @@ void remove_attach_node(struct attach_list *list, struct attach_node *node);
 
 /* One element of a joint stack. See README §Joints and §Joint Stack.
  * Note: struct joint maps to a single point; the user-visible "joint"
- * is a joint stack (all joints connected by joint edges at the same location). */
+ * is a joint stack (all joints connected by joint edges at the same location).
+ */
 struct joint {
   struct joint *prev;
   struct joint *next;
-  struct block *gen; /* generating block: the block whose position drives this joint's position. NULL for free joints (wheel centres, rod endpoints). Will be removed when blocks own their joints. */
+  struct block
+      *gen; /* generating block: the block whose position drives this joint's
+               position. NULL for free joints (wheel centres, rod endpoints).
+               Will be removed when blocks own their joints. */
   double x, y;
-  struct attach_list att; /* blocks that use this joint as a non-gen attachment point (e.g. rods, wheel body for spokes) */
-  bool in_drag_set; /* true while this joint is in the affected set of an in-progress move operation; see README §Move Operation State */
+  struct attach_list att; /* blocks that use this joint as a non-gen attachment
+                             point (e.g. rods, wheel body for spokes) */
+  bool in_drag_set;       /* true while this joint is in the affected set of an
+                             in-progress move operation; see README §Move Operation
+                             State */
   uint64_t _checksum_uid; /* TODO: document purpose */
 };
 
@@ -80,11 +87,13 @@ struct rod {
   struct attach_node *from_att;
   struct joint *to; /* right-side joint */
   struct attach_node *to_att;
-  double width; /* cross-section thickness (not length): 4.0 for water rods, 8.0 for solid rods */
+  double width; /* cross-section thickness (not length): 4.0 for water rods, 8.0
+                   for solid rods */
 };
 
 struct wheel {
-  struct joint *center; /* centre joint; gen=NULL (free joint) — the wheel's positional anchor */
+  struct joint *center; /* centre joint; gen=NULL (free joint) — the wheel's
+                           positional anchor */
   struct attach_node *center_att;
   double radius;
   double angle;
@@ -96,7 +105,7 @@ struct wheel {
 enum shape_type {
   SHAPE_RECT,
   SHAPE_CIRC,
-  SHAPE_BOX,    /* goal rectangle — see README §Blocks */
+  SHAPE_BOX, /* goal rectangle — see README §Blocks */
   SHAPE_ROD,
   SHAPE_WHEEL,
 };
@@ -173,9 +182,15 @@ struct block {
   struct shape shape;
   struct material *material;
   bool goal;
-  bool overlap; /* true if this block currently intersects another block (set by mark_overlaps) */
-  bool in_drag_set; /* true while this block is in the affected set of an in-progress move operation; see README §Move Operation State */
-  int uid; /* unique ID; see README §Blocks. NOTE: not initialised for interactively created blocks — TODO known bug, may violate ordering invariant if merge_design is called before export reassigns UIDs */
+  bool overlap; /* true if this block currently intersects another block (set by
+                   mark_overlaps) */
+  bool in_drag_set; /* true while this block is in the affected set of an
+                       in-progress move operation; see README §Move Operation
+                       State */
+  int uid;          /* unique ID; see README §Blocks. NOTE: not initialised for
+                       interactively created blocks — TODO known bug, may violate
+                       ordering invariant if merge_design is called before export
+                       reassigns UIDs */
   uint8_t type_id;
   b2Body *body;
 };
@@ -203,11 +218,14 @@ struct area {
 struct design {
   struct joint_list joints;
   struct block_list level_blocks;
-  struct block_list design_blocks; /* all design blocks (both player blocks and goal blocks, distinguished by block->goal); corresponds to <playerBlocks> in XML */
+  struct block_list
+      design_blocks; /* all design blocks (both player blocks and goal blocks,
+                        distinguished by block->goal); corresponds to
+                        <playerBlocks> in XML */
   struct area build_area;
   struct area goal_area;
   int level_id; /* TODO: document purpose */
-  int modcount;        /* cache invalidation counter; see README §Designs (Modcount) */
+  int modcount; /* cache invalidation counter; see README §Designs (Modcount) */
   int expect_checksum; /* TODO: document purpose */
   int actual_checksum; /* TODO: document purpose */
 };

@@ -888,8 +888,8 @@ void regenerate_ui_buttons(arena *arena) {
   {
     ui_button_single button{{5, 0}, vw - 30, vh - 30, 70, 50, 2};
     button.texts.push_back(ui_button_text{"Preview", 1, 0, 10});
-    button.texts.push_back(
-        ui_button_text{arena->preview_goal_piece_trajectory ? "ON" : "OFF", 1, 0, -10});
+    button.texts.push_back(ui_button_text{
+        arena->preview_goal_piece_trajectory ? "ON" : "OFF", 1, 0, -10});
     all_buttons->buttons.push_back(button);
   }
   {
