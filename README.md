@@ -307,6 +307,16 @@ Internally, each block currently stores a pointer to its corresponding body, tho
 
 A world can have its own time progress in ticks. It progresses 1 tick at a time. This is independent of other worlds.
 
+#### Joint Assignment
+
+Considering the XML (and the old data model) is ambiguous about which joint index within a block is the source or target for a joint edge, the design to world code does some guessing. Specifically, it looks for all possible matches src -> dst, satisfying the graph constraints, plus the requirement that the position of src and dst must be within PHYSICS_JOINT_EDGE_MAX_DISTANCE = 10mm (as defined in `find_closest_joint`).
+
+This constant has not been verified against original FC.
+
+If there are multiple candidates, tiebreaking happens by which distance is shortest. If there are no candidates, the joint edge will not be produced in the world.
+
+Additionally, joint edge entry i on block A has a preference for using src = (A, i), however, if this fails, it will try src = (A, j) for j =/= i.
+
 ### Editing
 
 There are 3 types of edits which can be performed:
@@ -350,6 +360,14 @@ In the case of creating a block, the correct order of operations is:
 4. Attempt to attach the target joint
 
 Note that dragging the target joint over a joint stack, and then away from the joint stack, should not "pick up" the joint stack and take it with us. To do this correctly, recalculating all 4 steps with every mouse update is one option, but there may be mathematically equivalent options.
+
+#### Joint Assignment
+
+For steps 2 and 4 in "Create Block Operation", only destination joints satisfying graph constraints and with position within EDITOR_JOINT_EDGE_MAX_DISTANCE = 8mm (as defined in `joint_hit_test`) will be considered.
+
+This constant has never been verified against original FC.
+
+If there are multiple candidate destination joints, tiebreaking happens by which distance is shortest. If there are no candidates, the joint edge will not be produced in the design.
 
 ### Augmented Design
 
