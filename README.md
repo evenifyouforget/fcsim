@@ -157,6 +157,11 @@ A design contains:
 * 0 or more blocks
 * An optional name (string) and description (string)
 
+While not currently implemented, we have plans to support multiple build areas and goal areas in the future, so for forward compatibility reasons, we want to change this to:
+
+* Build areas, which is a List[Area]
+* Goal areas, which is a List[Area]
+
 Internally, used during a session and never exported, it is also useful to have:
 
 * Modcount (int)
@@ -177,6 +182,8 @@ Contains:
 * Center Y (double)
 * Width (double)
 * Height (double)
+
+While not currently implemented, we have plans to support rotated build areas and goal areas in the future, so for forward compatibility reasons, we want to add a field for rotation (double). Alternatively, due to having almost identical fields to Block, perhaps Area should inherit from Block in the future.
 
 ### Blocks
 
