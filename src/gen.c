@@ -219,7 +219,7 @@ b2World *gen_world(struct design *design) {
   b2World_ctor(world, &aabb, gravity, true);
   b2World_SetFilter(world, collision_filter);
 
-  for (block = design->player_blocks.head; block; block = block->next)
+  for (block = design->design_blocks.head; block; block = block->next)
     gen_block(world, block);
 
   for (block = design->level_blocks.head; block; block = block->next)
@@ -237,7 +237,7 @@ void free_world(b2World *world, struct design *design) {
   b2World_dtor(world);
   free(world);
 
-  for (block = design->player_blocks.head; block; block = block->next)
+  for (block = design->design_blocks.head; block; block = block->next)
     block->body = NULL;
 
   for (block = design->level_blocks.head; block; block = block->next)
