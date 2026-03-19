@@ -309,6 +309,8 @@ This constant has not been verified against original FC.
 
 If there are multiple candidates, tiebreaking happens by which distance is shortest. If there are no candidates, the joint edge will not be produced in the design.
 
+Checking the graph constraints after picking the candidate with the shortest distance, rather than filtering candidates first by graph constraint legality, is likely a bug, though original FC's exact behaviour here is uncertain.
+
 Additionally, joint edge entry i on block A (which, recall, is ambiguous about the joint index within the block) has a preference for using src = (A, i), however, if this fails, it will try src = (A, j) for j =/= i. This is the behaviour in original FC: if block 2 is a rod with joints [0, 1], it will first attempt to attach its left side joint (joint index 0) to block 0, and if that fails, it will then try to attach its right side joint (joint index 1) to block 0. Not respecting this convention is a bug.
 
 After the initial parse from XML to design, there is no further ambiguity, as the exact source and destination joints are locked in. Even if there was an edge case where a different joint could win the distance contest, the joint would not be remapped.
