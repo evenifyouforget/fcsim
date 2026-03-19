@@ -136,6 +136,8 @@ These scancodes (keycodes) are not to be confused with keysyms which appear as `
 
 ## Terminology and (eventual) data model
 
+Types are written here in Python-like syntax, such as `List[Area]` which in C++ might look like `std::vector<area_t>`.
+
 ### Coordinates
 
 +Y is down. +angle is clockwise.
