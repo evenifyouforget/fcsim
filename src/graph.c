@@ -415,9 +415,11 @@ static double distance(double x1, double y1, double x2, double y2) {
   return sqrt(dx * dx + dy * dy);
 }
 
+#define IMPORT_JOINT_EDGE_MAX_DISTANCE 10.0
+
 static struct joint *find_closest_joint(struct attach_list *list, double x,
                                         double y) {
-  double best_dist = 10.0;
+  double best_dist = IMPORT_JOINT_EDGE_MAX_DISTANCE;
   struct joint *best_joint = NULL;
   struct attach_node *att;
 

@@ -541,11 +541,13 @@ static float distance(float x0, float y0, float x1, float y1) {
   return sqrtf(dx * dx + dy * dy);
 }
 
+static const double EDITOR_JOINT_EDGE_MAX_DISTANCE = 8.0;
+
 struct joint *joint_hit_test(struct arena *arena, float x, float y) {
   struct design *design = &arena->design;
   struct joint *best_joint = NULL;
   struct joint *joint;
-  double best_dist = 8.0f;
+  double best_dist = EDITOR_JOINT_EDGE_MAX_DISTANCE;
   double dist;
 
   for (joint = design->joints.head; joint; joint = joint->next) {
@@ -564,7 +566,7 @@ struct joint *joint_hit_test_exclude_rod(struct arena *arena, float x, float y,
   struct design *design = &arena->design;
   struct joint *best_joint = NULL;
   struct joint *joint;
-  double best_dist = 8.0f;
+  double best_dist = EDITOR_JOINT_EDGE_MAX_DISTANCE;
   double dist;
 
   for (joint = design->joints.head; joint; joint = joint->next) {
@@ -605,7 +607,7 @@ struct joint *joint_hit_test_exclude_wheel(struct arena *arena, float x,
   struct design *design = &arena->design;
   struct joint *best_joint = NULL;
   struct joint *joint;
-  double best_dist = 8.0f;
+  double best_dist = EDITOR_JOINT_EDGE_MAX_DISTANCE;
   double dist;
 
   for (joint = design->joints.head; joint; joint = joint->next) {
