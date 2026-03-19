@@ -282,7 +282,9 @@ A joint and all other joints connected to it by joint edges is called a joint st
 
 When adding a new joint A to an existing joint stack {B, C, ...}, the joint edge will connect A to whichever joint in the joint stack does not already have an incoming edge. Equivalently, the block with the highest index or highest unique ID is chosen.
 
-Two blocks cannot share more than one joint stack.
+For any given two blocks, they cannot share more than one joint stack.
+
+For any given joint stack, at most one involved block can be a circle.
 
 #### Regarding rods and migration work
 
