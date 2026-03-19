@@ -315,6 +315,8 @@ Additionally, joint edge entry i on block A (which, recall, is ambiguous about t
 
 After the initial parse from XML to design, there is no further ambiguity, as the exact source and destination joints are locked in. Even if there was an edge case where a different joint could win the distance contest, the joint would not be remapped.
 
+Currently, blocks may have their position (and in the case of rods, width and angle) recalculated based on joint information after import; in the future, to enable exact loading and saving, such recalculations will be done only on edit. FC's behaviour on this is unknown, but recalculating in import is possibly a bug.
+
 ### Box2D World
 
 A design is instantiated into a world. The same design can potentially be instantiated into multiple worlds, which will all simulate independently.
