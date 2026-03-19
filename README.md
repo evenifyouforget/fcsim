@@ -254,6 +254,8 @@ The number of joints is dependent on the type ID, and in some cases, dependent o
 
 Notably, level blocks always have 0 joints.
 
+Not creating 9 joints is a known bug.
+
 These joints appear in a fixed order (Though the correct order has only been documented for rods. We genuinely don't know for every other type)
 
 The canonical ID of a joint is the tuple (block index, joint index within block). However, using unique IDs instead, this is (block unique ID, joint index within block).
@@ -280,6 +282,8 @@ A joint and all other joints connected to it by joint edges is called a joint st
 
 When adding a new joint A to an existing joint stack {B, C, ...}, the joint edge will connect A to whichever joint in the joint stack does not already have an incoming edge. Equivalently, the block with the highest index or highest unique ID is chosen.
 
+Two blocks cannot share more than one joint stack.
+
 #### Regarding rods and migration work
 
 The old data model has rods specified by their two joint endpoints rather than the usual position, size, and angle. It seemed convenient at first, but it's really complicating the design not to have a unified model where the position, size, and angle is the source of truth, and blocks always own their joints.
@@ -297,6 +301,18 @@ A design that has any player blocks colliding is illegal.
 
 A design that has any player blocks not fully contained in the build area is illegal. However, in some cases, level creators artistically violate this, and the game permits it - if the starting state has wheels outside the build area, the blueprint can still have more player blocks added, as long as it does not become "more illegal".
 
+#### Joint Assignment: XML to Design
+
+Considering the XML (and the old data model) is ambiguous about which joint index within a block is the source or target for a joint edge, the XML to design code does some guessing. Specifically, it looks for all possible matches src -> dst, satisfying the graph constraints, plus the requirement that the position of src and dst must be within IMPORT_JOINT_EDGE_MAX_DISTANCE = 10mm (as defined in `find_closest_joint`).
+
+This constant has not been verified against original FC.
+
+If there are multiple candidates, tiebreaking happens by which distance is shortest. If there are no candidates, the joint edge will not be produced in the design.
+
+Additionally, joint edge entry i on block A (which, recall, is ambiguous about the joint index within the block) has a preference for using src = (A, i), however, if this fails, it will try src = (A, j) for j =/= i. This is the behaviour in original FC: if block 2 is a rod with joints [0, 1], it will first attempt to attach its left side joint (joint index 0) to block 0, and if that fails, it will then try to attach its right side joint (joint index 1) to block 0. Not respecting this convention is a bug.
+
+After the initial parse from XML to design, there is no further ambiguity, as the exact source and destination joints are locked in. Even if there was an edge case where a different joint could win the distance contest, the joint would not be remapped.
+
 ### Box2D World
 
 A design is instantiated into a world. The same design can potentially be instantiated into multiple worlds, which will all simulate independently.
@@ -306,16 +322,6 @@ When creating the world, each block is translated into a body. The body has prop
 Internally, each block currently stores a pointer to its corresponding body, though we are considering decoupling this as there's no real reason a block should own its body.
 
 A world can have its own time progress in ticks. It progresses 1 tick at a time. This is independent of other worlds.
-
-#### Joint Assignment
-
-Considering the XML (and the old data model) is ambiguous about which joint index within a block is the source or target for a joint edge, the design to world code does some guessing. Specifically, it looks for all possible matches src -> dst, satisfying the graph constraints, plus the requirement that the position of src and dst must be within PHYSICS_JOINT_EDGE_MAX_DISTANCE = 10mm (as defined in `find_closest_joint`).
-
-This constant has not been verified against original FC.
-
-If there are multiple candidates, tiebreaking happens by which distance is shortest. If there are no candidates, the joint edge will not be produced in the world.
-
-Additionally, joint edge entry i on block A has a preference for using src = (A, i), however, if this fails, it will try src = (A, j) for j =/= i.
 
 ### Editing
 
@@ -361,7 +367,7 @@ In the case of creating a block, the correct order of operations is:
 
 Note that dragging the target joint over a joint stack, and then away from the joint stack, should not "pick up" the joint stack and take it with us. To do this correctly, recalculating all 4 steps with every mouse update is one option, but there may be mathematically equivalent options.
 
-#### Joint Assignment
+#### Joint Assignment: Create Block Operation
 
 For steps 2 and 4 in "Create Block Operation", only destination joints satisfying graph constraints and with position within EDITOR_JOINT_EDGE_MAX_DISTANCE = 8mm (as defined in `joint_hit_test`) will be considered.
 
