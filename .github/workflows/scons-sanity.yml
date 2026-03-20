@@ -21,3 +21,6 @@ jobs:
 
     - name: Run SCons Build
       run: scons
+
+    - name: Run run_single_design tests
+      run: pytest test/test_run_single_design.py -v
