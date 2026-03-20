@@ -27,7 +27,7 @@ jobs:
         run: echo "$PWD/fcsim_repo/.venv/bin" >> $GITHUB_PATH
 
       - name: Install ftlib dependencies
-        run: pip install pytest pytest-json-report pytest-xdist
+        run: pip install pytest pytest-json-report pytest-xdist requests
         working-directory: ./ftlib_repo
 
       - name: Delete fcsim submodule and symlink local fcsim
@@ -47,7 +47,7 @@ jobs:
 
           passed=$(echo "$summary_line" | grep -oP '\d+\s+passed' | awk '{print $1}' || echo 0)
           failed=$(echo "$summary_line" | grep -oP '\d+\s+failed' | awk '{print $1}' || echo 0)
-          errors=$(echo "$summary_line" | grep -oP '\d+\s+errors' | awk '{print $1}' || echo 0)
+          errors=$(echo "$summary_line" | grep -oP '\d+\s+errors?' | awk '{print $1}' || echo 0)
           skipped=$(echo "$summary_line" | grep -oP '\d+\s+skipped' | awk '{print $1}' || echo 0)
 
           total_run=$((passed + failed + errors))
@@ -63,6 +63,16 @@ jobs:
           echo "Skipped: $skipped"
           echo "Total Run: $total_run"
           echo "Calculated Pass Rate: $pass_rate%"
+
+          if [ "$errors" -gt 0 ]; then
+            echo "::error file=reverse-integration-sanity.yml::Pytest reported $errors collection or session error(s). The test suite may not have run."
+            exit 1
+          fi
+
+          if ! echo "$pytest_output" | grep -q "test_single_design_fcsim"; then
+            echo "::error file=reverse-integration-sanity.yml::test_single_design_fcsim did not appear in results — fcsim backend tests did not run."
+            exit 1
+          fi
 
           min_pass_rate=83.9
 
