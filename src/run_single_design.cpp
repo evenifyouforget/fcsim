@@ -171,7 +171,8 @@ int main(int argc, char *argv[]) {
   arena_ptr->hover_block = NULL;
   arena_move_init(arena_ptr);
   arena_ptr->move_orig_block = NULL;
-  arena_ptr->tick_multiply = 1; // required: tick_func inner loop runs i < tick_multiply times
+  arena_ptr->tick_multiply =
+      1; // required: tick_func inner loop runs i < tick_multiply times
   arena_ptr->single_ticks_remaining = -1; // Default for normal playback
   arena_ptr->autostop_on_solve = false;
   arena_ptr->preview_trail = NULL;
