@@ -26,6 +26,9 @@ jobs:
       - name: Add venv to PATH
         run: echo "$PWD/fcsim_repo/.venv/bin" >> $GITHUB_PATH
 
+      - name: Install ftlib system dependencies
+        run: sudo apt-get install -y valgrind
+
       - name: Install ftlib dependencies
         run: pip install pytest pytest-json-report pytest-xdist requests
         working-directory: ./ftlib_repo
