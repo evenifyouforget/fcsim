@@ -12,7 +12,7 @@ jobs:
       run: bash install_requirements.sh
     - name: Add venv to PATH
       run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
-    - name: Run pre-commit
+    - name: Run prek
       # This runs all hooks against all files.
       # It will fail if any hook makes a change or finds an error.
-      run: pre-commit run --all-files --show-diff-on-failure
+      run: prek run --all-files --show-diff-on-failure
