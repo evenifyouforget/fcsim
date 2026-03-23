@@ -6,7 +6,6 @@ extern "C" {
 
 #include "box2d/b2Body.h"
 
-#include <cstring>
 #include <iostream>
 
 // Map ftlib piece types to fcsim types
@@ -159,9 +158,6 @@ int main(int argc, char *argv[]) {
   // CHIMERA: Set up arena by inlining arena_init and replacing XML parsing
   arena *arena_ptr = new arena();
 
-  // Zero-initialize the entire struct to match original arena_init behavior
-  memset(arena_ptr, 0, sizeof(struct arena));
-
   // Arena initialization (from arena_init)
   arena_ptr->view.x = 0.0f;
   arena_ptr->view.height = 800;
@@ -175,6 +171,8 @@ int main(int argc, char *argv[]) {
   arena_ptr->hover_block = NULL;
   arena_move_init(arena_ptr);
   arena_ptr->move_orig_block = NULL;
+  arena_ptr->tick_multiply =
+      1; // required: tick_func inner loop runs i < tick_multiply times
   arena_ptr->single_ticks_remaining = -1; // Default for normal playback
   arena_ptr->autostop_on_solve = false;
   arena_ptr->preview_trail = NULL;

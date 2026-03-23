@@ -33,7 +33,7 @@ source .venv/bin/activate
 ## Manually run linters
 
 ```sh
-pre-commit run --all-files
+prek run --all-files
 ```
 
 This may cause some files to change.
