@@ -35,7 +35,8 @@
       }
       #save_menu,
       #account_menu,
-      #version_menu {
+      #version_menu,
+      #keys_menu {
         position: fixed;
         top: 50%;
         left: 50%;
@@ -108,6 +109,42 @@
       #account-button {
         background-color: #4caf50;
       }
+      #keys-button {
+        background-color: #888;
+      }
+      .keys-table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 12px;
+      }
+      .keys-table td {
+        padding: 4px 8px;
+        vertical-align: top;
+      }
+      .keys-table tr:nth-child(even) {
+        background: #f5f5f5;
+      }
+      .key-col {
+        font-family: monospace;
+        white-space: nowrap;
+        color: #333;
+        font-weight: bold;
+        padding-right: 16px;
+      }
+      #keys_menu {
+        min-width: 320px;
+        max-width: 90vw;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+      #keys_menu h3 {
+        margin: 12px 0 4px;
+        font-size: 0.95em;
+        text-transform: uppercase;
+        color: #666;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 2px;
+      }
       #account_menu input[type="text"],
       #account_menu input[type="password"],
       #save_menu input[name="name"],
@@ -137,7 +174,8 @@
       #close-account-menu,
       #close,
       #_saveSubmit,
-      #close-version-menu {
+      #close-version-menu,
+      #close-keys-menu {
         background-color: #6c757d;
         color: white;
         padding: 8px 15px;
@@ -163,6 +201,7 @@
       <button class="tool" id="save">Save</button>
       <button class="tool" id="version-button">Version</button>
       <button class="tool" id="steam-button">Steam</button>
+      <button class="tool" id="keys-button">Keys</button>
       <span id="notification"></span>
     </div>
 
@@ -217,10 +256,16 @@
       <button class="close" id="close-version-menu">Close</button>
     </div>
 
+    <div id="keys_menu">
+      <div id="keys-target"></div>
+      <button class="close" id="close-keys-menu">Close</button>
+    </div>
+
     <canvas id="canvas"></canvas>
 
-    <!-- Scripts must be in this order: version.js provides the data, main.js uses it -->
+    <!-- Scripts must be in this order: version.js and keybindings.js provide data, main.js uses it -->
     <script src="version.js"></script>
+    <script src="keybindings.js"></script>
     <script src="main.js"></script>
   </body>
 </html>
