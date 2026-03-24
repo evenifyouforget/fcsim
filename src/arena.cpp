@@ -263,7 +263,7 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len) {
   num_times_init_called++;
 }
 
-/* TODO: dedupe */
+/* local copy of u64tostr from export.c; deduplicate into a shared header when convenient */
 static void u64tostr(char *buf, uint64_t val) {
   char tmp[20];
   int l = 0;

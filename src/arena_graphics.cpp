@@ -235,7 +235,8 @@ joint joint_from_xy(float x, float y) {
 }
 
 std::vector<joint> generate_joints(block *block) {
-  // TODO: correct joint order
+  // TODO: verify joint order matches data model (box.corners[], rod.from/to, etc.)
+  // — mismatch causes visual-only misplacement of joint markers
   const int type_id = block->type_id;
   shell shell = get_shell(block);
   std::vector<joint> result;
