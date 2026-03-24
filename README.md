@@ -285,6 +285,18 @@ A joint can have at most 1 incoming joint edge, and at most 1 outgoing joint edg
 
 Both joints involved in a joint edge will have "the same" position, however, due to floating-point math, the actual calculated coordinates may be slightly different.
 
+#### No-Out Joints, Allow-Out Joints
+
+Only certain joints are allowed to have outgoing joint edges.
+
+Both joints on a rod are allowed to have an outgoing joint edge.
+
+For wheels and goal circles, only the center joint is allowed to have an outgoing joint edge.
+
+For goal rectangles, none of their joints may have an outgoing joint edge.
+
+Thus, the maximum number of outgoing joint edges a block may have is 2. This is why some very optimized data models use an array of size 2 instead of a list.
+
 #### Joint Stack
 
 A joint and all other joints connected to it by joint edges is called a joint stack. This is what the user perceives as a single joint on screen. The order does matter for physics.
@@ -327,6 +339,10 @@ Additionally, joint edge entry i on block A (which, recall, is ambiguous about t
 After the initial parse from XML to design, there is no further ambiguity, as the exact source and destination joints are locked in. Even if there was an edge case where a different joint could win the distance contest, the joint would not be remapped.
 
 Currently, blocks may have their position (and in the case of rods, width and angle) recalculated based on joint information after import; in the future, to enable exact loading and saving, such recalculations will be done only on edit. FC's behaviour on this is unknown, but recalculating in import is possibly a bug.
+
+In practice, outgoing joint preference is only relevant for rods, since only rods have multiple allow-out joints - for wheels and goal circles, there is no possible ambiguity. Rod re-snapping is well known and considered a bug by players.
+
+In practice, incoming joint preference is irrelevant - any proper editor (including the original FC client) will automatically snap blocks so that all joints within a joint stack remain at "the same" position (again, subject to floating-point math), meaning that, by distance, there should never be a tie. Ties are only possible with certain external editors that do not enforce joint snapping.
 
 ### Box2D World
 
