@@ -4,7 +4,7 @@
 #include "str.h"
 
 void make_str(struct str *str, size_t cap) {
-  str->mem = malloc(cap);
+  str->mem = static_cast<char *>(malloc(cap));
   str->mem[0] = 0;
   str->len = 0;
   str->cap = cap;
@@ -24,7 +24,7 @@ void append_str(struct str *str, char *s) {
   if (new_cap <= new_len) {
     while (new_cap <= new_len)
       new_cap *= 2;
-    new_mem = malloc(new_cap);
+    new_mem = static_cast<char *>(malloc(new_cap));
     memcpy(new_mem, str->mem, str->len);
     free(str->mem);
     str->mem = new_mem;

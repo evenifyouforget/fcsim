@@ -11,6 +11,10 @@
 #define GL_APICALL
 #define GL_APIENTRY
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(_WIN64)
 typedef long long int GLsizeiptr;
 typedef long long int GLintptr;
@@ -588,5 +592,9 @@ GL_APICALL void GL_APIENTRY glVertexAttribPointer(GLuint index, GLint size,
                                                   const void *pointer);
 GL_APICALL void GL_APIENTRY glViewport(GLint x, GLint y, GLsizei width,
                                        GLsizei height);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
