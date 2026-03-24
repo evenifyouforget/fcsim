@@ -326,7 +326,7 @@ A design that has any player blocks not fully contained in the build area is ill
 
 #### Joint Assignment: XML to Design
 
-Considering the XML (and the old data model) is ambiguous about which joint index within a block is the source or target for a joint edge, the XML to design code does some guessing. Specifically, it looks for all possible matches src -> dst, satisfying the graph constraints, plus the requirement that the position of src and dst must be within IMPORT_JOINT_EDGE_MAX_DISTANCE = 10mm (as defined in `find_closest_joint`).
+Considering the XML (and the old data model) is ambiguous about which joint index within a block is the source or target for a joint edge, the XML to design code does some guessing. Specifically, it looks for all possible matches src -> dst, satisfying the graph constraints, plus the requirement that the distance between src and dst must be less than IMPORT_JOINT_EDGE_MAX_DISTANCE = 10mm (as defined in `find_closest_joint`).
 
 Experimentally, 10mm seems to be correct: [9.999999](http://FantasticContraption.com/?levelId=689776) will attach, while [10](http://FantasticContraption.com/?levelId=689774) will not attach.
 
