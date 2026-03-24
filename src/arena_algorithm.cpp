@@ -184,7 +184,7 @@ extern "C" int recalculate_design_checksum(struct design *design) {
     for (block = design->level_blocks.head; block; block = block->next)
       _add_block_to_checksum(state, block, phase);
 
-    for (block = design->player_blocks.head; block; block = block->next)
+    for (block = design->design_blocks.head; block; block = block->next)
       _add_block_to_checksum(state, block, phase);
   }
   _add_area_to_checksum(state, &design->build_area);
@@ -212,10 +212,10 @@ extern "C" void tick_func(void *arg) {
     // log all blocks just before step
     std::cerr << std::setprecision(17);
     std::cerr << "Tick " << the_arena->tick << std::endl;
-    for (block *block_ptr = the_arena->design.player_blocks.head; block_ptr;
+    for (block *block_ptr = the_arena->design.design_blocks.head; block_ptr;
          block_ptr = block_ptr->next) {
       b2Body *body_ptr = block_ptr->body;
-      std::cerr << "- ID = " << block_ptr->id
+      std::cerr << "- ID = " << block_ptr->uid
                 << ", Type = " << (int)block_ptr->type_id << ", Pos = ("
                 << body_ptr->m_position.x << ", " << body_ptr->m_position.y
                 << "), Vel = (" << body_ptr->m_linearVelocity.x << ", "
@@ -241,7 +241,7 @@ extern "C" void tick_func(void *arg) {
       break;
   }
 
-  if (the_arena->preview_gp_trajectory) {
+  if (the_arena->preview_goal_piece_trajectory) {
     // use remaining time budget for preview hyperspeed
     if (the_arena->preview_trail == nullptr) {
       the_arena->preview_trail = _new<multi_trail_t>();
@@ -290,7 +290,7 @@ bool multi_trail_t::accepting() {
 void multi_trail_t::submit_frame(design *current_design) {
   // scan for goal pieces
   size_t trail_index = 0;
-  for (block *the_block = current_design->player_blocks.head; the_block;
+  for (block *the_block = current_design->design_blocks.head; the_block;
        the_block = the_block->next) {
     if (the_block->goal) {
       // record position in the corresponding location

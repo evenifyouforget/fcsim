@@ -271,7 +271,7 @@ struct joint *new_joint(struct block *gen, double x, double y) {
   joint->gen = gen;
   joint->x = x;
   joint->y = y;
-  joint->visited = false;
+  joint->in_drag_set = false;
   init_attach_list(&joint->att);
 
   return joint;
@@ -372,7 +372,7 @@ static struct block *find_block(struct block_list *blocks, int id) {
   struct block *block;
 
   for (block = blocks->head; block; block = block->next) {
-    if (block->id == id)
+    if (block->uid == id)
       return block;
   }
 
@@ -415,9 +415,11 @@ static double distance(double x1, double y1, double x2, double y2) {
   return sqrt(dx * dx + dy * dy);
 }
 
+#define IMPORT_JOINT_EDGE_MAX_DISTANCE 10.0
+
 static struct joint *find_closest_joint(struct attach_list *list, double x,
                                         double y) {
-  double best_dist = 10.0;
+  double best_dist = IMPORT_JOINT_EDGE_MAX_DISTANCE;
   struct joint *best_joint = NULL;
   struct attach_node *att;
 
@@ -458,7 +460,7 @@ static bool block_has_joint(struct block *block, struct joint *joint) {
 bool share_block(struct design *design, struct joint *j1, struct joint *j2) {
   struct block *block;
 
-  for (block = design->player_blocks.head; block; block = block->next) {
+  for (block = design->design_blocks.head; block; block = block->next) {
     if (block_has_joint(block, j1) && block_has_joint(block, j2))
       return true;
   }
@@ -477,7 +479,7 @@ static void add_rod(struct design *design, struct block *block,
 
   get_rod_endpoints(xml_block, &x0, &y0, &x1, &y1);
 
-  make_joints_list(&att_list, &design->player_blocks, xml_block->joints);
+  make_joints_list(&att_list, &design->design_blocks, xml_block->joints);
   j0 = find_closest_joint(&att_list, x0, y0);
   j1 = find_closest_joint(&att_list, x1, y1);
   destroy_joints_list(&att_list);
@@ -526,7 +528,7 @@ static void add_wheel(struct design *design, struct block *block,
   x0 = xml_block->position.x;
   y0 = xml_block->position.y;
 
-  make_joints_list(&att_list, &design->player_blocks, xml_block->joints);
+  make_joints_list(&att_list, &design->design_blocks, xml_block->joints);
   j0 = find_closest_joint(&att_list, x0, y0);
   destroy_joints_list(&att_list);
 
@@ -601,10 +603,10 @@ static void add_level_block(struct design *design,
   }
 
   block->goal = false;
-  block->id = xml_block->id;
+  block->uid = xml_block->id;
   block->body = NULL;
   block->overlap = false;
-  block->visited = false;
+  block->in_drag_set = false;
 
   append_block(&design->level_blocks, block);
 }
@@ -648,12 +650,12 @@ static void add_player_block(struct design *design,
     break;
   }
 
-  block->id = xml_block->id;
+  block->uid = xml_block->id;
   block->body = NULL;
   block->overlap = false;
-  block->visited = false;
+  block->in_drag_set = false;
 
-  append_block(&design->player_blocks, block);
+  append_block(&design->design_blocks, block);
 }
 
 void set_area(struct area *area, struct xml_zone *xml_zone, double expand) {
@@ -673,7 +675,7 @@ void convert_xml(struct xml_level *xml_level, struct design *design) {
   for (block = xml_level->level_blocks; block; block = block->next)
     add_level_block(design, block);
 
-  init_block_list(&design->player_blocks);
+  init_block_list(&design->design_blocks);
   for (block = xml_level->player_blocks; block; block = block->next)
     add_player_block(design, block);
 
@@ -745,31 +747,31 @@ static bool is_design_piece(struct block *block) {
 static int max_block_id(const struct design *design) {
   int max = 0;
   struct block *b;
-  for (b = design->player_blocks.head; b; b = b->next)
-    if (b->id > max)
-      max = b->id;
+  for (b = design->design_blocks.head; b; b = b->next)
+    if (b->uid > max)
+      max = b->uid;
   return max;
 }
 
 static void clear_visited_blocks(struct design *design) {
   struct block *b;
-  for (b = design->player_blocks.head; b; b = b->next)
-    b->visited = false;
+  for (b = design->design_blocks.head; b; b = b->next)
+    b->in_drag_set = false;
   for (b = design->level_blocks.head; b; b = b->next)
-    b->visited = false;
+    b->in_drag_set = false;
 }
 
 static void clear_visited_joints(struct design *design) {
   struct joint *j;
   for (j = design->joints.head; j; j = j->next)
-    j->visited = false;
+    j->in_drag_set = false;
 }
 
 static void clean_joint_attach_list(struct joint *j) {
   struct attach_node *node = j->att.head;
   while (node) {
     struct attach_node *next = node->next;
-    if (!node->block->visited) {
+    if (!node->block->in_drag_set) {
       remove_attach_node(&j->att, node);
       free(node);
     }
@@ -779,16 +781,16 @@ static void clean_joint_attach_list(struct joint *j) {
 
 void merge_design(struct design *dst, struct design *src) {
   int offset = 1 + max_block_id(dst);
-  struct block *b = src->player_blocks.head;
+  struct block *b = src->design_blocks.head;
 
   /* move allowed blocks from src to dst */
   while (b) {
     struct block *next = b->next;
     if (is_design_piece(b)) {
-      remove_block(&src->player_blocks, b);
-      b->id += offset;
-      b->visited = true; /* mark for joint retention */
-      append_block(&dst->player_blocks, b);
+      remove_block(&src->design_blocks, b);
+      b->uid += offset;
+      b->in_drag_set = true; /* mark for joint retention */
+      append_block(&dst->design_blocks, b);
     }
     b = next;
   }
@@ -801,7 +803,7 @@ void merge_design(struct design *dst, struct design *src) {
     clean_joint_attach_list(j);
 
     /* keep if: has moved generator block OR has remaining attachments */
-    if ((j->gen && j->gen->visited) || j->att.head) {
+    if ((j->gen && j->gen->in_drag_set) || j->att.head) {
       remove_joint(&src->joints, j);
       append_joint(&dst->joints, j);
     } else {
@@ -813,7 +815,7 @@ void merge_design(struct design *dst, struct design *src) {
   }
   /* free any leftover lists in src */
   free_block_list(&src->level_blocks);
-  free_block_list(&src->player_blocks);
+  free_block_list(&src->design_blocks);
   free_joint_list(&src->joints);
 
   /* reset visited markers in dst */
@@ -827,6 +829,6 @@ void merge_design(struct design *dst, struct design *src) {
 void free_design(struct design *design) {
   free_joint_list(&design->joints);
   free_block_list(&design->level_blocks);
-  free_block_list(&design->player_blocks);
+  free_block_list(&design->design_blocks);
   free(design);
 }

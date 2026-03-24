@@ -46,8 +46,8 @@ block *_clean_copy(std::unordered_map<void *, void *> &pointer_map,
   new_obj->material = old_obj->material; // intentionally not deep copying
   new_obj->goal = old_obj->goal;
   new_obj->overlap = old_obj->overlap;
-  new_obj->visited = old_obj->visited;
-  new_obj->id = old_obj->id;
+  new_obj->in_drag_set = old_obj->in_drag_set;
+  new_obj->uid = old_obj->uid;
   new_obj->type_id = old_obj->type_id;
   new_obj->body = nullptr; // intentionally clearing
   return new_obj;
@@ -63,7 +63,7 @@ joint *_clean_copy(std::unordered_map<void *, void *> &pointer_map,
   new_obj->y = old_obj->y;
   CLEAN_COPY(*new_obj, *old_obj, att.head);
   CLEAN_COPY(*new_obj, *old_obj, att.tail);
-  new_obj->visited = old_obj->visited;
+  new_obj->in_drag_set = old_obj->in_drag_set;
   return new_obj;
 }
 
@@ -74,8 +74,8 @@ design *_clean_copy(std::unordered_map<void *, void *> &pointer_map,
   CLEAN_COPY(*new_obj, *old_obj, joints.tail);
   CLEAN_COPY(*new_obj, *old_obj, level_blocks.head);
   CLEAN_COPY(*new_obj, *old_obj, level_blocks.tail);
-  CLEAN_COPY(*new_obj, *old_obj, player_blocks.head);
-  CLEAN_COPY(*new_obj, *old_obj, player_blocks.tail);
+  CLEAN_COPY(*new_obj, *old_obj, design_blocks.head);
+  CLEAN_COPY(*new_obj, *old_obj, design_blocks.tail);
   new_obj->build_area = old_obj->build_area;
   new_obj->goal_area = old_obj->goal_area;
   new_obj->level_id = old_obj->level_id;

@@ -69,6 +69,7 @@ struct arena {
   /* MoveState* — C++-only type, stored as void* so this header stays valid C.
    * Follows the same pattern as block_graphics_v2. Initialised by
    * arena_move_init(); defined in arena.cpp. */
+  /* Move operation state — see README §Move Operation State */
   void *move_state;
   float move_orig_x;
   float move_orig_y;
@@ -92,7 +93,7 @@ struct arena {
                               // for step n frames
   bool autostop_on_solve;
 
-  bool preview_gp_trajectory;
+  bool preview_goal_piece_trajectory;
   struct design *preview_design;
   b2World *preview_world;
   void *preview_trail; // real type: multi_trail_t*
