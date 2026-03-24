@@ -328,11 +328,11 @@ A design that has any player blocks not fully contained in the build area is ill
 
 Considering the XML (and the old data model) is ambiguous about which joint index within a block is the source or target for a joint edge, the XML to design code does some guessing. Specifically, it looks for all possible matches src -> dst, satisfying the graph constraints, plus the requirement that the position of src and dst must be within IMPORT_JOINT_EDGE_MAX_DISTANCE = 10mm (as defined in `find_closest_joint`).
 
-This constant has not been verified against original FC.
+Experimentally, 10mm seems to be correct: [9.999999](http://FantasticContraption.com/?levelId=689776) will attach, while [10](http://FantasticContraption.com/?levelId=689774) will not attach.
 
 If there are multiple candidates, tiebreaking happens by which distance is shortest. If there are no candidates, the joint edge will not be produced in the design.
 
-Checking the graph constraints after picking the candidate with the shortest distance, rather than filtering candidates first by graph constraint legality, is likely a bug, though original FC's exact behaviour here is uncertain.
+Checking the graph constraints after picking the candidate with the shortest distance, rather than filtering candidates first by graph constraint legality, is what original FC does, and is not a bug. This can be seen [here](http://FantasticContraption.com/?levelId=689768) where all joints of goal rectangle 0 are within range for all goal circles, but only one goal circle ends up attached. The logical explanation is they all tried to grab the goal rectangle's center joint, but only the first goal circle could attach legally.
 
 Additionally, joint edge entry i on block A (which, recall, is ambiguous about the joint index within the block) has a preference for using src = (A, i), however, if this fails, it will try src = (A, j) for j =/= i. This is the behaviour in original FC: if block 2 is a rod with joints [0, 1], it will first attempt to attach its left side joint (joint index 0) to block 0, and if that fails, it will then try to attach its right side joint (joint index 1) to block 0. Not respecting this convention is a bug.
 
