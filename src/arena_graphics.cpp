@@ -235,7 +235,8 @@ joint joint_from_xy(float x, float y) {
 }
 
 std::vector<joint> generate_joints(block *block) {
-  // The order here may not match the data model; visually it makes no difference
+  // The order here may not match the data model; visually it makes no
+  // difference
   const int type_id = block->type_id;
   shell shell = get_shell(block);
   std::vector<joint> result;
