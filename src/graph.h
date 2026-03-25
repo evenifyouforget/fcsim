@@ -49,7 +49,11 @@ struct joint {
   bool in_drag_set;       /* true while this joint is in the affected set of an
                              in-progress move operation; see README §Move Operation
                              State */
-  uint64_t _checksum_uid; /* TODO: document purpose */
+  uint64_t
+      _checksum_uid; /* scratch value used during design checksum computation;
+                        encodes joint identity and neighbour topology across two
+                        passes of _assign_joint_uid. Not meaningful outside of
+                        checksum recalculation. */
 };
 
 struct joint *new_joint(struct block *gen, double x, double y);
@@ -210,8 +214,10 @@ void remove_block(struct block_list *list, struct block *block);
 struct area {
   double x, y;
   double w, h;
-  double expand; // added to both w and h, but only for geometry checks
-  /* TODO: document what expand means */
+  double
+      expand; /* outward tolerance (mm) applied symmetrically to both dimensions
+                 during containment checks. 4.0 for the build area, 0.0 for the
+                 goal area — matches original FC game behaviour. */
 };
 
 /* See README §Designs. */
@@ -224,10 +230,19 @@ struct design {
                         <playerBlocks> in XML */
   struct area build_area;
   struct area goal_area;
-  int level_id; /* TODO: document purpose */
+  int level_id; /* numeric FC level ID read from <levelID> in the XML; preserved
+                   and re-exported. -1 if absent (design not tied to a level).
+                 */
   int modcount; /* cache invalidation counter; see README §Designs (Modcount) */
-  int expect_checksum; /* TODO: document purpose */
-  int actual_checksum; /* TODO: document purpose */
+  int expect_checksum; /* checksum from the ?checksum= URL parameter; 0 if
+                          absent. User flow: export produces a share link
+                          containing this value; opening that link re-loads the
+                          design and compares against actual_checksum to verify
+                          the save/load cycle was lossless. */
+  int actual_checksum; /* design checksum computed by
+                          recalculate_design_checksum(); 0 until first
+                          recalculation. Shown as base-36 in the debug overlay
+                          alongside [OK] (matches expect) or [!] (mismatch). */
 };
 
 enum shell_type {

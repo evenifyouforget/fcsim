@@ -263,23 +263,6 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len) {
   num_times_init_called++;
 }
 
-/* TODO: dedupe */
-static void u64tostr(char *buf, uint64_t val) {
-  char tmp[20];
-  int l = 0;
-  int i;
-
-  do {
-    tmp[l++] = '0' + (val % 10);
-    val /= 10;
-  } while (val > 0);
-
-  for (i = 0; i < l; i++)
-    buf[i] = tmp[l - 1 - i];
-
-  buf[l] = 0;
-}
-
 void update_tool(struct arena *arena) {
   if (arena->shift)
     arena->tool = TOOL_MOVE;
