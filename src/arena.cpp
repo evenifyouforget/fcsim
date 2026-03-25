@@ -263,7 +263,6 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len) {
   num_times_init_called++;
 }
 
-
 void update_tool(struct arena *arena) {
   if (arena->shift)
     arena->tool = TOOL_MOVE;
