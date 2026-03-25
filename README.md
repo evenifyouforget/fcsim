@@ -285,6 +285,18 @@ A joint can have at most 1 incoming joint edge, and at most 1 outgoing joint edg
 
 Both joints involved in a joint edge will have "the same" position, however, due to floating-point math, the actual calculated coordinates may be slightly different.
 
+#### No-Out Joints, Allow-Out Joints
+
+Only certain joints are allowed to have outgoing joint edges.
+
+Both joints on a rod are allowed to have an outgoing joint edge.
+
+For wheels and goal circles, only the center joint is allowed to have an outgoing joint edge.
+
+For goal rectangles, none of their joints may have an outgoing joint edge.
+
+Thus, the maximum number of outgoing joint edges a block may have is 2. This is why some very optimized data models use an array of size 2 instead of a list.
+
 #### Joint Stack
 
 A joint and all other joints connected to it by joint edges is called a joint stack. This is what the user perceives as a single joint on screen. The order does matter for physics.
@@ -314,19 +326,23 @@ A design that has any player blocks not fully contained in the build area is ill
 
 #### Joint Assignment: XML to Design
 
-Considering the XML (and the old data model) is ambiguous about which joint index within a block is the source or target for a joint edge, the XML to design code does some guessing. Specifically, it looks for all possible matches src -> dst, satisfying the graph constraints, plus the requirement that the position of src and dst must be within IMPORT_JOINT_EDGE_MAX_DISTANCE = 10mm (as defined in `find_closest_joint`).
+Considering the XML (and the old data model) is ambiguous about which joint index within a block is the source or target for a joint edge, the XML to design code does some guessing. Specifically, it looks for all possible matches src -> dst, satisfying the graph constraints, plus the requirement that the distance between src and dst must be less than IMPORT_JOINT_EDGE_MAX_DISTANCE = 10mm (as defined in `find_closest_joint`).
 
-This constant has not been verified against original FC.
+Experimentally, 10mm seems to be correct: [9.999999](http://FantasticContraption.com/?levelId=689776) will attach, while [10](http://FantasticContraption.com/?levelId=689774) will not attach.
 
 If there are multiple candidates, tiebreaking happens by which distance is shortest. If there are no candidates, the joint edge will not be produced in the design.
 
-Checking the graph constraints after picking the candidate with the shortest distance, rather than filtering candidates first by graph constraint legality, is likely a bug, though original FC's exact behaviour here is uncertain.
+Checking the graph constraints after picking the candidate with the shortest distance, rather than filtering candidates first by graph constraint legality, is what original FC does, and is not a bug. This can be seen [here](http://FantasticContraption.com/?levelId=689768) where all joints of goal rectangle 0 are within range for all goal circles, but only one goal circle ends up attached. The logical explanation is they all tried to grab the goal rectangle's center joint, but only the first goal circle could attach legally.
 
 Additionally, joint edge entry i on block A (which, recall, is ambiguous about the joint index within the block) has a preference for using src = (A, i), however, if this fails, it will try src = (A, j) for j =/= i. This is the behaviour in original FC: if block 2 is a rod with joints [0, 1], it will first attempt to attach its left side joint (joint index 0) to block 0, and if that fails, it will then try to attach its right side joint (joint index 1) to block 0. Not respecting this convention is a bug.
 
 After the initial parse from XML to design, there is no further ambiguity, as the exact source and destination joints are locked in. Even if there was an edge case where a different joint could win the distance contest, the joint would not be remapped.
 
 Currently, blocks may have their position (and in the case of rods, width and angle) recalculated based on joint information after import; in the future, to enable exact loading and saving, such recalculations will be done only on edit. FC's behaviour on this is unknown, but recalculating in import is possibly a bug.
+
+In practice, outgoing joint preference is only relevant for rods, since only rods have multiple allow-out joints - for wheels and goal circles, there is no possible ambiguity. Rod re-snapping is well known and considered a bug by players.
+
+In practice, incoming joint preference is irrelevant - any proper editor (including the original FC client) will automatically snap blocks so that all joints within a joint stack remain at "the same" position (again, subject to floating-point math), meaning that, by distance, there should never be a tie. Ties are only possible with certain external editors that do not enforce joint snapping.
 
 ### Box2D World
 
