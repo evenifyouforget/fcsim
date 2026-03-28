@@ -24,9 +24,7 @@ const KEYBINDINGS = [
   },
   {
     section: "Simulation",
-    bindings: [
-      { key: "Space", description: "Start / stop simulation" },
-    ],
+    bindings: [{ key: "Space", description: "Start / stop simulation" }],
   },
   {
     section: "Speed",

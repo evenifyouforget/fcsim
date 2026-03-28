@@ -152,7 +152,8 @@ function showKeysMenu() {
       target.appendChild(table);
     }
   } else {
-    target.textContent = "Keybindings data unavailable (keybindings.js not loaded).";
+    target.textContent =
+      "Keybindings data unavailable (keybindings.js not loaded).";
   }
 }
 
@@ -597,12 +598,14 @@ function to_button(code) {
 }
 
 function canvas_keydown(event) {
-  if (opened || account_menu_opened || version_menu_opened || keys_menu_opened) return;
+  if (opened || account_menu_opened || version_menu_opened || keys_menu_opened)
+    return;
   inst.exports.key_down(to_key(event.code));
 }
 
 function canvas_keyup(event) {
-  if (opened || account_menu_opened || version_menu_opened || keys_menu_opened) return;
+  if (opened || account_menu_opened || version_menu_opened || keys_menu_opened)
+    return;
   inst.exports.key_up(to_key(event.code));
 }
 
