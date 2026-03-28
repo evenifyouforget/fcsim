@@ -5,7 +5,7 @@
 struct arena the_arena;
 
 extern "C" char *export_design(struct design *design, char *user, char *name,
-                                char *desc);
+                               char *desc);
 
 extern "C" {
 
