@@ -1,7 +1,3 @@
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-
 #include "button.h"
 #include "gl.h"
 
@@ -34,14 +30,14 @@ bool button_compile_shaders(void) {
   GLint value;
 
   vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex_shader, 1, &button_vertex_shader_src, NULL);
+  glShaderSource(vertex_shader, 1, &button_vertex_shader_src, nullptr);
   glCompileShader(vertex_shader);
   glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &value);
   if (!value)
     return false;
 
   fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragment_shader, 1, &button_fragment_shader_src, NULL);
+  glShaderSource(fragment_shader, 1, &button_fragment_shader_src, nullptr);
   glCompileShader(fragment_shader);
   glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &value);
   if (!value)
@@ -72,7 +68,7 @@ bool button_compile_shaders(void) {
 void button_create(struct button *button, int w, int h, float r, float g,
                    float b) {
   float data[8] = {
-      0, 0, w, 0, w, h, 0, h,
+      0, 0, (float)w, 0, (float)w, (float)h, 0, (float)h,
   };
 
   glGenBuffers(1, &button->vertex_buf);

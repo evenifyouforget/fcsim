@@ -679,7 +679,7 @@ function save_design(event) {
   let name = alloc_str(data.get("name"));
   let desc = alloc_str(data.get("description"));
 
-  let xml = inst.exports.export(user, name, desc);
+  let xml = inst.exports.do_export(user, name, desc);
   let len = inst.exports.strlen(xml);
   last_exported_checksum = inst.exports.get_main_design_checksum();
 

@@ -1,15 +1,14 @@
-#include "arena.h"
+#include "arena.hpp"
 #include "button.h"
 #include "gl.h"
-#include "graph.h"
 #include "text.h"
-#include "xml.h"
-#include <box2d/b2Body.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
 
 struct arena the_arena;
+
+extern "C" char *export_design(struct design *design, char *user, char *name,
+                                char *desc);
+
+extern "C" {
 
 void key_down(int key) { arena_key_down_event(&the_arena, key); }
 
@@ -48,12 +47,12 @@ void init(char *xml, int len, int expect_checksum) {
 
 int get_main_design_checksum() { return the_arena.design.actual_checksum; }
 
-char *export_design(struct design *design, char *user, char *name, char *desc);
-
-char *export(char *user, char *name, char *desc) {
+char *do_export(char *user, char *name, char *desc) {
   return export_design(&the_arena.design, user, name, desc);
 }
 
 void draw(void) { arena_draw(&the_arena); }
 
 void call(void (*func)(void *arg), void *arg) { func(arg); }
+
+} // extern "C"
