@@ -6,7 +6,6 @@
 #include "gl.h"
 #include "text.h"
 
-
 static GLuint font_tex;
 
 static const char *text_vertex_shader_src =
@@ -39,7 +38,6 @@ GLuint text_program_uv_attrib;
 GLuint text_program_scale_uniform;
 GLuint text_program_shift_uniform;
 GLuint text_program_tex_uniform;
-
 
 static uint8_t font[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* 00 */
@@ -281,7 +279,6 @@ static void make_letter_verts(float *data, uint8_t c, int idx) {
   }
 }
 
-
 void text_render(struct text *text, int w, int h, int x, int y) {
   glUseProgram(text_program);
 
@@ -343,4 +340,3 @@ void text_stream_render(struct text_stream *text, int w, int h, int x, int y) {
 
   text_render(&t, w, h, x, y);
 }
-
