@@ -16,7 +16,10 @@ const KEYBINDINGS = [
       { key: "C", description: "Counter-clockwise wheel" },
       { key: "M", description: "Grab (joint or component)" },
       { key: "D", description: "Delete (piece)" },
-      { key: "Shift + Click + Drag", description: "Grab (ignores current tool)" },
+      {
+        key: "Shift + Click + Drag",
+        description: "Grab (ignores current tool)",
+      },
       { key: "Ctrl + Click", description: "Delete (ignores current tool)" },
       { key: "Shift + Scroll Down", description: "Make fine adjustment finer" },
       { key: "Shift + Scroll Up", description: "Make fine adjustment coarser" },
