@@ -113,7 +113,6 @@ common_sources = [
     "src/arena.cpp",
     "src/arena_algorithm.cpp",
     "src/arena_graphics.cpp",
-    "src/button.cpp",
     "src/export.c",
     "src/core.cpp",
     "src/gen.c",

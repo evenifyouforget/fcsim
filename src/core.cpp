@@ -1,5 +1,4 @@
 #include "arena.hpp"
-#include "button.h"
 #include "gl.h"
 #include "text.h"
 
@@ -35,7 +34,6 @@ void init(char *xml, int len, int expect_checksum) {
 
   res = arena_compile_shaders();
   res = text_compile_shaders();
-  res = button_compile_shaders();
   /*
   if (!res)
           exit(1);
