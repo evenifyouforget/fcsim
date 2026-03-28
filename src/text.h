@@ -19,9 +19,12 @@ struct text_stream {
   size_t len;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 bool text_compile_shaders(void);
 
-void text_create(struct text *text, char *str);
 void text_render(struct text *text, int w, int h, int x, int y);
 
 void text_stream_create(struct text_stream *text, size_t len);
@@ -29,5 +32,9 @@ void text_stream_update(struct text_stream *text, const char *str);
 void text_stream_render(struct text_stream *text, int w, int h, int x, int y);
 
 void text_set_scale(float scale);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
