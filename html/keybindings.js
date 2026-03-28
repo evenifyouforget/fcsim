@@ -8,7 +8,7 @@ const KEYBINDINGS = [
   {
     section: "Pieces / Tools",
     bindings: [
-      { key: "Click (+ drag)", description: "Place piece" },
+      { key: "Click (+ Drag)", description: "Place piece" },
       { key: "R", description: "Water rod" },
       { key: "S", description: "Solid rod" },
       { key: "U", description: "Unpowered wheel" },
@@ -16,7 +16,7 @@ const KEYBINDINGS = [
       { key: "C", description: "Counter-clockwise wheel" },
       { key: "M", description: "Grab (joint or component)" },
       { key: "D", description: "Delete (piece)" },
-      { key: "Shift + Click", description: "Grab (ignores current tool)" },
+      { key: "Shift + Click + Drag", description: "Grab (ignores current tool)" },
       { key: "Ctrl + Click", description: "Delete (ignores current tool)" },
       { key: "Shift + Scroll Down", description: "Make fine adjustment finer" },
       { key: "Shift + Scroll Up", description: "Make fine adjustment coarser" },
@@ -44,7 +44,7 @@ const KEYBINDINGS = [
   {
     section: "Camera",
     bindings: [
-      { key: "Click + drag", description: "Pan camera" },
+      { key: "Click + Drag", description: "Pan camera" },
       { key: "Scroll", description: "Zoom camera" },
     ],
   },
