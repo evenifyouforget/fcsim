@@ -359,7 +359,7 @@ let gl_env = {
         lengths.push(len);
       }
     } else {
-      /* TODO */
+      /* length array provided — not implemented; WASM always passes length=0 */
     }
 
     for (let i = 0; i < count; i++) {
@@ -382,7 +382,7 @@ let gl_env = {
     type,
     pixels,
   ) {
-    /* TODO: how many bytes per pixel? */
+    /* 1 byte per pixel: the only caller uses GL_ALPHA / GL_UNSIGNED_BYTE */
     let pixel_data = new Uint8Array(
       inst.exports.memory.buffer,
       pixels,
