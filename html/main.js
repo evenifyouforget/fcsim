@@ -56,6 +56,9 @@ const passwordField = document.getElementById("password-field");
 const accountStatus = document.getElementById("account-status");
 let version_button = document.getElementById("version-button");
 let version_menu = document.getElementById("version_menu");
+const keysButton = document.getElementById("keys-button");
+const keysMenu = document.getElementById("keys_menu");
+const closeKeysMenuButton = document.getElementById("close-keys-menu");
 // These specific elements are no longer needed for individual text updates
 // because we inject a full HTML block into a target container instead.
 let version_target =
@@ -116,6 +119,47 @@ function showVersionMenu() {
 function hideVersionMenu() {
   version_menu.style.display = "none";
   version_menu_opened = false;
+}
+
+let keys_menu_opened = false;
+
+function showKeysMenu() {
+  keysMenu.style.display = "block";
+  keys_menu_opened = true;
+
+  const target = document.getElementById("keys-target");
+  target.innerHTML = "";
+
+  if (typeof KEYBINDINGS !== "undefined") {
+    for (const section of KEYBINDINGS) {
+      const h3 = document.createElement("h3");
+      h3.textContent = section.section;
+      target.appendChild(h3);
+
+      const table = document.createElement("table");
+      table.className = "keys-table";
+      for (const binding of section.bindings) {
+        const tr = document.createElement("tr");
+        const tdKey = document.createElement("td");
+        tdKey.className = "key-col";
+        tdKey.textContent = binding.key;
+        const tdDesc = document.createElement("td");
+        tdDesc.textContent = binding.description;
+        tr.appendChild(tdKey);
+        tr.appendChild(tdDesc);
+        table.appendChild(tr);
+      }
+      target.appendChild(table);
+    }
+  } else {
+    target.textContent =
+      "Keybindings data unavailable (keybindings.js not loaded).";
+  }
+}
+
+function hideKeysMenu() {
+  keysMenu.style.display = "none";
+  keys_menu_opened = false;
 }
 
 function _loginOnTextReceived(text) {
@@ -191,6 +235,8 @@ loginButton.addEventListener("click", handleLogin);
 logoutButton.addEventListener("click", handleLogout);
 version_button.addEventListener("click", showVersionMenu);
 close_version_menu.addEventListener("click", hideVersionMenu);
+keysButton.addEventListener("click", showKeysMenu);
+closeKeysMenuButton.addEventListener("click", hideKeysMenu);
 
 let canvas = document.getElementById("canvas");
 let gl = canvas.getContext("webgl");
@@ -552,12 +598,14 @@ function to_button(code) {
 }
 
 function canvas_keydown(event) {
-  if (opened || account_menu_opened || version_menu_opened) return;
+  if (opened || account_menu_opened || version_menu_opened || keys_menu_opened)
+    return;
   inst.exports.key_down(to_key(event.code));
 }
 
 function canvas_keyup(event) {
-  if (opened || account_menu_opened || version_menu_opened) return;
+  if (opened || account_menu_opened || version_menu_opened || keys_menu_opened)
+    return;
   inst.exports.key_up(to_key(event.code));
 }
 
