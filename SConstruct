@@ -164,7 +164,7 @@ run_single_design_xml_sources = [
 ]
 wasm_sources = [
     "src/arch/wasm/math.c",
-    "src/arch/wasm/malloc.c",
+    "src/arch/wasm/malloc.cpp",
     "src/arch/wasm/gl.c",
     "src/arch/wasm/string.c",
 ]
@@ -329,6 +329,7 @@ cov_env.VariantDir("build/cov", ".", False)
 wasm_env = base_env.Clone(
     CCFLAGS=common_ccflags + wasm_ccflags,
     CPPPATH=common_include + wasm_include,
+    CPPDEFINES=["WASM_MEMORY_BACKEND"],
     CC="clang",
     CXX="clang++",
     LINK="wasm-ld",

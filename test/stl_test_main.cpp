@@ -594,6 +594,8 @@ TEST(MsanTests, CallocIsClean) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+#include "malloc_test.cpp"
+
 int main(int argc, char **argv) {
   if (argc == 2 && __builtin_strcmp(argv[1], "--list") == 0)
     return list_tests();

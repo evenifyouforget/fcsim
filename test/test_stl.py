@@ -59,3 +59,15 @@ def test_stl(san, name):
         env={**os.environ, **cfg["env"]},
     )
     assert r.returncode == 0, r.stderr + r.stdout
+
+
+# TF6: run_single_test returns exit code 2 for an unknown test name.
+def test_unknown_test_exit_code():
+    for san, cfg in SANITIZERS.items():
+        r = subprocess.run(
+            [cfg["binary"], "--run", "NoSuch::Test"],
+            capture_output=True,
+            text=True,
+            env={**os.environ, **cfg["env"]},
+        )
+        assert r.returncode == 2, f"{san}: expected exit 2, got {r.returncode}"
