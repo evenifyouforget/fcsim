@@ -212,6 +212,57 @@ TEST(MallocTests, LargeAlloc) {
   CHECK_EQUAL(0u, a.live_alloc_count_get());
 }
 
+// ── E1–E3: efficiency bound — live_block_bytes ≤ 2×(useful + KMAX×count) ─────
+//
+// For each allocation of n bytes: block = next_pow2(n_aligned + HDR).
+// Since next_pow2(x) ≤ 2x and n_aligned ≤ n + sizeof(size_t)−1:
+//   block ≤ 2×(n + HDR + sizeof(size_t)−1)
+// Summed: live_block_bytes ≤ 2×(live_useful_bytes + KMAX×live_alloc_count)
+//   where KMAX = HDR + sizeof(size_t)−1.
+
+// E1: many small (1-byte) allocations — worst-case header/padding ratio
+TEST(MallocTests, OverheadBoundManySmall) {
+  TestBuf tb;
+  BuddyAllocator a(tb.base, BUF_SZ);
+  const size_t KMAX = BuddyAllocator::HDR + sizeof(size_t) - 1;
+  const int N = 64;
+  void *ptrs[N];
+  for (int i = 0; i < N; i++)
+    ptrs[i] = a.malloc(1);
+  CHECK(a.live_block_bytes_get() <=
+        2 * (a.live_useful_bytes_get() + KMAX * a.live_alloc_count_get()));
+  for (int i = 0; i < N; i++)
+    a.free(ptrs[i]);
+}
+
+// E2: single large allocation — overhead approaches zero asymptotically
+TEST(MallocTests, OverheadBoundLarge) {
+  TestBuf tb;
+  BuddyAllocator a(tb.base, BUF_SZ);
+  const size_t KMAX = BuddyAllocator::HDR + sizeof(size_t) - 1;
+  void *p = a.malloc(128 * 1024);
+  CHECK(a.live_block_bytes_get() <=
+        2 * (a.live_useful_bytes_get() + KMAX * a.live_alloc_count_get()));
+  a.free(p);
+}
+
+// E3: mixed sizes with partial free — bound holds for any live subset
+TEST(MallocTests, OverheadBoundMixed) {
+  TestBuf tb;
+  BuddyAllocator a(tb.base, BUF_SZ);
+  const size_t KMAX = BuddyAllocator::HDR + sizeof(size_t) - 1;
+  void *p1 = a.malloc(7);
+  void *p2 = a.malloc(100);
+  void *p3 = a.malloc(1024);
+  CHECK(a.live_block_bytes_get() <=
+        2 * (a.live_useful_bytes_get() + KMAX * a.live_alloc_count_get()));
+  a.free(p2);
+  CHECK(a.live_block_bytes_get() <=
+        2 * (a.live_useful_bytes_get() + KMAX * a.live_alloc_count_get()));
+  a.free(p1);
+  a.free(p3);
+}
+
 // ── F5: double-free detection (ASan via BUDDY_POISON) ────────────────────────
 
 ASAN_XFAIL_TEST(MallocTests, DoubleFree) {
