@@ -276,11 +276,11 @@ TEST(TestBufTests, MemoryGrowIncrements) {
   TestBuf tb;
   BuddyAllocator a(tb.base, BUF_SZ);
   size_t base_pages = (size_t)tb.base >> 16;
-  CHECK_EQUAL(base_pages, a.memory_size());      // TB3: initial value
+  CHECK_EQUAL(base_pages, a.memory_size()); // TB3: initial value
   a.memory_grow(1);
-  CHECK_EQUAL(base_pages + 1, a.memory_size());  // TB4: +1 page
+  CHECK_EQUAL(base_pages + 1, a.memory_size()); // TB4: +1 page
   a.memory_grow(3);
-  CHECK_EQUAL(base_pages + 4, a.memory_size());  // TB4: +3 more pages
+  CHECK_EQUAL(base_pages + 4, a.memory_size()); // TB4: +3 more pages
 }
 
 // TB5: memory_grow has no bounds check against total_bytes — allocating well
@@ -290,7 +290,8 @@ ASAN_XFAIL_TEST(TestBufTests, ExceedBuffer) {
   TestBuf tb;
   BuddyAllocator a(tb.base, BUF_SZ);
   // BUF_SZ * 2 forces memory_grow to "commit" pages beyond the end of tb.raw.
-  // The next block-header write lands out-of-bounds → ASan: heap-buffer-overflow.
+  // The next block-header write lands out-of-bounds → ASan:
+  // heap-buffer-overflow.
   void *p = a.malloc(BUF_SZ * 2);
   (void)p;
 }
