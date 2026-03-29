@@ -7,10 +7,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-const float static_r = 0.000f;
-const float static_g = 0.745f;
-const float static_b = 0.004f;
-
 struct material static_env_material = {
     .density = 0.0,
     .friction = 0.7,
@@ -20,10 +16,6 @@ struct material static_env_material = {
     .collision_bit = ENV_COLLISION_BIT,
     .collision_mask = ENV_COLLISION_MASK,
 };
-
-const float dynamic_r = 0.976f;
-const float dynamic_g = 0.855f;
-const float dynamic_b = 0.184f;
 
 struct material dynamic_env_material = {
     .density = 1.0,
@@ -35,18 +27,6 @@ struct material dynamic_env_material = {
     .collision_mask = ENV_COLLISION_MASK,
 };
 
-const float wheel_r = 0.537f;
-const float wheel_g = 0.980f;
-const float wheel_b = 0.890f;
-
-const float cw_wheel_r = 1.000f;
-const float cw_wheel_g = 0.925f;
-const float cw_wheel_b = 0.000f;
-
-const float ccw_wheel_r = 1.000f;
-const float ccw_wheel_g = 0.800f;
-const float ccw_wheel_b = 0.800f;
-
 struct material solid_material = {
     .density = 1.0,
     .friction = 0.7,
@@ -57,10 +37,6 @@ struct material solid_material = {
     .collision_mask = SOLID_COLLISION_MASK,
 };
 
-const float solid_rod_r = 0.420f;
-const float solid_rod_g = 0.204f;
-const float solid_rod_b = 0.000f;
-
 struct material solid_rod_material = {
     .density = 1.0,
     .friction = 0.7,
@@ -70,10 +46,6 @@ struct material solid_rod_material = {
     .collision_bit = SOLID_COLLISION_BIT,
     .collision_mask = SOLID_COLLISION_MASK,
 };
-
-const float water_rod_r = 0.000f;
-const float water_rod_g = 0.000f;
-const float water_rod_b = 1.000f;
 
 struct material water_rod_material = {
     .density = 1.0,
