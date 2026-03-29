@@ -79,18 +79,21 @@ struct BuddyAllocator {
           ? min_block_size
           : (size_t)(1 << MALLOC_INITIAL_ROOT);
 
-  static_assert(HDR == sizeof(size_t) * 3,
+  static_assert(
+      HDR == sizeof(size_t) * 3,
       "HDR: three header words (BLKHDR_SIZE, BLKHDR_NEXT, BLKHDR_PAYLOAD)");
   static_assert(min_block_size >= sizeof(size_t) * 4,
-      "min_block_size must fit header (3 words) plus at least one payload word");
-  static_assert((min_block_size & (min_block_size - 1)) == 0,
+                "min_block_size must fit header (3 words) plus at least one "
+                "payload word");
+  static_assert(
+      (min_block_size & (min_block_size - 1)) == 0,
       "min_block_size must be a power of 2 for buddy splitting to work");
   static_assert(HDR < min_block_size,
-      "header must fit entirely within the minimum block size");
+                "header must fit entirely within the minimum block size");
   static_assert(initial_root >= min_block_size,
-      "initial_root must be at least min_block_size");
+                "initial_root must be at least min_block_size");
   static_assert((initial_root & (initial_root - 1)) == 0,
-      "initial_root must be a power of 2");
+                "initial_root must be a power of 2");
 
   explicit BuddyAllocator(unsigned char *base,
                           [[maybe_unused]] size_t buf_bytes)
