@@ -1,7 +1,6 @@
 "use strict";
 
 const FC_URL = "https://fantasticcontraption.com";
-const SELF_URL = "";
 
 function self_url_full() {
   // https://stackoverflow.com/a/6257480
@@ -59,11 +58,6 @@ let version_menu = document.getElementById("version_menu");
 const keysButton = document.getElementById("keys-button");
 const keysMenu = document.getElementById("keys_menu");
 const closeKeysMenuButton = document.getElementById("close-keys-menu");
-// These specific elements are no longer needed for individual text updates
-// because we inject a full HTML block into a target container instead.
-let version_target =
-  document.getElementById("version-target") ||
-  document.getElementById("version_menu");
 let close_version_menu = document.getElementById("close-version-menu");
 let steam_button = document.getElementById("steam-button");
 
@@ -210,11 +204,6 @@ function handleLogout() {
 }
 
 let opened = false;
-
-function play(event) {
-  inst.exports.key_down(65);
-  play_button.blur();
-}
 
 function save(event) {
   save_menu.style.display = "block";
@@ -679,7 +668,7 @@ function save_design(event) {
   let name = alloc_str(data.get("name"));
   let desc = alloc_str(data.get("description"));
 
-  let xml = inst.exports.export(user, name, desc);
+  let xml = inst.exports.do_export(user, name, desc);
   let len = inst.exports.strlen(xml);
   last_exported_checksum = inst.exports.get_main_design_checksum();
 
