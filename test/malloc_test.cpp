@@ -244,3 +244,53 @@ ASAN_XFAIL_TEST(MallocTests, BufferOverflowWrite) {
   char *p = (char *)a.malloc(1);
   p[4] = 'x'; // write into poisoned padding
 }
+
+// ── TestBuf / BuddyAllocator test-backend self-tests ─────────────────────────
+//
+// These tests verify the invariants that every MallocTest silently depends on.
+// A failure here means the test backend is broken, not the allocator logic.
+
+// TB1: base pointer is BUF_ALIGN-aligned.
+// Precondition for ensure_root_size's page-counting arithmetic:
+//   memory_size() = ((size_t)heap_base_ptr + committed_bytes) >> 16
+// If base is not a multiple of BUF_ALIGN (65536), the initial memory_size()
+// != base >> 16 and the page-growth invariant below would not hold.
+TEST(TestBufTests, BaseIsAligned) {
+  TestBuf tb;
+  CHECK_EQUAL(0u, (size_t)tb.base % BUF_ALIGN);
+}
+
+// TB2: base memory is zero-initialized.
+// BuddyAllocator assumes all block-header words start at zero; a non-zero
+// BLKHDR_NEXT in the very first block would confuse the free-list logic.
+TEST(TestBufTests, BaseIsZeroed) {
+  TestBuf tb;
+  for (size_t i = 0; i < BUF_SZ; i += 4096)
+    CHECK_EQUAL(0, (int)tb.base[i]);
+}
+
+// TB3 + TB4: memory_size() starts at base>>16 and grows by exactly n per
+// memory_grow(n) call.  This is the contract that lets ensure_root_size work
+// correctly in the non-WASM backend.
+TEST(TestBufTests, MemoryGrowIncrements) {
+  TestBuf tb;
+  BuddyAllocator a(tb.base, BUF_SZ);
+  size_t base_pages = (size_t)tb.base >> 16;
+  CHECK_EQUAL(base_pages, a.memory_size());      // TB3: initial value
+  a.memory_grow(1);
+  CHECK_EQUAL(base_pages + 1, a.memory_size());  // TB4: +1 page
+  a.memory_grow(3);
+  CHECK_EQUAL(base_pages + 4, a.memory_size());  // TB4: +3 more pages
+}
+
+// TB5: memory_grow has no bounds check against total_bytes — allocating well
+// past BUF_SZ causes the allocator to write a block header past the end of the
+// TestBuf heap allocation, which ASan catches as heap-buffer-overflow.
+ASAN_XFAIL_TEST(TestBufTests, ExceedBuffer) {
+  TestBuf tb;
+  BuddyAllocator a(tb.base, BUF_SZ);
+  // BUF_SZ * 2 forces memory_grow to "commit" pages beyond the end of tb.raw.
+  // The next block-header write lands out-of-bounds → ASan: heap-buffer-overflow.
+  void *p = a.malloc(BUF_SZ * 2);
+  (void)p;
+}
