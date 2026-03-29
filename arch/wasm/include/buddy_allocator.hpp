@@ -20,8 +20,8 @@
 //     malloc immediately writes the request size into BLKHDR_PAYLOAD before
 //     returning — so free() can always recover the original size from there
 
-#define BLKHDR_SIZE(b)    (((size_t *)(b))[0])
-#define BLKHDR_NEXT(b)    (((size_t *)(b))[1])
+#define BLKHDR_SIZE(b) (((size_t *)(b))[0])
+#define BLKHDR_NEXT(b) (((size_t *)(b))[1])
 #define BLKHDR_PAYLOAD(b) (((size_t *)(b))[2])
 
 #ifndef MALLOC_MIN_BLOCK

@@ -6,7 +6,7 @@
 // heap_base_ptr must be a multiple of 65536 so the initial memory_size() equals
 // heap_base_ptr >> 16 and grows by exactly 1 per memory_grow(1) call.
 static constexpr size_t BUF_ALIGN = 65536;
-static constexpr size_t BUF_SZ    = 4 * 1024 * 1024;
+static constexpr size_t BUF_SZ = 4 * 1024 * 1024;
 
 // Per-test heap buffer aligned to 65536. Using heap allocation (not a static
 // array) avoids disrupting ASan's global red-zone layout for other tests.
@@ -52,8 +52,10 @@ TEST(MallocTests, DataSurvivesAlloc) {
   BuddyAllocator a(tb.base, BUF_SZ);
   int *arr = (int *)a.malloc(10 * sizeof(int));
   CHECK(arr != nullptr);
-  for (int i = 0; i < 10; i++) arr[i] = i * 7;
-  for (int i = 0; i < 10; i++) CHECK_EQUAL(i * 7, arr[i]);
+  for (int i = 0; i < 10; i++)
+    arr[i] = i * 7;
+  for (int i = 0; i < 10; i++)
+    CHECK_EQUAL(i * 7, arr[i]);
   a.free(arr);
 }
 
@@ -62,7 +64,8 @@ TEST(MallocTests, CallocZeroes) {
   BuddyAllocator a(tb.base, BUF_SZ);
   int *p = (int *)a.calloc(8, sizeof(int));
   CHECK(p != nullptr);
-  for (int i = 0; i < 8; i++) CHECK_EQUAL(0, p[i]);
+  for (int i = 0; i < 8; i++)
+    CHECK_EQUAL(0, p[i]);
   a.free(p);
 }
 
@@ -79,8 +82,10 @@ TEST(MallocTests, BuddyMerge) {
   TestBuf tb;
   BuddyAllocator a(tb.base, BUF_SZ);
   void *ptrs[32];
-  for (int i = 0; i < 32; i++) ptrs[i] = a.malloc(16);
-  for (int i = 0; i < 32; i++) a.free(ptrs[i]);
+  for (int i = 0; i < 32; i++)
+    ptrs[i] = a.malloc(16);
+  for (int i = 0; i < 32; i++)
+    a.free(ptrs[i]);
   CHECK_EQUAL(0u, a.live_alloc_count_get());
   CHECK_EQUAL(0u, a.live_useful_bytes_get());
 }
@@ -110,6 +115,7 @@ TEST(MallocTests, ManySmallAllocs) {
     CHECK(ptrs[i] != nullptr);
   }
   CHECK_EQUAL((size_t)N, a.live_alloc_count_get());
-  for (int i = 0; i < N; i++) a.free(ptrs[i]);
+  for (int i = 0; i < N; i++)
+    a.free(ptrs[i]);
   CHECK_EQUAL(0u, a.live_alloc_count_get());
 }
