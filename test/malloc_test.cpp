@@ -119,3 +119,122 @@ TEST(MallocTests, ManySmallAllocs) {
     a.free(ptrs[i]);
   CHECK_EQUAL(0u, a.live_alloc_count_get());
 }
+
+// ── M5: pointer uniqueness ────────────────────────────────────────────────────
+
+TEST(MallocTests, PointerUniqueness) {
+  TestBuf tb;
+  BuddyAllocator a(tb.base, BUF_SZ);
+  void *p1 = a.malloc(16);
+  void *p2 = a.malloc(16);
+  CHECK(p1 != p2);
+  a.free(p1);
+  a.free(p2);
+}
+
+// ── M4: non-overlapping ───────────────────────────────────────────────────────
+
+TEST(MallocTests, NonOverlapping) {
+  TestBuf tb;
+  BuddyAllocator a(tb.base, BUF_SZ);
+  const int N = 16, SZ = 64;
+  unsigned char *ptrs[N];
+  for (int i = 0; i < N; i++) {
+    ptrs[i] = (unsigned char *)a.malloc(SZ);
+    CHECK(ptrs[i] != nullptr);
+    __builtin_memset(ptrs[i], i + 1, SZ);
+  }
+  // if any two allocations overlapped, a later fill would corrupt an earlier one
+  for (int i = 0; i < N; i++) {
+    for (int j = 0; j < SZ; j++)
+      CHECK_EQUAL(i + 1, (int)ptrs[i][j]);
+    a.free(ptrs[i]);
+  }
+}
+
+// ── A1: sizeof(size_t) alignment ─────────────────────────────────────────────
+
+TEST(MallocTests, AlignmentSizeT) {
+  TestBuf tb;
+  BuddyAllocator a(tb.base, BUF_SZ);
+  const size_t sizes[] = {1, 3, 7, 8, 15, 16, 31, 100, 200};
+  for (size_t i = 0; i < sizeof(sizes) / sizeof(sizes[0]); i++) {
+    void *p = a.malloc(sizes[i]);
+    CHECK(p != nullptr);
+    CHECK_EQUAL(0u, (size_t)p % sizeof(size_t));
+    a.free(p);
+  }
+}
+
+// ── F3: free enables reuse ────────────────────────────────────────────────────
+
+TEST(MallocTests, FreeEnablesReuse) {
+  TestBuf tb;
+  BuddyAllocator a(tb.base, BUF_SZ);
+  void *p1 = a.malloc(64);
+  CHECK(p1 != nullptr);
+  a.free(p1);
+  CHECK_EQUAL(0u, a.live_alloc_count_get());
+  void *p2 = a.malloc(64);
+  CHECK(p2 != nullptr);
+  CHECK_EQUAL(1u, a.live_alloc_count_get());
+  a.free(p2);
+}
+
+// ── C2: calloc with zero arguments ───────────────────────────────────────────
+
+TEST(MallocTests, CallocZeroArgs) {
+  TestBuf tb;
+  BuddyAllocator a(tb.base, BUF_SZ);
+  CHECK(a.calloc(0, sizeof(int)) == nullptr);
+  CHECK(a.calloc(4, 0) == nullptr);
+  CHECK_EQUAL(0u, a.live_alloc_count_get());
+}
+
+// ── S1: large allocation (forces memory_grow) ─────────────────────────────────
+
+TEST(MallocTests, LargeAlloc) {
+  TestBuf tb;
+  BuddyAllocator a(tb.base, BUF_SZ);
+  const size_t LARGE = 128 * 1024;
+  unsigned char *p = (unsigned char *)a.malloc(LARGE);
+  CHECK(p != nullptr);
+  for (size_t i = 0; i < LARGE; i += 4096)
+    p[i] = (unsigned char)(i & 0xFF);
+  for (size_t i = 0; i < LARGE; i += 4096)
+    CHECK_EQUAL((int)(i & 0xFF), (int)p[i]);
+  a.free(p);
+  CHECK_EQUAL(0u, a.live_alloc_count_get());
+}
+
+// ── F5: double-free detection (ASan via BUDDY_POISON) ────────────────────────
+
+ASAN_XFAIL_TEST(MallocTests, DoubleFree) {
+  TestBuf tb;
+  BuddyAllocator a(tb.base, BUF_SZ);
+  int *p = (int *)a.malloc(sizeof(int));
+  *p = 42;
+  a.free(p);
+  a.free(p); // triggers read of poisoned region in free()'s double-free guard
+}
+
+// ── F6: use-after-free detection (ASan via BUDDY_POISON) ─────────────────────
+
+ASAN_XFAIL_TEST(MallocTests, UseAfterFreeWrite) {
+  TestBuf tb;
+  BuddyAllocator a(tb.base, BUF_SZ);
+  int *p = (int *)a.malloc(sizeof(int));
+  a.free(p);
+  *p = 99; // write to poisoned region
+}
+
+// ── O1: intra-block overflow detection (ASan via BUDDY_POISON padding) ────────
+
+ASAN_XFAIL_TEST(MallocTests, BufferOverflowWrite) {
+  TestBuf tb;
+  BuddyAllocator a(tb.base, BUF_SZ);
+  // malloc(1): useful region = 1 byte; buddy block = min_block_size bytes;
+  // bytes [ptr+1 .. ptr+block_payload-1] are poisoned padding.
+  char *p = (char *)a.malloc(1);
+  p[4] = 'x'; // write into poisoned padding
+}

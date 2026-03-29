@@ -20,8 +20,8 @@
 //     malloc immediately writes the request size into BLKHDR_PAYLOAD before
 //     returning — so free() can always recover the original size from there
 
-#define BLKHDR_SIZE(b) (((size_t *)(b))[0])
-#define BLKHDR_NEXT(b) (((size_t *)(b))[1])
+#define BLKHDR_SIZE(b)    (((size_t *)(b))[0])
+#define BLKHDR_NEXT(b)    (((size_t *)(b))[1])
 #define BLKHDR_PAYLOAD(b) (((size_t *)(b))[2])
 
 #ifndef MALLOC_MIN_BLOCK
@@ -29,6 +29,22 @@
 #endif
 #ifndef MALLOC_INITIAL_ROOT
 #define MALLOC_INITIAL_ROOT MALLOC_MIN_BLOCK
+#endif
+
+// ASan integration: poison/unpoison the user-visible payload region so that
+// use-after-free, double-free, and intra-block overflow are detected.
+// The header region [block, block+HDR) is never poisoned — the allocator
+// always needs to read it.
+// These macros compile to no-ops in non-ASan builds.
+#if defined(__has_feature) && __has_feature(address_sanitizer)
+#  include <sanitizer/asan_interface.h>
+#  define BUDDY_POISON(addr, sz)   __asan_poison_memory_region((addr), (sz))
+#  define BUDDY_UNPOISON(addr, sz) __asan_unpoison_memory_region((addr), (sz))
+#  define BUDDY_IS_POISONED(addr)  __asan_address_is_poisoned((addr))
+#else
+#  define BUDDY_POISON(addr, sz)   ((void)0)
+#  define BUDDY_UNPOISON(addr, sz) ((void)0)
+#  define BUDDY_IS_POISONED(addr)  (0)
 #endif
 
 struct BuddyAllocator {
@@ -148,8 +164,14 @@ struct BuddyAllocator {
       while (cur_size > min_block_size && 2 * n <= cur_size) {
         cur_size >>= 1;
         size_t sibling = cur + cur_size;
+        // The sibling's header [sibling, sibling+HDR) sits inside the parent
+        // block's user payload, which may be poisoned (freed earlier).
+        // Unpoison it before the header write; re-poison the sibling's own
+        // user payload afterwards.
+        BUDDY_UNPOISON((void *)sibling, HDR);
         BLKHDR_SIZE(sibling) = BLKHDR_SIZE(cur) = cur_size;
         append_tail(sibling);
+        BUDDY_POISON((void *)(sibling + HDR), cur_size - HDR);
       }
       remove_block(cur);
       return (void *)(cur + HDR);
@@ -160,6 +182,10 @@ struct BuddyAllocator {
   void track_alloc(void *result, size_t useful_n) {
     size_t block = (size_t)result - HDR;
     BLKHDR_PAYLOAD(block) = useful_n;
+    size_t block_payload = BLKHDR_SIZE(block) - HDR;
+    BUDDY_UNPOISON(result, useful_n);
+    if (block_payload > useful_n)
+      BUDDY_POISON((unsigned char *)result + useful_n, block_payload - useful_n);
     live_useful_bytes_ += useful_n;
     live_block_bytes_ += BLKHDR_SIZE(block);
     live_alloc_count_++;
@@ -181,6 +207,7 @@ struct BuddyAllocator {
       ensure_root_size(root_size);
       BLKHDR_SIZE(first_free) = root_size;
       link_block(first_free, first_free);
+      BUDDY_POISON((void *)(first_free + HDR), root_size - HDR);
     }
     // all memory used: expand
     if (status == 2) {
@@ -189,6 +216,7 @@ struct BuddyAllocator {
       first_free = (size_t)heap_base_ptr + root_size;
       BLKHDR_SIZE(first_free) = root_size;
       link_block(first_free, first_free);
+      BUDDY_POISON((void *)(first_free + HDR), root_size - HDR);
       root_size <<= 1;
     }
     void *result = search_block(n);
@@ -202,6 +230,7 @@ struct BuddyAllocator {
       size_t big_block = (size_t)heap_base_ptr + root_size;
       BLKHDR_SIZE(big_block) = root_size;
       append_tail(big_block);
+      BUDDY_POISON((void *)(big_block + HDR), root_size - HDR);
       root_size <<= 1;
     } while ((root_size >> 1) < n);
     result = search_block(n);
@@ -220,11 +249,21 @@ struct BuddyAllocator {
   void free(void *p) {
     if (p == nullptr)
       return;
+    // Double-free guard: if the user region is already poisoned, this pointer
+    // was already freed. Trigger an intentional read of the poisoned address
+    // so ASan reports it as use-after-free.
+    if (BUDDY_IS_POISONED(p)) {
+      volatile char bad = *(volatile char *)p;
+      (void)bad;
+    }
     const size_t root = (size_t)heap_base_ptr;
     size_t r = (size_t)p - HDR;
     live_useful_bytes_ -= BLKHDR_PAYLOAD(r);
     live_block_bytes_ -= BLKHDR_SIZE(r);
     live_alloc_count_--;
+    // Poison before relinking so use-after-free on adjacent allocations is
+    // detected even during the merge loop below.
+    BUDDY_POISON(p, BLKHDR_SIZE(r) - HDR);
     size_t r_size = BLKHDR_SIZE(r);
     while (true) {
       if (r_size >= root_size)
