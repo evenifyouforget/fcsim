@@ -120,7 +120,8 @@ TEST(MallocTests, ManySmallAllocs) {
   CHECK_EQUAL(0u, a.live_alloc_count_get());
 }
 
-// ── M5: pointer uniqueness ────────────────────────────────────────────────────
+// ── M5: pointer uniqueness
+// ────────────────────────────────────────────────────
 
 TEST(MallocTests, PointerUniqueness) {
   TestBuf tb;
@@ -132,7 +133,8 @@ TEST(MallocTests, PointerUniqueness) {
   a.free(p2);
 }
 
-// ── M4: non-overlapping ───────────────────────────────────────────────────────
+// ── M4: non-overlapping
+// ───────────────────────────────────────────────────────
 
 TEST(MallocTests, NonOverlapping) {
   TestBuf tb;
@@ -144,7 +146,8 @@ TEST(MallocTests, NonOverlapping) {
     CHECK(ptrs[i] != nullptr);
     __builtin_memset(ptrs[i], i + 1, SZ);
   }
-  // if any two allocations overlapped, a later fill would corrupt an earlier one
+  // if any two allocations overlapped, a later fill would corrupt an earlier
+  // one
   for (int i = 0; i < N; i++) {
     for (int j = 0; j < SZ; j++)
       CHECK_EQUAL(i + 1, (int)ptrs[i][j]);
@@ -166,7 +169,8 @@ TEST(MallocTests, AlignmentSizeT) {
   }
 }
 
-// ── F3: free enables reuse ────────────────────────────────────────────────────
+// ── F3: free enables reuse
+// ────────────────────────────────────────────────────
 
 TEST(MallocTests, FreeEnablesReuse) {
   TestBuf tb;
@@ -191,7 +195,8 @@ TEST(MallocTests, CallocZeroArgs) {
   CHECK_EQUAL(0u, a.live_alloc_count_get());
 }
 
-// ── S1: large allocation (forces memory_grow) ─────────────────────────────────
+// ── S1: large allocation (forces memory_grow)
+// ─────────────────────────────────
 
 TEST(MallocTests, LargeAlloc) {
   TestBuf tb;
@@ -228,7 +233,8 @@ ASAN_XFAIL_TEST(MallocTests, UseAfterFreeWrite) {
   *p = 99; // write to poisoned region
 }
 
-// ── O1: intra-block overflow detection (ASan via BUDDY_POISON padding) ────────
+// ── O1: intra-block overflow detection (ASan via BUDDY_POISON padding)
+// ────────
 
 ASAN_XFAIL_TEST(MallocTests, BufferOverflowWrite) {
   TestBuf tb;

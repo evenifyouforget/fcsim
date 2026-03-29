@@ -20,8 +20,8 @@
 //     malloc immediately writes the request size into BLKHDR_PAYLOAD before
 //     returning — so free() can always recover the original size from there
 
-#define BLKHDR_SIZE(b)    (((size_t *)(b))[0])
-#define BLKHDR_NEXT(b)    (((size_t *)(b))[1])
+#define BLKHDR_SIZE(b) (((size_t *)(b))[0])
+#define BLKHDR_NEXT(b) (((size_t *)(b))[1])
 #define BLKHDR_PAYLOAD(b) (((size_t *)(b))[2])
 
 #ifndef MALLOC_MIN_BLOCK
@@ -37,14 +37,14 @@
 // always needs to read it.
 // These macros compile to no-ops in non-ASan builds.
 #if defined(__has_feature) && __has_feature(address_sanitizer)
-#  include <sanitizer/asan_interface.h>
-#  define BUDDY_POISON(addr, sz)   __asan_poison_memory_region((addr), (sz))
-#  define BUDDY_UNPOISON(addr, sz) __asan_unpoison_memory_region((addr), (sz))
-#  define BUDDY_IS_POISONED(addr)  __asan_address_is_poisoned((addr))
+#include <sanitizer/asan_interface.h>
+#define BUDDY_POISON(addr, sz) __asan_poison_memory_region((addr), (sz))
+#define BUDDY_UNPOISON(addr, sz) __asan_unpoison_memory_region((addr), (sz))
+#define BUDDY_IS_POISONED(addr) __asan_address_is_poisoned((addr))
 #else
-#  define BUDDY_POISON(addr, sz)   ((void)0)
-#  define BUDDY_UNPOISON(addr, sz) ((void)0)
-#  define BUDDY_IS_POISONED(addr)  (0)
+#define BUDDY_POISON(addr, sz) ((void)0)
+#define BUDDY_UNPOISON(addr, sz) ((void)0)
+#define BUDDY_IS_POISONED(addr) (0)
 #endif
 
 struct BuddyAllocator {
@@ -185,7 +185,8 @@ struct BuddyAllocator {
     size_t block_payload = BLKHDR_SIZE(block) - HDR;
     BUDDY_UNPOISON(result, useful_n);
     if (block_payload > useful_n)
-      BUDDY_POISON((unsigned char *)result + useful_n, block_payload - useful_n);
+      BUDDY_POISON((unsigned char *)result + useful_n,
+                   block_payload - useful_n);
     live_useful_bytes_ += useful_n;
     live_block_bytes_ += BLKHDR_SIZE(block);
     live_alloc_count_++;
