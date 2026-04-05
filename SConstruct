@@ -163,10 +163,10 @@ run_single_design_xml_sources = [
     "src/run_single_design_xml.cpp",
 ]
 wasm_sources = [
-    "src/arch/wasm/math.c",
+    "src/arch/wasm/math.cpp",
     "src/arch/wasm/malloc.cpp",
-    "src/arch/wasm/gl.c",
-    "src/arch/wasm/string.c",
+    "src/arch/wasm/gl.cpp",
+    "src/arch/wasm/string.cpp",
 ]
 
 linux_sources_all = common_sources + linux_sources
