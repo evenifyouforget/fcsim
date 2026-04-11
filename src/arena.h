@@ -66,7 +66,7 @@ struct arena {
   enum state state;
   struct joint *hover_joint;
   struct block *hover_block;
-  void *hit_test_state; /* actual type: HitTestState* (arena.cpp) */
+  void *hit_test_state; /* actual type: hit_test_state_t* (arena.cpp) */
 
   /* MoveState* — C++-only type, stored as void* so this header stays valid C.
    * Follows the same pattern as block_graphics_v2. Initialised by

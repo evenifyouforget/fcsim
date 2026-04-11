@@ -1134,7 +1134,7 @@ void preview_trail_draw(arena *arena) {
 static void draw_hit_test_crosshairs(struct arena *arena) {
   if (arena->state == STATE_RUNNING || arena->state == STATE_RUNNING_PAN)
     return;
-  HitTestState *ht = (HitTestState *)arena->hit_test_state;
+  hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
   if (!ht || ht->candidates.size() == 0)
     return;
   block_graphics *graphics = (block_graphics *)arena->block_graphics_v2;
