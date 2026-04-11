@@ -155,6 +155,7 @@ extern GLuint joint_program_coord_attrib;
 void block_graphics_init(struct arena *ar);
 void arena_move_init(struct arena *arena);
 void arena_hit_test_init(struct arena *arena);
+void arena_hit_test_update(struct arena *arena);
 #ifndef ARENA_C
 extern int _fcsim_base_fps_mod;
 extern double _fcsim_target_tps;
