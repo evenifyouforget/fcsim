@@ -12,6 +12,14 @@ extern "C" {
 #include "box2d/b2Vec.h"
 }
 
+struct HitTestState {
+  bool sticky = false;
+  int ref_px = 0, ref_py = 0;            /* pixel coords when sticky started */
+  std::vector<struct joint *> candidates; /* joints within hit radius, sorted by distance */
+  int sel_idx = 0;                        /* index of selected candidate */
+  int last_modcount = -1;                 /* design modcount at last candidate refresh */
+};
+
 struct trail_t {
   std::vector<b2Vec2> datapoints;
 };

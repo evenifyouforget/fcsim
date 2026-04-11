@@ -170,7 +170,9 @@ extern struct material water_rod_material;
 #define FCSIM_SKY 16
 #define FCSIM_UI_BUTTON 17
 #define FCSIM_GOAL_RECT_OVERTURNED 18
-#define FCSIM_NUM_TYPES 19
+#define FCSIM_HIT_TEST_CANDIDATE 19
+#define FCSIM_HIT_TEST_SELECTED  20
+#define FCSIM_NUM_TYPES 21
 #define FCSIM_NUM_PALETTES 3
 
 extern uint32_t piece_color_table[FCSIM_NUM_TYPES][2 * FCSIM_NUM_PALETTES];

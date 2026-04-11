@@ -23,6 +23,7 @@ const KEYBINDINGS = [
       { key: "Ctrl + Click", description: "Delete (ignores current tool)" },
       { key: "Shift + Scroll Down", description: "Make fine adjustment finer" },
       { key: "Shift + Scroll Up", description: "Make fine adjustment coarser" },
+      { key: "Tab", description: "Cycle to next joint stack (sticky hit test)" },
     ],
   },
   {
