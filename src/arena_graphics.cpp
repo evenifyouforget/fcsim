@@ -1137,6 +1137,13 @@ static void draw_hit_test_crosshairs(struct arena *arena) {
   hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
   if (!ht || ht->candidates.size() == 0)
     return;
+  /* Clear stale candidates immediately — joints may have been freed since the
+   * last mouse-move event, which is the only other place we detect this. */
+  if (arena->design.modcount != ht->last_modcount) {
+    ht->sticky = false;
+    ht->candidates.clear();
+    return;
+  }
   block_graphics *graphics = (block_graphics *)arena->block_graphics_v2;
   for (int i = 0; i < (int)ht->candidates.size(); i++) {
     struct joint *j = ht->candidates[i];

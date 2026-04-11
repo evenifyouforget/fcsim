@@ -64,7 +64,7 @@ void arena_move_init(struct arena *arena) {
 }
 
 extern "C" void arena_hit_test_init(struct arena *arena) {
-  arena->hit_test_state = _new<HitTestState>();
+  arena->hit_test_state = _new<hit_test_state_t>();
 }
 
 #define MAX_RENDER_TEXT_LENGTH 1000
@@ -446,7 +446,7 @@ void start_stop(struct arena *arena) {
   // also unpause
   arena->single_ticks_remaining = -1;
 
-  HitTestState *ht = (HitTestState *)arena->hit_test_state;
+  hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
   ht->sticky = false;
   ht->candidates.clear();
 }
@@ -524,8 +524,13 @@ void arena_key_down_event(struct arena *arena, int key) {
     break;
   case 23: /* Tab */
     if (arena->state == STATE_NORMAL) {
-      HitTestState *ht = (HitTestState *)arena->hit_test_state;
-      if (!ht->candidates.size() == 0) {
+      hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
+      /* Discard candidates if the design changed since they were collected. */
+      if (arena->design.modcount != ht->last_modcount) {
+        ht->sticky = false;
+        ht->candidates.clear();
+      }
+      if (ht->candidates.size() != 0) {
         if (!ht->sticky) {
           ht->sticky = true;
           ht->ref_px = arena->cursor_x;
@@ -890,7 +895,7 @@ void action_none(struct arena *arena, int x, int y) {
   float x_world;
   float y_world;
   struct block *block;
-  HitTestState *ht = (HitTestState *)arena->hit_test_state;
+  hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
 
   if (arena->state == STATE_RUNNING || arena->state == STATE_RUNNING_PAN)
     return;
