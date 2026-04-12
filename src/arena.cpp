@@ -905,9 +905,9 @@ void arena_hit_test_update(struct arena *arena) {
   if (ht->sticky) {
     float dx = (float)(arena->cursor_x - ht->ref_px);
     float dy = (float)(arena->cursor_y - ht->ref_py);
-    bool mouse_moved = (dx * dx + dy * dy) >
-                       (float)(EDITOR_HIT_TEST_REFRESH_PIXELS *
-                               EDITOR_HIT_TEST_REFRESH_PIXELS);
+    bool mouse_moved =
+        (dx * dx + dy * dy) > (float)(EDITOR_HIT_TEST_REFRESH_PIXELS *
+                                      EDITOR_HIT_TEST_REFRESH_PIXELS);
     bool design_changed = (arena->design.modcount != ht->last_modcount);
     if (mouse_moved || design_changed) {
       ht->sticky = false;

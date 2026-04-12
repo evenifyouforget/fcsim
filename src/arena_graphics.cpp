@@ -1144,8 +1144,8 @@ static void draw_hit_test_crosshairs(struct arena *arena) {
   for (int i = 0; i < (int)ht->candidates.size(); i++) {
     struct joint *j = ht->candidates[i];
     ::joint jv = joint_from_xy(j->x, j->y);
-    int type_id = (i == ht->sel_idx) ? FCSIM_HIT_TEST_SELECTED
-                                     : FCSIM_HIT_TEST_CANDIDATE;
+    int type_id =
+        (i == ht->sel_idx) ? FCSIM_HIT_TEST_SELECTED : FCSIM_HIT_TEST_CANDIDATE;
     block_graphics_add_joint(graphics, jv, get_color_by_type(type_id, 1));
   }
 }
