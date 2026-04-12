@@ -921,34 +921,15 @@ void arena_hit_test_update(struct arena *arena) {
 }
 
 void action_none(struct arena *arena, int x, int y) {
-  float x_world;
-  float y_world;
+  float x_world, y_world;
   struct block *block;
   hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
 
   if (arena->state == STATE_RUNNING || arena->state == STATE_RUNNING_PAN)
     return;
 
-  if (ht->sticky) {
-    float dx = (float)(x - ht->ref_px);
-    float dy = (float)(y - ht->ref_py);
-    bool mouse_moved = (dx * dx + dy * dy) >
-                       (float)(EDITOR_HIT_TEST_REFRESH_PIXELS *
-                               EDITOR_HIT_TEST_REFRESH_PIXELS);
-    bool design_changed = (arena->design.modcount != ht->last_modcount);
-    if (mouse_moved || design_changed) {
-      ht->sticky = false;
-      ht->candidates.clear();
-    }
-  }
-
-  if (!ht->sticky) {
-    pixel_to_world(&arena->view, x, y, &x_world, &y_world);
-    ht->candidates = joint_hit_test_multi(arena, x_world, y_world);
-    ht->sel_idx = 0;
-    ht->last_modcount = arena->design.modcount;
-  }
-
+  /* Candidates are maintained by arena_hit_test_update (called every frame).
+   * Just read from the hit test state here. */
   if (ht->candidates.size() != 0) {
     arena->hover_joint = ht->candidates[ht->sel_idx];
     arena->hover_block = NULL;
@@ -1495,18 +1476,12 @@ void resolve_joint(struct arena *arena, struct joint *joint) {
 }
 
 void mouse_down_move(struct arena *arena, float x, float y) {
-  /* When the user has tab-cycled to a specific joint, honour that selection
-   * directly rather than relying on hover_joint, which action_none may have
-   * refreshed between the Tab press and the click. */
   hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
-  if (ht && ht->sticky && ht->candidates.size() != 0)
-    arena->hover_joint = ht->candidates[ht->sel_idx];
-
   arena->move_orig_joint = NULL;
   arena->move_orig_block = NULL;
 
-  if (arena->hover_joint) {
-    resolve_joint(arena, arena->hover_joint);
+  if (ht->candidates.size() != 0) {
+    resolve_joint(arena, ht->candidates[ht->sel_idx]);
     arena->state = STATE_MOVE;
     arena->move_orig_x = x;
     arena->move_orig_y = y;
