@@ -8,6 +8,12 @@
 #define ARENA_C
 extern "C" {
 #include "arena.h"
+#ifndef __wasm__
+#include <stdio.h>
+#else
+int printf(const char *fmt, ...);
+#endif
+#define DBG(...) printf(__VA_ARGS__)
 #include "gen.h"
 #include "gl.h"
 #include "graph.h"
@@ -530,6 +536,8 @@ void arena_key_down_event(struct arena *arena, int key) {
         ht->sticky = false;
         ht->candidates.clear();
       }
+      DBG("[Tab before] cands=%d sel=%d sticky=%d\n",
+          (int)ht->candidates.size(), ht->sel_idx, (int)ht->sticky);
       if (ht->candidates.size() != 0) {
         if (!ht->sticky) {
           ht->sticky = true;
@@ -539,6 +547,7 @@ void arena_key_down_event(struct arena *arena, int key) {
         }
         ht->sel_idx = (ht->sel_idx + 1) % (int)ht->candidates.size();
         arena->hover_joint = ht->candidates[ht->sel_idx];
+        DBG("[Tab after] sel=%d sticky=%d\n", ht->sel_idx, (int)ht->sticky);
       }
     }
     break;
@@ -905,6 +914,8 @@ void arena_hit_test_update(struct arena *arena) {
                        (float)(EDITOR_HIT_TEST_REFRESH_PIXELS *
                                EDITOR_HIT_TEST_REFRESH_PIXELS);
     bool design_changed = (arena->design.modcount != ht->last_modcount);
+    DBG("[ht_upd sticky] moved=%d changed=%d sel=%d\n",
+        (int)mouse_moved, (int)design_changed, ht->sel_idx);
     if (mouse_moved || design_changed) {
       ht->sticky = false;
       ht->candidates.clear();
@@ -917,6 +928,7 @@ void arena_hit_test_update(struct arena *arena) {
     ht->candidates = joint_hit_test_multi(arena, x_world, y_world);
     ht->sel_idx = 0;
     ht->last_modcount = arena->design.modcount;
+    DBG("[ht_upd refresh] cands=%d\n", (int)ht->candidates.size());
   }
 }
 
@@ -1479,6 +1491,9 @@ void mouse_down_move(struct arena *arena, float x, float y) {
   hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
   arena->move_orig_joint = NULL;
   arena->move_orig_block = NULL;
+
+  DBG("[mouse_down] cands=%d sel=%d sticky=%d\n",
+      (int)ht->candidates.size(), ht->sel_idx, (int)ht->sticky);
 
   if (ht->candidates.size() != 0) {
     resolve_joint(arena, ht->candidates[ht->sel_idx]);
