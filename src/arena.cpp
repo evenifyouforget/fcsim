@@ -1495,6 +1495,13 @@ void resolve_joint(struct arena *arena, struct joint *joint) {
 }
 
 void mouse_down_move(struct arena *arena, float x, float y) {
+  /* When the user has tab-cycled to a specific joint, honour that selection
+   * directly rather than relying on hover_joint, which action_none may have
+   * refreshed between the Tab press and the click. */
+  hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
+  if (ht && ht->sticky && ht->candidates.size() != 0)
+    arena->hover_joint = ht->candidates[ht->sel_idx];
+
   arena->move_orig_joint = NULL;
   arena->move_orig_block = NULL;
 
