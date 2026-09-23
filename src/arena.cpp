@@ -287,14 +287,117 @@ void arena_key_up_event(struct arena *arena, int key) {
 
 static int block_inside_area(struct block *block, struct area *area);
 
+/* Win check as the original game does it: Player.hasWon(), which works on
+ * Flash display-list values rather than physics values:
+ *
+ * - a block's x/y are DisplayObject.x/y, set from the body each tick
+ *   (Block.updateFromPhysicsBody) and stored as integer twips (1/20 px,
+ *   truncated toward zero);
+ * - the goal area's centre is likewise its DisplayObject.x/y
+ *   (StartZone.getPosition), while its width/height are plain Numbers;
+ * - goal circles (Wheel) use x +- radius;
+ * - goal rects use DisplayObject.width/height minus 4. That is the axis-
+ *   aligned bounds of the block's foreground graphic after rotation. The
+ *   foreground holds the fill and radius-3 anchor circles with a 2px stroke
+ *   at the centre and corners (JointedDynamicRectangle.drawBlock,
+ *   Block.drawTypedAnchor), so its local bounds are +-(w/2 + 4) x +-(h/2 + 4).
+ *   The rotated bounds are the extent of the four transformed corners, each
+ *   truncated to twips.
+ *
+ * Checked against ftlib's dataset of real FC results: see README §Win check.
+ */
+/* (the web build's libc has no trunc/fmod/INFINITY, so these avoid them) */
+static double flash_twips(double v) {
+  double t = v * 20.0;
+  /* out of int32 range (or NaN): Flash stores 0x80000000 twips */
+  if (!(t > -2147483648.0 && t < 2147483648.0))
+    return -2147483648.0 / 20.0;
+  /* in range, int conversion truncates toward zero, like trunc() */
+  return (double)(int32_t)t / 20.0;
+}
+
+/* fmod(a, 360) for |a| < 2^31, exactly: the true remainder is always
+ * representable, so a - q * 360 is exact once q is the right integer */
+static double fmod360(double a) {
+  double q = (double)(int32_t)(a / 360.0);
+  double r = a - q * 360.0;
+  if (a >= 0 ? r < 0 : r > 0)
+    q += a >= 0 ? -1 : 1, r = a - q * 360.0;
+  else if (r >= 360.0 || r <= -360.0)
+    q += a >= 0 ? 1 : -1, r = a - q * 360.0;
+  return r;
+}
+
+static bool flash_block_inside(struct block *block, double x0, double x1,
+                               double y0, double y1) {
+  struct shell shell;
+  double ex, ey, x, y;
+
+  get_shell(&shell, &block->shape);
+  if (block->body) {
+    shell.x = block->body->m_position.x;
+    shell.y = block->body->m_position.y;
+    shell.angle = block->body->m_rotation;
+  }
+  x = flash_twips(shell.x);
+  y = flash_twips(shell.y);
+  if (shell.type == SHELL_CIRC) {
+    ex = ey = shell.circ.radius * 2 / 2;
+  } else {
+    /* Block.updateFromPhysicsBody: rotation = m_rotation * (180 / pi) */
+    double deg = shell.angle * (180 / 3.141592653589793);
+    double rad, c, s, a, b, xmin = 0, xmax = 0, ymin = 0, ymax = 0;
+    int sx, sy, first = 1;
+
+    /* matches FC on the "huge rotation" test levels */
+    if (fabs(deg) >= 32768)
+      deg = -32768;
+    /* DisplayObject.rotation keeps the angle in [-180, 180) */
+    if (deg == deg) { /* not NaN */
+      deg = fmod360(deg + 180);
+      if (deg < 0)
+        deg += 360;
+      deg -= 180;
+    }
+    rad = deg * (3.141592653589793 / 180);
+    c = fp_cos(rad);
+    s = fp_sin(rad);
+    a = shell.rect.w / 2 + 4;
+    b = shell.rect.h / 2 + 4;
+    for (sx = -1; sx <= 1; sx += 2) {
+      for (sy = -1; sy <= 1; sy += 2) {
+        double px = flash_twips(c * sx * a - s * sy * b);
+        double py = flash_twips(s * sx * a + c * sy * b);
+        if (first) {
+          xmin = xmax = px;
+          ymin = ymax = py;
+          first = 0;
+        }
+        xmin = fmin(xmin, px);
+        xmax = fmax(xmax, px);
+        ymin = fmin(ymin, py);
+        ymax = fmax(ymax, py);
+      }
+    }
+    ex = ((xmax - xmin) - 4) / 2;
+    ey = ((ymax - ymin) - 4) / 2;
+  }
+
+  return !(x - ex < x0 || x + ex > x1 || y - ey < y0 || y + ey > y1);
+}
+
 bool goal_blocks_inside_goal_area(struct design *design) {
+  struct area *g = &design->goal_area;
+  double gx = flash_twips(g->x), gy = flash_twips(g->y);
+  double x0 = gx - g->w / 2, x1 = gx + g->w / 2;
+  double y0 = gy - g->h / 2, y1 = gy + g->h / 2;
   struct block *block;
   bool any = false;
 
   for (block = design->design_blocks.head; block; block = block->next) {
     if (block->goal) {
       any = true;
-      if (!block_inside_area(block, &design->goal_area))
+      if (!flash_block_inside(block, x0, x1, y0, y1))
         return false;
     }
   }
@@ -604,6 +707,9 @@ struct joint *joint_hit_test_exclude_wheel(struct arena *arena, float x,
       continue;
     if (joint == wheel->spokes[3])
       continue;
+    if (joint == wheel->inner[0] || joint == wheel->inner[1] ||
+        joint == wheel->inner[2] || joint == wheel->inner[3])
+      continue;
     if (has_wheel(joint, wheel))
       continue;
     dist = distance(x, y, joint->x, joint->y);
@@ -790,6 +896,17 @@ void delete_wheel_joints(struct design *design, struct wheel *wheel) {
       free(wheel->spokes[i]);
     }
   }
+
+  for (i = 0; i < 4; i++) {
+    if (!wheel->inner[i])
+      continue;
+    if (wheel->inner[i]->att.head) {
+      wheel->inner[i]->gen = NULL;
+    } else {
+      remove_joint(&design->joints, wheel->inner[i]);
+      free(wheel->inner[i]);
+    }
+  }
 }
 
 void delete_block(struct arena *arena, struct block *block) {
@@ -868,6 +985,11 @@ void action_none(struct arena *arena, int x, int y) {
 
 void move_joint(struct arena *arena, struct joint *joint, double x, double y);
 
+/* offsets of a wheel's inner joints from its centre; see add_wheel_inner_joints
+ */
+static const double wheel_inner_dx[4] = {20.0, 0.0, -20.0, 0.0};
+static const double wheel_inner_dy[4] = {0.0, 20.0, 0.0, -20.0};
+
 void update_wheel_joints2(struct wheel *wheel) {
   double a[4] = {
       0.0,
@@ -884,6 +1006,13 @@ void update_wheel_joints2(struct wheel *wheel) {
   for (i = 0; i < 4; i++) {
     wheel->spokes[i]->x = x + fp_cos(wheel->angle + a[i]) * wheel->radius;
     wheel->spokes[i]->y = y + fp_sin(wheel->angle + a[i]) * wheel->radius;
+  }
+
+  for (i = 0; i < 4; i++) {
+    if (!wheel->inner[i])
+      continue;
+    wheel->inner[i]->x = x + wheel_inner_dx[i];
+    wheel->inner[i]->y = y + wheel_inner_dy[i];
   }
 }
 
@@ -945,6 +1074,13 @@ void update_wheel_joints(struct arena *arena, struct wheel *wheel) {
     spoke_x = x + fp_cos(wheel->angle + a[i]) * wheel->radius;
     spoke_y = y + fp_sin(wheel->angle + a[i]) * wheel->radius;
     move_joint(arena, wheel->spokes[i], spoke_x, spoke_y);
+  }
+
+  for (i = 0; i < 4; i++) {
+    if (!wheel->inner[i])
+      continue;
+    move_joint(arena, wheel->inner[i], x + wheel_inner_dx[i],
+               y + wheel_inner_dy[i]);
   }
 }
 
@@ -1346,6 +1482,9 @@ void block_dfs(struct arena *arena, struct block *block, bool value, bool all) {
       joint_dfs(arena, shape->wheel.center, value, all);
     for (i = 0; i < 4; i++)
       joint_dfs(arena, shape->wheel.spokes[i], value, all);
+    for (i = 0; i < 4; i++)
+      if (shape->wheel.inner[i])
+        joint_dfs(arena, shape->wheel.inner[i], value, all);
     break;
   }
 
@@ -1527,6 +1666,9 @@ void mouse_down_wheel(struct arena *arena, float x, float y) {
     block->shape.wheel.spokes[i] = new_joint(block, spoke_x, spoke_y);
     append_joint(&design->joints, block->shape.wheel.spokes[i]);
   }
+  /* radius 20: no inner joints (they need radius > 20) */
+  for (i = 0; i < 4; i++)
+    block->shape.wheel.inner[i] = NULL;
 
   block->material = &solid_material;
   block->goal = false;

@@ -101,6 +101,9 @@ void _add_block_to_checksum(checksum_state_t &state, struct block *block,
       for (int i = 0; i < 4; ++i) {
         _assign_joint_uid(state, block->shape.wheel.spokes[i], phase);
       }
+      for (int i = 0; i < 4; ++i) {
+        _assign_joint_uid(state, block->shape.wheel.inner[i], phase);
+      }
       break;
     }
     }
@@ -150,6 +153,11 @@ void _add_block_to_checksum(checksum_state_t &state, struct block *block,
       //_add_value_to_checksum(state, (uint64_t)(block->shape.wheel.spin));
       for (int i = 0; i < 4; ++i) {
         _add_joint_to_checksum(state, block->shape.wheel.spokes[i]);
+      }
+      if (block->shape.wheel.inner[0]) {
+        for (int i = 0; i < 4; ++i) {
+          _add_joint_to_checksum(state, block->shape.wheel.inner[i]);
+        }
       }
       break;
     }

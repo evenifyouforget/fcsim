@@ -334,7 +334,11 @@ int get_block_joints(struct block *block, struct joint **res) {
     res[0] = shape->wheel.center;
     for (i = 0; i < 4; i++)
       res[i + 1] = shape->wheel.spokes[i];
-    return 5;
+    if (!shape->wheel.inner[0])
+      return 5;
+    for (i = 0; i < 4; i++)
+      res[i + 5] = shape->wheel.inner[i];
+    return 9;
   default:
     return 0;
   }
@@ -396,7 +400,7 @@ static struct joint *find_closest_joint(struct attach_list *list, double x,
   struct attach_node *att;
 
   for (att = list->head; att; att = att->next) {
-    struct joint *joints[5];
+    struct joint *joints[MAX_BLOCK_JOINTS];
     int joint_cnt;
     int i;
 
@@ -415,7 +419,7 @@ static struct joint *find_closest_joint(struct attach_list *list, double x,
 }
 
 static bool block_has_joint(struct block *block, struct joint *joint) {
-  struct joint *j[5];
+  struct joint *j[MAX_BLOCK_JOINTS];
   int n;
   int i;
 
@@ -489,6 +493,22 @@ static void add_rod(struct design *design, struct block *block,
   shape->rod.width = (xml_block->type == XML_SOLID_ROD ? 8 : 4);
 }
 
+void add_wheel_inner_joints(struct design *design, struct block *block) {
+  static const double dx[4] = {20.0, 0.0, -20.0, 0.0};
+  static const double dy[4] = {0.0, 20.0, 0.0, -20.0};
+  struct wheel *wheel = &block->shape.wheel;
+  int i;
+
+  for (i = 0; i < 4; i++) {
+    wheel->inner[i] = NULL;
+    if (wheel->radius > 20) {
+      wheel->inner[i] =
+          new_joint(block, wheel->center->x + dx[i], wheel->center->y + dy[i]);
+      append_joint(&design->joints, wheel->inner[i]);
+    }
+  }
+}
+
 static void add_wheel(struct design *design, struct block *block,
                       struct xml_block *xml_block) {
   struct shape *shape = &block->shape;
@@ -542,6 +562,11 @@ static void add_wheel(struct design *design, struct block *block,
     shape->wheel.spokes[i] = new_joint(block, spoke_x, spoke_y);
     append_joint(&design->joints, shape->wheel.spokes[i]);
   }
+
+  /* Wheel.as constructor: if radius > 20, four more joints at
+   * (x+20, y), (x, y+20), (x-20, y), (x, y-20) from the (snapped) centre,
+   * independent of rotation, added after the circumference joints */
+  add_wheel_inner_joints(design, block);
 }
 
 static void add_level_block(struct design *design,
