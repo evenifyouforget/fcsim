@@ -258,12 +258,14 @@ The number of joints is dependent on the type ID, and in some cases, dependent o
 
 * For rods (water rod, wood rod), it is 2 (left side, and right side)
 * For goal rectangles, it is 5 (center, and 4 corners)
-* For design circles (the 3 wheel types, and goal circles), it is 5 (center, and 4 cardinal points) or 9 (additional 4 cardinal points at fixed diameter of 40mm if the block's actual diameter is greater than 40mm)
+* For design circles (the 3 wheel types, and goal circles), it is 5 (center, and 4 cardinal points) or 9 (additional 4 cardinal points at fixed diameter of 40mm if the block's actual diameter is greater than 40mm). The 4 extra joints are at (x+20, y), (x, y+20), (x-20, y), (x, y-20) from the center: unlike the circumference joints, they are *not* rotated by the wheel's rotation. This follows the original game's `Wheel` constructor. Once the simulation runs they turn with the wheel's body, so on a wheel rotated at build time they stay offset by that rotation. The game nonetheless *draws* them rotated with the wheel at build time, so on a rotated wheel the visible inner joints are not where rods actually snap. fcsim replicates this drawing. Large wheels can only come from XML (for example goal circles from the level editor), since wheels placed in the editor have a 40mm diameter.
 * For all other type IDs, it is 0
 
 Notably, level blocks always have 0 joints.
 
-Not creating 9 joints is a known bug.
+The 9 joints are created in the order above (center, circumference, inner), which is the order the original game builds its physics joints in. Rods snap to the inner joints like any other joint, and blocks sharing one do not collide.
+
+Note that the design checksum hashes each joint's neighbours in the joint list, so adding the inner joints changes the checksum of designs with large wheels.
 
 These joints appear in a fixed order (Though the correct order has only been documented for rods. We genuinely don't know for every other type)
 
@@ -343,6 +345,17 @@ Currently, blocks may have their position (and in the case of rods, width and an
 In practice, outgoing joint preference is only relevant for rods, since only rods have multiple allow-out joints - for wheels and goal circles, there is no possible ambiguity. Rod re-snapping is well known and considered a bug by players.
 
 In practice, incoming joint preference is irrelevant - any proper editor (including the original FC client) will automatically snap blocks so that all joints within a joint stack remain at "the same" position (again, subject to floating-point math), meaning that, by distance, there should never be a tie. Ties are only possible with certain external editors that do not enforce joint snapping.
+
+### Win condition
+
+A design solves on the first tick after which all goal blocks are inside the goal area. The check follows the original game's `Player.hasWon()`, which works on Flash display-list values rather than physics values:
+
+* Goal block and goal area centers are Flash `DisplayObject.x/y`, which are stored as integer twips (1/20 of a unit), truncated toward zero. The goal area's width and height are exact.
+* Goal circles use x ± radius.
+* Goal rectangles use the axis-aligned bounds of their rendered graphic after rotation, minus 4. The anchor circles drawn at the corners (radius 3, 2px stroke) give local bounds of ±(w/2 + 4) × ±(h/2 + 4), so an unrotated goal rectangle must be 2mm inside the goal area on every side. Each rotated corner is truncated to twips.
+* Rotations with |degrees| ≥ 32768 act as -32768 degrees.
+
+Against ftlib's dataset of solve ticks recorded in the original game, this raises agreement from 76.3% to 94.1% (together with the 9 wheel joints: 96.4%).
 
 ### Box2D World
 
