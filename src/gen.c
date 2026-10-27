@@ -10,8 +10,8 @@
 #include "graph.h"
 
 static bool share_joint(struct block *block1, struct block *block2) {
-  struct joint *j1[5];
-  struct joint *j2[5];
+  struct joint *j1[MAX_BLOCK_JOINTS];
+  struct joint *j2[MAX_BLOCK_JOINTS];
   int n1, n2;
   int i1, i2;
 

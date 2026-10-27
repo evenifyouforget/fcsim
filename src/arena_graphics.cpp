@@ -276,7 +276,11 @@ std::vector<joint> generate_joints(block *block) {
     result.push_back(joint_from_xy(shell.x - wc, shell.y - ws));
     result.push_back(joint_from_xy(shell.x + ws, shell.y - wc));
     if (w > 40) {
-      // extra inner joints
+      // extra inner joints. Drawn rotated with the wheel, as the original
+      // game draws them (Wheel.drawBlock), even though at build time the
+      // actual inner joints are axis-aligned (see add_wheel_inner_joints):
+      // on a rotated wheel, the visual and real inner joints differ until
+      // the simulation starts.
       float wc2 = 40 * cosa_half;
       float ws2 = 40 * sina_half;
       result.push_back(joint_from_xy(shell.x + wc2, shell.y + ws2));

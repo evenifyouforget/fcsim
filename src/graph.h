@@ -104,6 +104,10 @@ struct wheel {
   int spin; /* 0 = no spin, 5 = clockwise, -5 = counter-clockwise */
 
   struct joint *spokes[4];
+  /* Wheels with radius > 20 also have 4 joints fixed 20mm from the centre,
+   * axis-aligned (not rotated with the wheel), as in the original game
+   * (Wheel.as). NULL when absent. See README §Joints. */
+  struct joint *inner[4];
 };
 
 enum shape_type {
@@ -286,6 +290,12 @@ void free_world(b2World *world, struct design *design);
 
 void step(struct b2World *world);
 void get_shell(struct shell *shell, struct shape *shape);
+/* Create a wheel's inner joints (if radius > 20) from its centre and append
+ * them to the design's joint list. */
+void add_wheel_inner_joints(struct design *design, struct block *block);
+
+/* max joints per block: wheel centre + 4 spokes + 4 inner joints */
+#define MAX_BLOCK_JOINTS 9
 int get_block_joints(struct block *block, struct joint **res);
 bool share_block(struct design *design, struct joint *j1, struct joint *j2);
 
