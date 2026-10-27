@@ -497,17 +497,18 @@ static void add_rod(struct design *design, struct block *block,
   shape->rod.width = (xml_block->type == XML_SOLID_ROD ? 8 : 4);
 }
 
+const double wheel_inner_dx[4] = {20.0, 0.0, -20.0, 0.0};
+const double wheel_inner_dy[4] = {0.0, 20.0, 0.0, -20.0};
+
 void add_wheel_inner_joints(struct design *design, struct block *block) {
-  static const double dx[4] = {20.0, 0.0, -20.0, 0.0};
-  static const double dy[4] = {0.0, 20.0, 0.0, -20.0};
   struct wheel *wheel = &block->shape.wheel;
   int i;
 
   for (i = 0; i < 4; i++) {
     wheel->inner[i] = NULL;
     if (wheel->radius > 20) {
-      wheel->inner[i] =
-          new_joint(block, wheel->center->x + dx[i], wheel->center->y + dy[i]);
+      wheel->inner[i] = new_joint(block, wheel->center->x + wheel_inner_dx[i],
+                                  wheel->center->y + wheel_inner_dy[i]);
       append_joint(&design->joints, wheel->inner[i]);
     }
   }

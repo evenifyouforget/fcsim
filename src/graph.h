@@ -290,8 +290,11 @@ void free_world(b2World *world, struct design *design);
 
 void step(struct b2World *world);
 void get_shell(struct shell *shell, struct shape *shape);
+/* offsets of a wheel's inner joints from its centre, in inner[] order */
+extern const double wheel_inner_dx[4];
+extern const double wheel_inner_dy[4];
 /* Create a wheel's inner joints (if radius > 20) from its centre and append
- * them to the design's joint list. */
+ * them to the design's joint list. Sets inner[] to NULL otherwise. */
 void add_wheel_inner_joints(struct design *design, struct block *block);
 
 /* max joints per block: wheel centre + 4 spokes + 4 inner joints */
