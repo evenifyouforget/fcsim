@@ -578,6 +578,7 @@ function to_key(code) {
   if (code == "Digit0") return 19;
   if (code == "ShiftLeft") return 50;
   if (code == "ControlLeft") return 37;
+  if (code == "Tab") return 23;
   return 0;
 }
 
@@ -589,6 +590,7 @@ function to_button(code) {
 function canvas_keydown(event) {
   if (opened || account_menu_opened || version_menu_opened || keys_menu_opened)
     return;
+  if (event.code == "Tab") event.preventDefault();
   inst.exports.key_down(to_key(event.code));
 }
 
