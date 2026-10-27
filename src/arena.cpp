@@ -8,6 +8,9 @@
 #define ARENA_C
 extern "C" {
 #include "arena.h"
+#ifndef __wasm__
+#include <stdio.h>
+#endif
 #include "gen.h"
 #include "gl.h"
 #include "graph.h"
@@ -21,6 +24,7 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 }
+#include "arena.hpp"
 
 /*
  * MoveState is a snapshot of the connected component being dragged, captured
@@ -60,6 +64,10 @@ struct MoveState {
 
 void arena_move_init(struct arena *arena) {
   arena->move_state = _new<MoveState>();
+}
+
+extern "C" void arena_hit_test_init(struct arena *arena) {
+  arena->hit_test_state = _new<hit_test_state_t>();
 }
 
 #define MAX_RENDER_TEXT_LENGTH 1000
@@ -227,6 +235,7 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len) {
     arena->hover_block = NULL;
 
     arena_move_init(arena);
+    arena_hit_test_init(arena);
 
     /* first design replaces arena->design entirely */
     arena->design = tmp;
@@ -439,6 +448,10 @@ void start_stop(struct arena *arena) {
   }
   // also unpause
   arena->single_ticks_remaining = -1;
+
+  hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
+  ht->sticky = false;
+  ht->candidates.clear();
 }
 
 /*
@@ -512,6 +525,26 @@ void arena_key_down_event(struct arena *arena, int key) {
   case 37: /* ctrl */
     arena->ctrl = true;
     break;
+  case 23: /* Tab */
+    if (arena->state == STATE_NORMAL) {
+      hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
+      /* Discard candidates if the design changed since they were collected. */
+      if (arena->design.modcount != ht->last_modcount) {
+        ht->sticky = false;
+        ht->candidates.clear();
+      }
+      if (ht->candidates.size() != 0) {
+        if (!ht->sticky) {
+          ht->sticky = true;
+          ht->ref_px = arena->cursor_x;
+          ht->ref_py = arena->cursor_y;
+          ht->sel_idx = 0;
+        }
+        ht->sel_idx = (ht->sel_idx + 1) % (int)ht->candidates.size();
+        arena->hover_joint = ht->candidates[ht->sel_idx];
+      }
+    }
+    break;
   }
 
   update_tool(arena);
@@ -542,6 +575,30 @@ struct joint *joint_hit_test(struct arena *arena, float x, float y) {
   }
 
   return best_joint;
+}
+
+static std::vector<struct joint *> joint_hit_test_multi(struct arena *arena,
+                                                        float x, float y) {
+  std::vector<std::pair<double, struct joint *>> with_dist;
+  for (struct joint *j = arena->design.joints.head; j; j = j->next) {
+    double d = distance(x, y, j->x, j->y);
+    if (d < EDITOR_JOINT_EDGE_MAX_DISTANCE)
+      with_dist.push_back(std::make_pair(d, j));
+  }
+  /* Insertion sort — candidate count is tiny (typically 1-5). */
+  for (int i = 1; i < (int)with_dist.size(); i++) {
+    std::pair<double, struct joint *> key = with_dist[i];
+    int k = i - 1;
+    while (k >= 0 && with_dist[k].first > key.first) {
+      with_dist[k + 1] = with_dist[k];
+      k--;
+    }
+    with_dist[k + 1] = key;
+  }
+  std::vector<struct joint *> result;
+  for (int i = 0; i < (int)with_dist.size(); i++)
+    result.push_back(with_dist[i].second);
+  return result;
 }
 
 struct joint *joint_hit_test_exclude_rod(struct arena *arena, float x, float y,
@@ -837,24 +894,53 @@ void action_pan(struct arena *arena, int x, int y) {
   arena->view.y -= dy_world;
 }
 
+void arena_hit_test_update(struct arena *arena) {
+  float x_world, y_world;
+  hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
+
+  if (arena->state == STATE_RUNNING || arena->state == STATE_RUNNING_PAN ||
+      arena->state == STATE_MOVE)
+    return;
+
+  if (ht->sticky) {
+    float dx = (float)(arena->cursor_x - ht->ref_px);
+    float dy = (float)(arena->cursor_y - ht->ref_py);
+    bool mouse_moved =
+        (dx * dx + dy * dy) > (float)(EDITOR_HIT_TEST_REFRESH_PIXELS *
+                                      EDITOR_HIT_TEST_REFRESH_PIXELS);
+    bool design_changed = (arena->design.modcount != ht->last_modcount);
+    if (mouse_moved || design_changed) {
+      ht->sticky = false;
+      ht->candidates.clear();
+    }
+  }
+
+  if (!ht->sticky) {
+    pixel_to_world(&arena->view, arena->cursor_x, arena->cursor_y, &x_world,
+                   &y_world);
+    ht->candidates = joint_hit_test_multi(arena, x_world, y_world);
+    ht->sel_idx = 0;
+    ht->last_modcount = arena->design.modcount;
+  }
+}
+
 void action_none(struct arena *arena, int x, int y) {
-  float x_world;
-  float y_world;
-  struct joint *joint;
+  float x_world, y_world;
   struct block *block;
+  hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
 
   if (arena->state == STATE_RUNNING || arena->state == STATE_RUNNING_PAN)
     return;
 
-  pixel_to_world(&arena->view, x, y, &x_world, &y_world);
-
-  joint = joint_hit_test(arena, x_world, y_world);
-  if (joint) {
-    arena->hover_joint = joint;
+  /* Candidates are maintained by arena_hit_test_update (called every frame).
+   * Just read from the hit test state here. */
+  if (ht->candidates.size() != 0) {
+    arena->hover_joint = ht->candidates[ht->sel_idx];
     arena->hover_block = NULL;
     return;
   }
 
+  pixel_to_world(&arena->view, x, y, &x_world, &y_world);
   block = block_hit_test(arena, x_world, y_world);
   if (block) {
     arena->hover_joint = NULL;
@@ -1394,11 +1480,12 @@ void resolve_joint(struct arena *arena, struct joint *joint) {
 }
 
 void mouse_down_move(struct arena *arena, float x, float y) {
+  hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
   arena->move_orig_joint = NULL;
   arena->move_orig_block = NULL;
 
-  if (arena->hover_joint) {
-    resolve_joint(arena, arena->hover_joint);
+  if (ht->candidates.size() != 0) {
+    resolve_joint(arena, ht->candidates[ht->sel_idx]);
     arena->state = STATE_MOVE;
     arena->move_orig_x = x;
     arena->move_orig_y = y;
