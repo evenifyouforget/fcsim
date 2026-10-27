@@ -15,6 +15,7 @@
 #endif
 
 #define TAU 6.28318530718
+#define EDITOR_HIT_TEST_REFRESH_PIXELS 20
 
 struct view {
   float x;
@@ -65,6 +66,7 @@ struct arena {
   enum state state;
   struct joint *hover_joint;
   struct block *hover_block;
+  void *hit_test_state; /* actual type: hit_test_state_t* (arena.cpp) */
 
   /* MoveState* — C++-only type, stored as void* so this header stays valid C.
    * Follows the same pattern as block_graphics_v2. Initialised by
@@ -152,6 +154,8 @@ extern GLuint joint_program_coord_attrib;
 // c++ compat
 void block_graphics_init(struct arena *ar);
 void arena_move_init(struct arena *arena);
+void arena_hit_test_init(struct arena *arena);
+void arena_hit_test_update(struct arena *arena);
 #ifndef ARENA_C
 extern int _fcsim_base_fps_mod;
 extern double _fcsim_target_tps;

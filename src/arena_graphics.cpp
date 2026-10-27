@@ -518,8 +518,12 @@ void block_graphics_push_and_bind(block_graphics *graphics) {
                &(graphics->_colors[0]), GL_STATIC_DRAW);
 }
 
+static void draw_hit_test_crosshairs(struct arena *arena);
+
 void block_graphics_reset(arena *arena, struct design *design) {
   block_graphics *graphics = (block_graphics *)arena->block_graphics_v2;
+
+  arena_hit_test_update(arena);
 
   // clear old data
   graphics->clear();
@@ -534,6 +538,8 @@ void block_graphics_reset(arena *arena, struct design *design) {
 
   for (block = design->design_blocks.head; block; block = block->next)
     block_graphics_add_block(graphics, block);
+
+  draw_hit_test_crosshairs(arena);
 }
 
 void block_graphics_draw(struct block_graphics *graphics, struct view *view,
@@ -1124,6 +1130,23 @@ void preview_trail_draw(arena *arena) {
                               get_color_by_type(FCSIM_GOAL_CIRCLE, 0), 4);
       last = current;
     }
+  }
+}
+
+static void draw_hit_test_crosshairs(struct arena *arena) {
+  if (arena->state == STATE_RUNNING || arena->state == STATE_RUNNING_PAN ||
+      arena->state == STATE_MOVE)
+    return;
+  hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
+  if (!ht || ht->candidates.size() == 0)
+    return;
+  block_graphics *graphics = (block_graphics *)arena->block_graphics_v2;
+  for (int i = 0; i < (int)ht->candidates.size(); i++) {
+    struct joint *j = ht->candidates[i];
+    ::joint jv = joint_from_xy(j->x, j->y);
+    int type_id =
+        (i == ht->sel_idx) ? FCSIM_HIT_TEST_SELECTED : FCSIM_HIT_TEST_CANDIDATE;
+    block_graphics_add_joint(graphics, jv, get_color_by_type(type_id, 1));
   }
 }
 
