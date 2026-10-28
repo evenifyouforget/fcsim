@@ -313,7 +313,8 @@ static int block_inside_area(struct block *block, struct area *area);
  *   The rotated bounds are the extent of the four transformed corners, each
  *   truncated to twips.
  *
- * Checked against ftlib's dataset of real FC results: see README §Win check.
+ * Checked against ftlib's dataset of real FC results: see README §Win
+ * condition.
  */
 /* (the web build's libc has no trunc/fmod/INFINITY, so these avoid them) */
 static double flash_twips(double v) {
@@ -351,7 +352,7 @@ static bool flash_block_inside(struct block *block, double x0, double x1,
   x = flash_twips(shell.x);
   y = flash_twips(shell.y);
   if (shell.type == SHELL_CIRC) {
-    ex = ey = shell.circ.radius * 2 / 2;
+    ex = ey = shell.circ.radius;
   } else {
     /* Block.updateFromPhysicsBody: rotation = m_rotation * (180 / pi) */
     double deg = shell.angle * (180 / 3.141592653589793);
@@ -1071,11 +1072,6 @@ void action_none(struct arena *arena, int x, int y) {
 
 void move_joint(struct arena *arena, struct joint *joint, double x, double y);
 
-/* offsets of a wheel's inner joints from its centre; see add_wheel_inner_joints
- */
-static const double wheel_inner_dx[4] = {20.0, 0.0, -20.0, 0.0};
-static const double wheel_inner_dy[4] = {0.0, 20.0, 0.0, -20.0};
-
 void update_wheel_joints2(struct wheel *wheel) {
   double a[4] = {
       0.0,
@@ -1753,9 +1749,8 @@ void mouse_down_wheel(struct arena *arena, float x, float y) {
     block->shape.wheel.spokes[i] = new_joint(block, spoke_x, spoke_y);
     append_joint(&design->joints, block->shape.wheel.spokes[i]);
   }
-  /* radius 20: no inner joints (they need radius > 20) */
-  for (i = 0; i < 4; i++)
-    block->shape.wheel.inner[i] = NULL;
+  /* radius 20: sets no inner joints (they need radius > 20) */
+  add_wheel_inner_joints(design, block);
 
   block->material = &solid_material;
   block->goal = false;
