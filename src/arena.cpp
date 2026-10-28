@@ -8,9 +8,6 @@
 #define ARENA_C
 extern "C" {
 #include "arena.h"
-#ifndef __wasm__
-#include <stdio.h>
-#endif
 #include "gen.h"
 #include "gl.h"
 #include "graph.h"
