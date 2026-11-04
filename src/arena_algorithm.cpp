@@ -219,7 +219,7 @@ extern "C" void tick_func(void *arg) {
       the_arena->single_ticks_remaining--;
 #ifdef CLI
     // log all blocks just before step, only if FCSIM_TRACE is set: it costs
-    // a flushed line per block per tick, which slows runs down ~10x
+    // a flushed line per block per tick, which makes runs several times slower
     static const bool trace = std::getenv("FCSIM_TRACE") != nullptr;
     if (trace) {
       std::cerr << std::setprecision(17);
