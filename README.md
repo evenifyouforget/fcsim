@@ -355,7 +355,7 @@ A design solves on the first tick after which all goal blocks are inside the goa
 * Goal rectangles use the axis-aligned bounds of their rendered graphic after rotation, minus 4. The anchor circles drawn at the corners (radius 3, 2px stroke) give local bounds of ±(w/2 + 4) × ±(h/2 + 4), so an unrotated goal rectangle must be 2mm inside the goal area on every side. Each rotated corner is truncated to twips.
 * Rotations with |degrees| ≥ 32768 act as -32768 degrees.
 
-Against ftlib's dataset of solve ticks recorded in the original game, this raises agreement from 76.3% to 94.1% (together with the 9 wheel joints: 96.4%).
+Against ftlib's dataset of solve ticks recorded in the original game (873 designs and levels, as of ftlib#51), this raises agreement from 74.2% to 91.3% (together with the 9 wheel joints: 96.4%).
 
 ### Box2D World
 
