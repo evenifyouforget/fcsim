@@ -195,6 +195,17 @@ TEST(MallocTests, CallocZeroArgs) {
   CHECK_EQUAL(0u, a.live_alloc_count_get());
 }
 
+// ── C3: calloc whose nmemb * size overflows size_t ──────────────────────────
+
+TEST(MallocTests, CallocOverflow) {
+  TestBuf tb;
+  BuddyAllocator a(tb.base, BUF_SZ);
+  // product wraps to 2 without the overflow check
+  CHECK(a.calloc((size_t)-1 / 2 + 2, 2) == nullptr);
+  CHECK(a.calloc((size_t)-1, (size_t)-1) == nullptr);
+  CHECK_EQUAL(0u, a.live_alloc_count_get());
+}
+
 // ── S1: large allocation (forces memory_grow)
 // ─────────────────────────────────
 

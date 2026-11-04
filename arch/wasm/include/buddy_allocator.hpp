@@ -69,6 +69,11 @@ struct BuddyAllocator {
   // at least one word of payload, and must be a power of 2.
   // MALLOC_MIN_BLOCK specifies the minimum as a power-of-2 exponent; we clamp
   // up to sizeof(size_t)*4 so the invariant holds on both 32-bit and 64-bit.
+  // The exponents are shifted as int below, so keep them within int range.
+  static_assert(MALLOC_MIN_BLOCK >= 0 && MALLOC_MIN_BLOCK <= 30,
+                "MALLOC_MIN_BLOCK must be in [0, 30]");
+  static_assert(MALLOC_INITIAL_ROOT >= 0 && MALLOC_INITIAL_ROOT <= 30,
+                "MALLOC_INITIAL_ROOT must be in [0, 30]");
   static constexpr size_t min_block_size =
       (size_t)(1 << MALLOC_MIN_BLOCK) < sizeof(size_t) * 4
           ? sizeof(size_t) * 4
@@ -79,12 +84,6 @@ struct BuddyAllocator {
           ? min_block_size
           : (size_t)(1 << MALLOC_INITIAL_ROOT);
 
-  static_assert(
-      HDR == sizeof(size_t) * 3,
-      "HDR: three header words (BLKHDR_SIZE, BLKHDR_NEXT, BLKHDR_PAYLOAD)");
-  static_assert(min_block_size >= sizeof(size_t) * 4,
-                "min_block_size must fit header (3 words) plus at least one "
-                "payload word");
   static_assert(
       (min_block_size & (min_block_size - 1)) == 0,
       "min_block_size must be a power of 2 for buddy splitting to work");
@@ -257,9 +256,12 @@ struct BuddyAllocator {
   }
 
   void *calloc(size_t nmemb, size_t size) {
-    void *mem = malloc(nmemb * size);
+    size_t total;
+    if (__builtin_mul_overflow(nmemb, size, &total))
+      return nullptr;
+    void *mem = malloc(total);
     if (mem)
-      memset(mem, 0, nmemb * size);
+      memset(mem, 0, total);
     return mem;
   }
 
