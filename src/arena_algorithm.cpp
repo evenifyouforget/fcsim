@@ -2,6 +2,7 @@
 #include "stddef.h"
 #else
 #include <cstddef>
+#include <cstdlib>
 #include <iomanip>
 #include <iostream>
 #endif
@@ -217,19 +218,23 @@ extern "C" void tick_func(void *arg) {
     if (the_arena->single_ticks_remaining > 0)
       the_arena->single_ticks_remaining--;
 #ifdef CLI
-    // log all blocks just before step
-    std::cerr << std::setprecision(17);
-    std::cerr << "Tick " << the_arena->tick << std::endl;
-    for (block *block_ptr = the_arena->design.design_blocks.head; block_ptr;
-         block_ptr = block_ptr->next) {
-      b2Body *body_ptr = block_ptr->body;
-      std::cerr << "- ID = " << block_ptr->uid
-                << ", Type = " << (int)block_ptr->type_id << ", Pos = ("
-                << body_ptr->m_position.x << ", " << body_ptr->m_position.y
-                << "), Vel = (" << body_ptr->m_linearVelocity.x << ", "
-                << body_ptr->m_linearVelocity.y
-                << "), Ang = " << body_ptr->m_rotation
-                << ", AngVel = " << body_ptr->m_angularVelocity << std::endl;
+    // log all blocks just before step, only if FCSIM_TRACE is set: it costs
+    // a flushed line per block per tick, which makes runs several times slower
+    static const bool trace = std::getenv("FCSIM_TRACE") != nullptr;
+    if (trace) {
+      std::cerr << std::setprecision(17);
+      std::cerr << "Tick " << the_arena->tick << std::endl;
+      for (block *block_ptr = the_arena->design.design_blocks.head; block_ptr;
+           block_ptr = block_ptr->next) {
+        b2Body *body_ptr = block_ptr->body;
+        std::cerr << "- ID = " << block_ptr->uid
+                  << ", Type = " << (int)block_ptr->type_id << ", Pos = ("
+                  << body_ptr->m_position.x << ", " << body_ptr->m_position.y
+                  << "), Vel = (" << body_ptr->m_linearVelocity.x << ", "
+                  << body_ptr->m_linearVelocity.y
+                  << "), Ang = " << body_ptr->m_rotation
+                  << ", AngVel = " << body_ptr->m_angularVelocity << std::endl;
+      }
     }
 #endif
     step(the_arena->world);

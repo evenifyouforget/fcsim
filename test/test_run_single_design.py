@@ -1,3 +1,4 @@
+import os
 import subprocess
 from pathlib import Path
 
@@ -54,3 +55,30 @@ def test_run_single_design(case):
     assert (
         end_tick == expected_end_tick
     ), f"end_tick: expected {expected_end_tick}, got {end_tick}"
+
+
+def _run(stdin_str, env):
+    return subprocess.run(
+        [str(BINARY)],
+        input=stdin_str,
+        capture_output=True,
+        text=True,
+        timeout=10,
+        env=env,
+    )
+
+
+def test_tick_trace_is_opt_in():
+    # 10 ticks of one block, never solves
+    stdin_str = CASES[1][1]
+    env = {k: v for k, v in os.environ.items() if k != "FCSIM_TRACE"}
+    quiet = _run(stdin_str, env)
+    traced = _run(stdin_str, {**env, "FCSIM_TRACE": "1"})
+    assert quiet.returncode == 0 and traced.returncode == 0
+    # the trace only goes to stderr, results are unaffected
+    assert quiet.stdout == traced.stdout
+    assert "Tick " not in quiet.stderr
+    tick_lines = [
+        line for line in traced.stderr.splitlines() if line.startswith("Tick ")
+    ]
+    assert tick_lines == [f"Tick {t}" for t in range(10)]
