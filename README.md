@@ -419,6 +419,28 @@ This constant has never been verified against original FC.
 
 If there are multiple candidate destination joints, tiebreaking happens by which distance is shortest. If there are no candidates, the joint edge will not be produced in the design.
 
+#### Hit Test State
+
+When several joints are under the cursor (typically a joint stack), the editor keeps a list of all of them so Tab can cycle between them. This lives in `hit_test_state_t` (`src/arena.hpp`), stored in `arena->hit_test_state`:
+
+* `candidates`: every joint within hit range of the cursor (`joint_hit_test_multi`), sorted by distance, not just the nearest one
+* `sel_idx`: index of the currently selected candidate
+* `sticky`, `ref_px`, `ref_py`: whether the list is frozen, and the cursor pixel position when it was frozen
+* `last_modcount`: the design modcount at the time `candidates` was collected
+
+`arena_hit_test_update` refreshes the list once per drawn frame (called from `block_graphics_reset`). It is skipped in `STATE_RUNNING`, `STATE_RUNNING_PAN` and `STATE_MOVE`. Starting or stopping the simulation clears the list.
+
+Pressing Tab in `STATE_NORMAL` freezes the list (`sticky`) and advances `sel_idx`. While sticky, the per-frame refresh leaves the list alone until either the cursor moves more than `EDITOR_HIT_TEST_REFRESH_PIXELS` from `ref_px/ref_py`, or the design modcount changes. The selected candidate is drawn with a distinct crosshair (`draw_hit_test_crosshairs`).
+
+Readers of the list:
+
+* `action_none` (hover): sets `hover_joint` to the selected candidate, falling back to block hit testing if there are no candidates
+* `mouse_down_move` (start of a move): moves the selected candidate
+* The Tab handler
+* Rod and wheel creation read it indirectly, through `hover_joint`
+
+`candidates` holds raw `joint` pointers, so the list is only valid while `design.modcount == last_modcount`. Any edit can delete or replace joints between frames. Every reader must check this before dereferencing. The Tab handler discards a stale list; `action_none` and `mouse_down_move` re-collect it at the current cursor position (`hit_test_refresh_if_stale`).
+
 ### Augmented Design
 
 Currently doesn't exist as an explicit struct type, but it really should since it's such a common association.
