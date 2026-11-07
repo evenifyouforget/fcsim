@@ -1039,6 +1039,21 @@ void arena_hit_test_update(struct arena *arena) {
   }
 }
 
+/* Candidates are refreshed once per drawn frame by arena_hit_test_update, but
+ * input events can arrive between frames. If the design changed since the
+ * candidates were collected, they may point at freed joints (#148), so
+ * recollect them at (x_world, y_world) before they are read. */
+static void hit_test_refresh_if_stale(struct arena *arena, float x_world,
+                                      float y_world) {
+  hit_test_state_t *ht = (hit_test_state_t *)arena->hit_test_state;
+  if (arena->design.modcount == ht->last_modcount)
+    return;
+  ht->sticky = false;
+  ht->candidates = joint_hit_test_multi(arena, x_world, y_world);
+  ht->sel_idx = 0;
+  ht->last_modcount = arena->design.modcount;
+}
+
 void action_none(struct arena *arena, int x, int y) {
   float x_world, y_world;
   struct block *block;
@@ -1047,15 +1062,17 @@ void action_none(struct arena *arena, int x, int y) {
   if (arena->state == STATE_RUNNING || arena->state == STATE_RUNNING_PAN)
     return;
 
-  /* Candidates are maintained by arena_hit_test_update (called every frame).
-   * Just read from the hit test state here. */
+  pixel_to_world(&arena->view, x, y, &x_world, &y_world);
+  hit_test_refresh_if_stale(arena, x_world, y_world);
+
+  /* Otherwise candidates are maintained by arena_hit_test_update (called every
+   * frame). Just read from the hit test state here. */
   if (ht->candidates.size() != 0) {
     arena->hover_joint = ht->candidates[ht->sel_idx];
     arena->hover_block = NULL;
     return;
   }
 
-  pixel_to_world(&arena->view, x, y, &x_world, &y_world);
   block = block_hit_test(arena, x_world, y_world);
   if (block) {
     arena->hover_joint = NULL;
@@ -1616,6 +1633,7 @@ void mouse_down_move(struct arena *arena, float x, float y) {
   arena->move_orig_joint = NULL;
   arena->move_orig_block = NULL;
 
+  hit_test_refresh_if_stale(arena, x, y);
   if (ht->candidates.size() != 0) {
     resolve_joint(arena, ht->candidates[ht->sel_idx]);
     arena->state = STATE_MOVE;
