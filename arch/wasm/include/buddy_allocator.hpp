@@ -94,11 +94,14 @@ struct BuddyAllocator {
   static_assert((initial_root & (initial_root - 1)) == 0,
                 "initial_root must be a power of 2");
 
-  explicit BuddyAllocator(unsigned char *base,
-                          [[maybe_unused]] size_t buf_bytes)
-      : heap_base_ptr(base), first_free((size_t)base), root_size(initial_root),
-        status(0), live_alloc_count_(0), live_useful_bytes_(0),
-        live_block_bytes_(0)
+  // constexpr so the wasm build's global can be constant-initialized: nothing
+  // there runs global constructors (see src/arch/wasm/malloc.cpp). The
+  // pointer-to-integer cast that first_free needs is not allowed in a constant
+  // expression, so it is done on first malloc instead.
+  constexpr explicit BuddyAllocator(unsigned char *base,
+                                    [[maybe_unused]] size_t buf_bytes)
+      : heap_base_ptr(base), first_free(0), root_size(initial_root), status(0),
+        live_alloc_count_(0), live_useful_bytes_(0), live_block_bytes_(0)
 #ifndef WASM_MEMORY_BACKEND
         ,
         total_bytes(buf_bytes), committed_bytes(0)
@@ -220,6 +223,7 @@ struct BuddyAllocator {
     // first time: init available memory
     if (status == 0) {
       status = 1;
+      first_free = (size_t)heap_base_ptr;
       ensure_root_size(root_size);
       BLKHDR_SIZE(first_free) = root_size;
       link_block(first_free, first_free);
