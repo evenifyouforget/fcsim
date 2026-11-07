@@ -450,9 +450,9 @@ static void block_graphics_add_circ(struct block_graphics *graphics,
 #define JOINT_OUTER_RADIUS 4
 
 void block_graphics_add_joint(block_graphics *graphics, joint joint,
-                              color overlay) {
+                              color overlay, int type_id = FCSIM_JOINT) {
   const int z_offset = 4;
-  color col = alpha_over(get_color_by_type(FCSIM_JOINT, 1), overlay);
+  color col = alpha_over(get_color_by_type(type_id, 1), overlay);
 
   const int circle_segments = 24;
   uint32_t v_last;
@@ -499,9 +499,17 @@ static void block_graphics_add_block(struct block_graphics *graphics,
   else
     block_graphics_add_rect(graphics, shell, block->type_id, 2, overlay);
 
+  // in FC the centre joint of a goal circle is white (#25); generate_joints
+  // lists the centre first
+  bool goal_circle = block->type_id == FCSIM_GOAL_CIRCLE ||
+                     block->type_id == FCSIM_CW_GOAL_CIRCLE ||
+                     block->type_id == FCSIM_CCW_GOAL_CIRCLE;
   std::vector<joint> joints_generated = generate_joints(block);
   for (auto it = joints_generated.begin(); it != joints_generated.end(); ++it) {
-    block_graphics_add_joint(graphics, *it, color{0, 0, 0, 0});
+    int joint_type = goal_circle && it == joints_generated.begin()
+                         ? FCSIM_GOAL_CIRCLE_JOINT
+                         : FCSIM_JOINT;
+    block_graphics_add_joint(graphics, *it, color{0, 0, 0, 0}, joint_type);
   }
 }
 
