@@ -712,6 +712,8 @@ function init_module(results) {
   canvas.addEventListener("mousemove", canvas_mousemove);
   canvas.addEventListener("wheel", canvas_wheel);
   save_form.addEventListener("submit", save_design);
+  // EXPERIMENT FOR #29 - DO NOT MERGE
+  if (typeof probe29_start === "function") probe29_start();
 }
 
 let module_promise = WebAssembly.instantiateStreaming(
