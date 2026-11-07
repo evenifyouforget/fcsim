@@ -120,8 +120,7 @@ static double fp_sincos(double x, int off) {
  * Large arguments (#13).
  *
  * fp_sincos is the fast path of the SSE2 sin/cos in the 794-target runtime.
- * That runtime only takes the fast path while the top 16 bits of |x| are at
- * most 0x40F5, i.e. |x| < 90112. For larger |x| it falls back to the x87
+ * For larger |x| that runtime falls back to the x87
  * FSIN/FCOS instructions. Those reduce the argument with a 66-bit
  * approximation of pi, pi66 = 0xC90FDAA22168C234C * 2^-66, so for large x
  * their result is close to sin(x * pi / pi66), not sin(x). The difference is
@@ -135,6 +134,10 @@ static double fp_sincos(double x, int off) {
  * not known, so those arguments keep the fast path, as before.
  */
 
+/* Where the fast path ends. 90112 (top 16 bits of |x| at most 0x40F5) is
+ * the range check of Intel's SSE2 sin/cos that fp_sincos follows, from
+ * memory, not checked against the 794-target binary. The designs in #13
+ * only show that it lies between 6.1 and 90500. */
 #define X87_THRESHOLD 90112.0
 #define X87_LIMIT 9223372036854775808.0 /* 2^63 */
 
