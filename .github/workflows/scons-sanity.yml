@@ -22,5 +22,5 @@ jobs:
     - name: Run SCons Build
       run: scons
 
-    - name: Run run_single_design tests
-      run: pytest test/test_run_single_design.py -v
+    - name: Run run_single_design and wasm string tests
+      run: pytest test/test_run_single_design.py test/test_wasm_string_*.py -v
