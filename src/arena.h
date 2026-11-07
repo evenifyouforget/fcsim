@@ -52,6 +52,15 @@ struct arena {
   int ival;
   int tick_ms;
   int tick_multiply;
+  /* Real-time tick clock (#31): during normal playback, tick_func runs the
+   * ticks that are due at _fcsim_target_tps since clock_origin_ms instead of
+   * a fixed tick_multiply per timer callback, so the average rate is exact
+   * whatever the timer's period or jitter. clock_synced is cleared to
+   * restart the clock (speed change, pause, stepping). */
+  bool clock_synced;
+  double clock_origin_ms;
+  double clock_target_tps;
+  double clock_ticks; /* ticks run since clock_origin_ms */
 
   struct view view;
 
