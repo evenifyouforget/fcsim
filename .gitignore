@@ -9,6 +9,7 @@ stl_test
 stl_test_asan
 stl_test_msan
 stl_test_cov
+arena_test_asan
 coverage_profiles/
 coverage_html/
 *.profraw
