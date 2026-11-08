@@ -115,6 +115,8 @@ uint32_t piece_color_table[FCSIM_NUM_TYPES][2 * FCSIM_NUM_PALETTES] = {
      0x80ffff00}, // FCSIM_HIT_TEST_CANDIDATE
     {0x00ffffff, 0xcc00ffff, 0x00ffffff, 0xcc00ffff, 0x00ffffff,
      0xcc00ffff}, // FCSIM_HIT_TEST_SELECTED
+    {0x00ffffff, 0xffffffff, 0x00ffffff, 0xffffffff, 0x00ffffff,
+     0xffffffff}, // FCSIM_GOAL_CIRCLE_JOINT
                   // FCSIM_NUM_TYPES
 };
 uint32_t piece_color_palette_offset = 0;
