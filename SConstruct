@@ -261,6 +261,12 @@ linux_ccflags = [
     "-O3",
     "-flto",
 ]
+# -flto must also be passed when linking: gcc's linker plugin picks up LTO
+# objects without it, but clang's objects are LLVM bitcode that the linker
+# can't read unless the driver knows it is an LTO link (#35)
+linux_linkflags = [
+    "-flto",
+]
 asan_ccflags = [
     "-O1",
     "-g",
@@ -320,6 +326,7 @@ linux_env = base_env.Clone(
     CPPPATH=common_include,
     # if using CCPDEFINES, need to match for fpatan variant
     LIBS=libs,
+    LINKFLAGS=linux_linkflags,
 )
 linux_env.VariantDir("build/linux", ".", False)
 
@@ -328,6 +335,7 @@ run_single_design_env = base_env.Clone(
     CPPPATH=common_include,
     CPPDEFINES=run_single_defines,
     LIBS=run_single_design_libs,
+    LINKFLAGS=linux_linkflags,
 )
 run_single_design_env.VariantDir("build/run_single_design", ".", False)
 
