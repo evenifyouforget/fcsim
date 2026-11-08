@@ -95,6 +95,7 @@ The build uses `-Werror` for a selected set of warnings (see `SConstruct`). New 
 - Fill in `pull_request_template.md`: the issues closed (`Closes #N`), the test checklist, and AI-usage transparency.
 - Label the PR appropriately.
 - One PR per issue is preferred, unless the changes are intrinsically linked.
+- Stacked PRs should be used when there is a dependency.
 
 CI must pass before merge, and this is enforced. These are the checks on a PR:
 
