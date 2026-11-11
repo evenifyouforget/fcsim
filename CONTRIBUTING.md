@@ -57,7 +57,7 @@ The browser is the only place to check the web build's custom `malloc` and memor
 3. Runs `pytest test --all`.
 4. Fails if the pass rate is below `min_pass_rate`.
 
-That file holds the authoritative value, currently **80.7%**. The job also fails on pytest collection or session errors, or if the fcsim backend tests did not run.
+That file holds the authoritative value, currently **95.5%**. ftlib's latest overall pass rate is 95.57%. The job also fails on pytest collection or session errors, or if the fcsim backend tests did not run.
 
 The pass rate is not expected to be 100%. Some designs depend on behaviour fcsim does not reproduce yet. If your change raises the pass rate, bump `min_pass_rate` in the same PR so the gain is locked in. If it lowers the rate, explain why in the PR. The PR template asks for this.
 
