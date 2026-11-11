@@ -204,6 +204,10 @@ run_single_defines = [
 msan_defines = [
     "SANITIZER_MSAN",
 ]
+# wasm32 char is signed; match it for the code under test
+test_ccflags = [
+    "-fsigned-char",
+]
 
 werror_ccflags = [
     # preemptively catch some other common errors
@@ -342,7 +346,7 @@ run_single_design_env.VariantDir("build/run_single_design", ".", False)
 asan_env = base_env.Clone(
     CC="clang",
     CXX="clang++",
-    CCFLAGS=common_ccflags + asan_ccflags,
+    CCFLAGS=common_ccflags + asan_ccflags + test_ccflags,
     CPPPATH=common_include + wasm_include,
     CPPDEFINES=test_defines,
     LINKFLAGS=asan_linkflags,
@@ -352,7 +356,7 @@ asan_env.VariantDir("build/asan", ".", False)
 msan_env = base_env.Clone(
     CC="clang",
     CXX="clang++",
-    CCFLAGS=common_ccflags + msan_ccflags,
+    CCFLAGS=common_ccflags + msan_ccflags + test_ccflags,
     CPPPATH=common_include + wasm_include,
     CPPDEFINES=test_defines + msan_defines,
     LINKFLAGS=msan_linkflags,
@@ -362,7 +366,7 @@ msan_env.VariantDir("build/msan", ".", False)
 cov_env = base_env.Clone(
     CC="clang",
     CXX="clang++",
-    CCFLAGS=common_ccflags + cov_ccflags,
+    CCFLAGS=common_ccflags + cov_ccflags + test_ccflags,
     CPPPATH=common_include + wasm_include,
     CPPDEFINES=test_defines,
     LINKFLAGS=cov_linkflags,
