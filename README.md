@@ -101,6 +101,8 @@ Hopefully at some point we can fully reverse engineer these specialized instruct
 
 # Development
 
+For environment setup, tests, dev tools, code style and the PR process, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Web STL
 
 The web build does not support STL, so we need a mock STL.
