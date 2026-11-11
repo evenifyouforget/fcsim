@@ -97,6 +97,13 @@ In light of this, we are making a distinction between `794-stable` and `794-targ
 The build `fcsim-fpatan` has `fpatan` but is still missing `fsin` and possibly others, so it does not implement `794-target`.
 Feel free to call it `794-fpatan` instead.
 
+`794-fsin` (s794-fsin) is `794-stable` plus a software emulation of the x87 `fsin`/`fcos` instructions (`USE_FSIN`, `src/fpmath/sincos.c`).
+For large angles the `794-target` runtime switches from its fast software `sin`/`cos` to `fsin`/`fcos`, which reduce the angle with a 66-bit approximation of pi, so their results differ by a few ulps (#13).
+The emulation reproduces that bit for bit and is 100% portable.
+It is the web build's default, and the native build `fcsim-fsin` provides it too.
+The angle where the switch happens (currently 90112) is not yet confirmed against FC; FC test designs only pin it between 6.1 and 90500.
+`tools/fsin_check.c` (x86 only) checks the emulation against real `fsin` hardware and suggests test angles for narrowing the switch point down.
+
 Hopefully at some point we can fully reverse engineer these specialized instructions and implement them in software, such that we can implement `794-target` in a fully portable way.
 
 # Development
