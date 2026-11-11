@@ -1,11 +1,12 @@
 """fp_sin/fp_cos for large arguments (#13).
 
 For |x| >= 90112 the 794-target runtime computes sin/cos with the x87
-FSIN/FCOS instructions, which reduce the argument with a 66-bit pi. fcsim
-emulates them in src/fpmath/sincos.c. This compiles that file natively and
-checks it bit for bit against an exact model of the instructions:
-sin/cos(x * pi / pi66), rounded to the x87's 64-bit significand and then to
-double, both to nearest with ties to even.
+FSIN/FCOS instructions, which reduce the argument with a 66-bit pi. With
+USE_FSIN (spectre s794-fsin), fcsim emulates them in src/fpmath/sincos.c.
+This compiles that file natively and checks it bit for bit against an exact
+model of the instructions: sin/cos(x * pi / pi66), rounded to the x87's
+64-bit significand and then to double, both to nearest with ties to even.
+Without USE_FSIN (s794-stable) nothing may change.
 """
 
 import random
@@ -86,15 +87,14 @@ def _inputs():
     return xs
 
 
-@pytest.fixture(scope="module")
-def driver(tmp_path_factory):
-    tmp = tmp_path_factory.mktemp("sincos")
-    (tmp / "driver.c").write_text(DRIVER)
-    exe = tmp / "driver"
+def _build(tmp, name, defines):
+    exe = tmp / name
     subprocess.run(
         [
             "cc",
             "-O2",
+            "-ffp-contract=off",
+            *defines,
             f"-I{ROOT / 'include'}",
             str(tmp / "driver.c"),
             str(ROOT / "src" / "fpmath" / "sincos.c"),
@@ -107,18 +107,52 @@ def driver(tmp_path_factory):
     return exe
 
 
-def test_large_arguments_match_x87_model(driver):
-    xs = _inputs()
+@pytest.fixture(scope="module")
+def tmp(tmp_path_factory):
+    tmp = tmp_path_factory.mktemp("sincos")
+    (tmp / "driver.c").write_text(DRIVER)
+    return tmp
+
+
+@pytest.fixture(scope="module")
+def driver(tmp):
+    return _build(tmp, "driver_fsin", ["-DUSE_FSIN"])
+
+
+@pytest.fixture(scope="module")
+def stable_driver(tmp):
+    return _build(tmp, "driver_stable", [])
+
+
+def _run(exe, xs):
     out = subprocess.run(
-        [str(driver), *(x.hex() for x in xs)],
+        [str(exe), *(x.hex() for x in xs)],
         capture_output=True,
         text=True,
         check=True,
     ).stdout.split("\n")
+    return [[float.fromhex(v) for v in line.split()] for line in out[: len(xs)]]
+
+
+def test_large_arguments_match_x87_model(driver):
+    xs = _inputs()
     mismatches = []
-    for x, line in zip(xs, out):
-        got = [float.fromhex(v) for v in line.split()]
+    for x, got in zip(xs, _run(driver, xs)):
         want = _x87_model(x)
         if got != want:
             mismatches.append(f"x={x!r}: got {got}, want {want}")
     assert not mismatches, "\n".join(mismatches[:20])
+
+
+def test_stable_and_fsin_agree_below_threshold(driver, stable_driver):
+    rng = random.Random(794)
+    xs = [0.0, 0.5, -1.0, 6.1, 1000.0, 90111.99999999999, -90111.99999999999]
+    xs += [rng.uniform(-90112.0, 90112.0) for _ in range(200)]
+    assert _run(stable_driver, xs) == _run(driver, xs)
+
+
+def test_stable_keeps_the_fast_path(driver, stable_driver):
+    # without USE_FSIN, large arguments must not take the x87 emulation
+    xs = [90500.0, 1e6, 123456789.123]
+    stable, fsin = _run(stable_driver, xs), _run(driver, xs)
+    assert all(s != f for s, f in zip(stable, fsin)), (stable, fsin)
