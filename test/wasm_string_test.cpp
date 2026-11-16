@@ -22,8 +22,8 @@ static int sign(int x) { return (x > 0) - (x < 0); }
 TEST_GROUP(WasmStringTests){};
 
 // strcmp/memcmp compare bytes as unsigned char, as the C standard requires
-// (#156). wasm32 char is signed (the test build uses -fsigned-char to match),
-// so bytes >= 0x80 catch a signed comparison.
+// (#156). Bytes >= 0x80 catch a signed comparison where char is signed, as
+// on wasm32 and the x86 CI.
 TEST(WasmStringTests, MemcmpUnsigned) {
   CHECK_EQUAL(1, sign(fcsim_memcmp("\x80", "\x01", 1)));
   CHECK_EQUAL(-1, sign(fcsim_memcmp("\x01", "\x80", 1)));
