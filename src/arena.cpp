@@ -1065,8 +1065,8 @@ void action_none(struct arena *arena, int x, int y) {
   pixel_to_world(&arena->view, x, y, &x_world, &y_world);
   hit_test_refresh_if_stale(arena, x_world, y_world);
 
-  /* Otherwise candidates are maintained by arena_hit_test_update (called every
-   * frame). Just read from the hit test state here. */
+  /* Candidates are maintained by arena_hit_test_update (called every frame).
+   * Just read from the hit test state here. */
   if (ht->candidates.size() != 0) {
     arena->hover_joint = ht->candidates[ht->sel_idx];
     arena->hover_block = NULL;
