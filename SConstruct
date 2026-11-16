@@ -173,6 +173,7 @@ linux_sources_all = common_sources + linux_sources
 run_single_design_sources_all = common_sources + run_single_design_sources
 run_single_design_xml_sources_all = common_sources + run_single_design_xml_sources
 test_sources_all = stl_mock_sources + test_sources
+arena_test_sources_all = common_sources + ["test/arena_test_main.cpp"]
 wasm_sources_all = common_sources + stl_mock_sources + wasm_sources
 
 # flags
@@ -316,6 +317,18 @@ msan_env = base_env.Clone(
 )
 msan_env.VariantDir("build/msan", ".", False)
 
+# editor tests: the native arena code under ASan/UBSan, without a window
+arena_asan_env = base_env.Clone(
+    CC="clang",
+    CXX="clang++",
+    CCFLAGS=common_ccflags + asan_ccflags,
+    CPPPATH=common_include,
+    CPPDEFINES=run_single_defines,
+    LINKFLAGS=asan_linkflags,
+    LIBS=libs,
+)
+arena_asan_env.VariantDir("build/arena_asan", ".", False)
+
 cov_env = base_env.Clone(
     CC="clang",
     CXX="clang++",
@@ -368,6 +381,12 @@ build_with_variant(
 build_with_variant(asan_env, "build/asan/", test_sources_all, target="stl_test_asan")
 build_with_variant(msan_env, "build/msan/", test_sources_all, target="stl_test_msan")
 build_with_variant(cov_env, "build/cov/", test_sources_all, target="stl_test_cov")
+build_with_variant(
+    arena_asan_env,
+    "build/arena_asan/",
+    arena_test_sources_all,
+    target="arena_test_asan",
+)
 build_with_variant(wasm_env, "build/wasm/", wasm_sources_all, target="html/fcsim.wasm")
 
 # Automated version tagging - build html/version.js
