@@ -82,3 +82,42 @@ def test_tick_trace_is_opt_in():
         line for line in traced.stderr.splitlines() if line.startswith("Tick ")
     ]
     assert tick_lines == [f"Tick {t}" for t in range(10)]
+
+
+XML_BINARY = Path(__file__).parent.parent / "run_single_design_xml"
+
+GOAL_RECT_XML = """<?xml version="1.0"?><retrieveLevel><level>
+{level_blocks}
+<playerBlocks><JointedDynamicRectangle id="0"><rotation>0</rotation>
+<position><x>0</x><y>0</y></position><width>20</width><height>20</height>
+<goalBlock>true</goalBlock><joints/></JointedDynamicRectangle></playerBlocks>
+<start><position><x>0</x><y>0</y></position><width>400</width><height>400</height></start>
+<end><position><x>0</x><y>0</y></position><width>400</width><height>400</height></end>
+</level></retrieveLevel>"""
+
+# XML that leaves parts of the level unset (#183): (description, stdin, solve, end)
+XML_CASES = [
+    ("not_xml", "hello", -1, 5),
+    ("empty_input", "", -1, 5),
+    (
+        "self_closing_level_blocks",
+        GOAL_RECT_XML.format(level_blocks="<levelBlocks/>"),
+        1,
+        1,
+    ),
+    ("no_level_blocks", GOAL_RECT_XML.format(level_blocks=""), 1, 1),
+    ("truncated", GOAL_RECT_XML.format(level_blocks="")[:300], -1, 5),
+]
+
+
+def test_run_single_design_xml_incomplete_level():
+    for description, stdin_str, solve, end in XML_CASES:
+        result = subprocess.run(
+            [str(XML_BINARY), "5"],
+            input=stdin_str,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        assert result.returncode == 0, f"{description}: exit {result.returncode}"
+        assert result.stdout.split() == [str(solve), str(end)], description
