@@ -19,6 +19,9 @@ jobs:
     - name: Add venv to PATH
       run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
+    - name: Run fpmath tests
+      run: pytest test/test_fpmath_sincos.py -v
+
     - name: Run SCons Build
       run: scons
 

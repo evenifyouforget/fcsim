@@ -198,6 +198,10 @@ test_defines = [
 fpatan_defines = [
     "USE_FPATAN",
 ]
+# spectre s794-fsin: x87 FSIN/FCOS emulation for large angles (#13)
+fsin_defines = [
+    "USE_FSIN",
+]
 run_single_defines = [
     "CLI",
 ]
@@ -372,7 +376,7 @@ cov_env.VariantDir("build/cov", ".", False)
 wasm_env = base_env.Clone(
     CCFLAGS=common_ccflags + wasm_ccflags,
     CPPPATH=common_include + wasm_include,
-    CPPDEFINES=["WASM_MEMORY_BACKEND"],
+    CPPDEFINES=["WASM_MEMORY_BACKEND"] + fsin_defines,
     CC="clang",
     CXX="clang++",
     LINK="wasm-ld",
@@ -395,6 +399,13 @@ build_with_variant(
     linux_sources_all,
     target="fcsim-fpatan",
     CPPDEFINES=["USE_FPATAN"],
+)
+build_with_variant(
+    linux_env,
+    "build/linux3/",
+    linux_sources_all,
+    target="fcsim-fsin",
+    CPPDEFINES=fsin_defines,
 )
 build_with_variant(
     run_single_design_env,
