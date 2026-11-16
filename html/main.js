@@ -645,69 +645,47 @@ if (import_checksum_str) {
 
 let save_status = document.getElementById("save_status");
 
-// saveDesign.php answers with the new design ID on success
-const DESIGN_ID_RE = /^\s*(\d+)\s*$/;
-
-function show_design_link(new_design_id) {
+function on_text(text, xml_str, orphaned) {
+  console.log(text);
+  text = text.trim();
+  if (!/^\d+$/.test(text)) {
+    design_link.style.display = "none";
+    if (!orphaned) {
+      // FC's server refuses to save designs for some levels, such as most
+      // purged and official paid levels (#29). Retry without the level ID.
+      post_save(
+        xml_str.replace(/<levelId>[^<]*<\/levelId>/, "<levelId></levelId>"),
+        true,
+      );
+      return;
+    }
+    save_status.textContent =
+      "Save failed: the server did not return a design ID.";
+    return;
+  }
+  save_status.textContent = orphaned
+    ? "The server refused to save this design under its level, so it was saved without a level."
+    : "";
   let export_checksum_str = last_exported_checksum
     .toString(36)
     .split("")
     .reverse()
     .join("");
   design_link.innerHTML = design_link.href =
-    self_url_full() +
-    "?designId=" +
-    new_design_id +
-    "&checksum=" +
-    export_checksum_str;
+    self_url_full() + "?designId=" + text + "&checksum=" + export_checksum_str;
   design_link.style.display = "block";
 }
 
-function post_save(xml_str) {
-  return fetch(FC_URL + "/saveDesign.php", {
+function post_save(xml_str, orphaned) {
+  fetch(FC_URL + "/saveDesign.php", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: new URLSearchParams({ xml: xml_str }),
-  }).then((response) => response.text());
-}
-
-async function send_save(xml_str) {
-  design_link.style.display = "none";
-  save_status.textContent = "Saving...";
-  try {
-    let text = await post_save(xml_str);
-    console.log(text);
-    let match = text.match(DESIGN_ID_RE);
-    let orphaned = false;
-    if (!match) {
-      // FC's server refuses to save designs for some levels, such as most
-      // purged and official paid levels (#29). Retry without the level ID;
-      // the saved design then isn't attached to any level.
-      let orphan_xml = xml_str.replace(
-        /<levelId>[^<]*<\/levelId>/,
-        "<levelId></levelId>",
-      );
-      if (orphan_xml !== xml_str) {
-        text = await post_save(orphan_xml);
-        console.log(text);
-        match = text.match(DESIGN_ID_RE);
-        orphaned = true;
-      }
-    }
-    if (match) {
-      show_design_link(match[1]);
-      save_status.textContent = orphaned
-        ? "The server refused to save this design under its level, so it was saved without a level."
-        : "";
-    } else {
-      save_status.textContent =
-        "Save failed: the server did not return a design ID.";
-    }
-  } catch (err) {
-    save_status.textContent = "Save failed: " + String(err);
-  }
+  })
+    .then((response) => response.text())
+    .then((text) => on_text(text, xml_str, orphaned));
 }
 
 function save_design(event) {
@@ -720,11 +698,12 @@ function save_design(event) {
   let desc = alloc_str(data.get("description"));
 
   let xml = inst.exports.do_export(user, name, desc);
+  let len = inst.exports.strlen(xml);
   last_exported_checksum = inst.exports.get_main_design_checksum();
 
   let xml_str = make_cstring(xml);
 
-  send_save(xml_str);
+  post_save(xml_str, false);
 }
 
 function init_module(results) {
