@@ -213,6 +213,31 @@ werror_ccflags = [
     "-Werror=format",
     "-Werror=strict-aliasing",
     "-Werror=unused-variable",
+    # #109: likely bugs that no build variant currently warns about, even
+    # with -Wall -Wextra -Wpedantic, under both gcc and clang. Flow-sensitive
+    # warnings (maybe-uninitialized, array-bounds, ...) are left out because
+    # they come and go between compiler versions.
+    "-Werror=address",
+    "-Werror=char-subscripts",
+    "-Werror=comment",
+    "-Werror=dangling-else",
+    "-Werror=empty-body",
+    "-Werror=enum-compare",
+    "-Werror=infinite-recursion",
+    "-Werror=int-in-bool-context",
+    "-Werror=logical-not-parentheses",
+    "-Werror=memset-transposed-args",
+    "-Werror=misleading-indentation",
+    "-Werror=nonnull",
+    "-Werror=shift-negative-value",
+    "-Werror=sizeof-array-div",
+    "-Werror=sizeof-pointer-div",
+    "-Werror=sizeof-pointer-memaccess",
+    "-Werror=string-compare",
+    "-Werror=tautological-compare",
+    "-Werror=unused-label",
+    "-Werror=unused-local-typedefs",
+    "-Werror=unused-value",
 ]
 werror_cflags = [
     # actually caught an error originally in loop-contest
@@ -221,10 +246,25 @@ werror_cflags = [
     "-Werror=implicit-function-declaration",
     "-Werror=int-conversion",
     "-Werror=pointer-sign",
+    "-Werror=implicit-int",
+]
+# C++ only: gcc warns that these are not valid for C, so keep them out of
+# CCFLAGS
+werror_cxxflags = [
+    "-Werror=delete-non-virtual-dtor",
+    "-Werror=mismatched-new-delete",
+    "-Werror=pessimizing-move",
+    "-Werror=reorder",
 ]
 common_ccflags = werror_ccflags
 linux_ccflags = [
     "-O3",
+    "-flto",
+]
+# -flto must also be passed when linking: gcc's linker plugin picks up LTO
+# objects without it, but clang's objects are LLVM bitcode that the linker
+# can't read unless the driver knows it is an LTO link (#35)
+linux_linkflags = [
     "-flto",
 ]
 asan_ccflags = [
@@ -278,6 +318,7 @@ base_env = Environment(
         ]
     },
     CFLAGS=werror_cflags,
+    CXXFLAGS=werror_cxxflags,
 )
 
 linux_env = base_env.Clone(
@@ -285,6 +326,7 @@ linux_env = base_env.Clone(
     CPPPATH=common_include,
     # if using CCPDEFINES, need to match for fpatan variant
     LIBS=libs,
+    LINKFLAGS=linux_linkflags,
 )
 linux_env.VariantDir("build/linux", ".", False)
 
@@ -293,6 +335,7 @@ run_single_design_env = base_env.Clone(
     CPPPATH=common_include,
     CPPDEFINES=run_single_defines,
     LIBS=run_single_design_libs,
+    LINKFLAGS=linux_linkflags,
 )
 run_single_design_env.VariantDir("build/run_single_design", ".", False)
 

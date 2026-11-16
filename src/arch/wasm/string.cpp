@@ -1,5 +1,12 @@
 #include <stddef.h>
 
+// These are the memcpy/memset/memmove the rest of the wasm build calls, so
+// the compiler must not turn their loops back into calls to those functions
+// (loop idiom recognition), or they would call themselves until the stack
+// overflows. no_builtin on every function here does what -fno-builtin would,
+// without affecting builtin optimizations in other translation units.
+#pragma clang attribute push(__attribute__((no_builtin)), apply_to = function)
+
 // Internal helpers: not part of the C ABI.
 
 static void *memcpy_right(void *dest, const void *src, size_t n) {
@@ -69,3 +76,5 @@ int memcmp(const void *s1, const void *s2, size_t n) {
 }
 
 } // extern "C"
+
+#pragma clang attribute pop
