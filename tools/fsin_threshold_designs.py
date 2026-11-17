@@ -160,7 +160,51 @@ def heap(n):
     return make
 
 
-TEMPLATES = [("hill", hill), ("pinball", pinball)] + [
+def seesaws(a):
+    """Many tiny goal balls, all at the large angle, fall through layers of
+    seesaws (thin dynamic planks on three static circles) between ramps; the
+    level only solves once every ball is in the goal area. After the
+    Seesaw4 test levels (e.g. FC level 690676), with randomised ball sizes
+    and small jitter on the layout."""
+    level = [
+        blk("StaticRectangle", 0, 2000, 4000, 2600),
+        blk("StaticRectangle", -1500, 0, 1000, 4000, -0.0349),
+        blk("StaticRectangle", 1500, 0, 1000, 4000, 0.0349),
+    ]
+    for y in (-800, -600, -400, -200, 0, 200):
+        # ramps: zero-height dynamic rects, which Box2D makes static
+        level += [
+            blk("DynamicRectangle", -2000, y, 3400, 0, 0.0524 + u(-0.003, 0.003)),
+            blk("DynamicRectangle", 2000, y, 3400, 0, -0.0524 + u(-0.003, 0.003)),
+        ]
+        if y == -800:
+            continue
+        # seesaw: plank resting on a central pivot, two side supports below
+        jx = u(-5, 5)
+        level += [
+            blk("DynamicRectangle", jx, y, 800, 2),
+            blk("StaticCircle", jx, y + 10, 20, 20),
+            blk("StaticCircle", jx + 200 + u(-10, 10), y + 30, 20, 20),
+            blk("StaticCircle", jx - 200 + u(-10, 10), y + 30, 20, 20),
+        ]
+    x0 = u(-120, 60)
+    balls = [
+        blk(
+            "NoSpinWheel",
+            x0 + 30 * i,
+            -900 - 30 * j,
+            *[rng.randint(1, 10)] * 2,
+            a,
+            True,
+            7 * i + j,
+        )
+        for i in range(7)
+        for j in range(7)
+    ]
+    return design(level, balls, (0, 0, 2000, 1400), (0, 1000, 2000, 1000))
+
+
+TEMPLATES = [("hill", hill), ("pinball", pinball), ("seesaws", seesaws)] + [
     (f"heap{n}", heap(n)) for n in (20, 50, 110)
 ]
 
@@ -168,11 +212,12 @@ TEMPLATES = [("hill", hill), ("pinball", pinball)] + [
 # ---- simulation ----
 
 
-def run(xml, threshold, ticks, trace=False):
-    """(solve tick or -1, angles of player block 0 per tick if trace)"""
+def run(xml, threshold, ticks, trace=None):
+    """(solve tick or -1, if trace = A: every angle reached by the player
+    blocks that start at angle A)"""
     env = dict(os.environ, FSIN_THRESHOLD=repr(threshold))
     env.pop("FCSIM_TRACE", None)
-    if trace:
+    if trace is not None:
         env["FCSIM_TRACE"] = "1"
     p = subprocess.run(
         [str(BINARY), str(ticks)], input=xml, capture_output=True, text=True, env=env
@@ -181,25 +226,26 @@ def run(xml, threshold, ticks, trace=False):
         raise RuntimeError(f"{BINARY} exited {p.returncode}")
     solve = int(p.stdout.split()[0])
     angles = []
-    if trace:
-        first = False
+    if trace is not None:
+        ticks_angles = []
         for line in p.stderr.splitlines():
             if line.startswith("Tick"):
-                first = True
-            elif first:
-                angles.append(float(re.search(r"Ang = ([^,]+),", line)[1]))
-                first = False
+                ticks_angles.append([])
+            else:
+                ticks_angles[-1].append(float(re.search(r"Ang = ([^,]+),", line)[1]))
+        tracked = [i for i, ang in enumerate(ticks_angles[0]) if ang == trace]
+        angles = [t[i] for t in ticks_angles for i in tracked]
     return solve, angles
 
 
 def attempt(make, low, high, ticks, min_diff):
     a = u(low, high)
     xml = make(a)
-    below, ang_lo = run(xml, low, ticks, trace=True)
-    above, ang_hi = run(xml, high, ticks, trace=True)
+    below, ang_lo = run(xml, low, ticks, trace=a)
+    above, ang_hi = run(xml, high, ticks, trace=a)
     if below < 0 or above < 0 or abs(below - above) < min_diff:
         return None
-    # the angle body's range over both runs; it must stay inside (low, high]
+    # the range of the angle bodies over both runs; it must stay inside (low, high]
     a_min = min(ang_lo + ang_hi, key=abs)
     a_max = max(ang_lo + ang_hi, key=abs)
     a_min, a_max = abs(a_min), abs(a_max)
