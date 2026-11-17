@@ -233,7 +233,12 @@ def run(xml, threshold, ticks, trace=None):
                 ticks_angles.append([])
             else:
                 ticks_angles[-1].append(float(re.search(r"Ang = ([^,]+),", line)[1]))
-        tracked = [i for i, ang in enumerate(ticks_angles[0]) if ang == trace]
+        # fcsim's strtod may round the XML angle differently by an ulp or so
+        tracked = [
+            i
+            for i, ang in enumerate(ticks_angles[0])
+            if abs(ang - trace) <= 1e-12 * abs(trace)
+        ]
         angles = [t[i] for t in ticks_angles for i in tracked]
     return solve, angles
 
