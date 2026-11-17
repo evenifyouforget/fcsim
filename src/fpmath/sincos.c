@@ -335,9 +335,25 @@ static double x87_sincos(double x, int want_cos) {
   }
 }
 
+#ifdef FSIN_THRESHOLD_FROM_ENV
+/* experiment builds only (tools/fsin_threshold_designs.py): the switch point
+ * comes from $FSIN_THRESHOLD, defaulting to X87_THRESHOLD */
+#include <stdlib.h>
+static double x87_threshold(void) {
+  static double t = -1;
+  if (t < 0) {
+    const char *e = getenv("FSIN_THRESHOLD");
+    t = e ? atof(e) : X87_THRESHOLD;
+  }
+  return t;
+}
+#else
+#define x87_threshold() X87_THRESHOLD
+#endif
+
 static int x87_range(double x) {
   double ax = fabs(x);
-  return ax >= X87_THRESHOLD && ax < X87_LIMIT;
+  return ax >= x87_threshold() && ax < X87_LIMIT;
 }
 
 double fp_sin(double x) {

@@ -317,3 +317,5 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+run_single_design_xml_fsin
+fsin_designs/

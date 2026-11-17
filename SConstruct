@@ -419,6 +419,14 @@ build_with_variant(
     run_single_design_xml_sources_all,
     target="run_single_design_xml",
 )
+# experiment only (#13): s794-fsin with the switch point from $FSIN_THRESHOLD
+build_with_variant(
+    run_single_design_env,
+    "build/run_single_design_xml_fsin/",
+    run_single_design_xml_sources_all,
+    target="run_single_design_xml_fsin",
+    CPPDEFINES=run_single_defines + fsin_defines + ["FSIN_THRESHOLD_FROM_ENV"],
+)
 build_with_variant(asan_env, "build/asan/", test_sources_all, target="stl_test_asan")
 build_with_variant(msan_env, "build/msan/", test_sources_all, target="stl_test_msan")
 build_with_variant(cov_env, "build/cov/", test_sources_all, target="stl_test_cov")
