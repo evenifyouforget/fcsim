@@ -7,11 +7,13 @@ Experiment only, not for merging. Usage:
     python3 tools/fsin_threshold_designs.py LOW HIGH [--count 10] [--min-diff 1]
 
 LOW and HIGH are the current bounds on the switch point T (LOW < T <= HIGH).
-Each design has one body starting at a random angle A in (LOW, HIGH), and two
-predicted solve ticks, computed with the fsin emulation:
+Each design puts some bodies at angles near a random A in (LOW, HIGH). Of all
+the angles they reach during the run, A_min and A_max are the lowest and
+highest inside (LOW, HIGH). Each design comes with two predicted solve ticks,
+computed with the fsin emulation:
 
-    below: what FC shows if T <= A's lowest value during the run
-    above: what FC shows if T >  A's highest value during the run
+    below: what FC shows if T <= A_min
+    above: what FC shows if T >  A_max
 
 A design is kept only if both predictions hold for every T in their half of
 (LOW, HIGH] (checked at both ends) and they differ by at least --min-diff ticks.
@@ -30,6 +32,8 @@ import random
 import re
 import subprocess
 import sys
+import urllib.parse
+import urllib.request
 from pathlib import Path
 
 rng = random.SystemRandom()
@@ -160,22 +164,25 @@ def heap(n):
     return make
 
 
-def seesaws(a):
+def seesaws(a, turn=0.0):
     """Many tiny goal balls, all at the large angle, fall through layers of
     seesaws (thin dynamic planks on three static circles) between ramps; the
     level only solves once every ball is in the goal area. After the
     Seesaw4 test levels (e.g. FC level 690676), with randomised ball sizes
-    and small jitter on the layout."""
+    and small jitter on the layout. TURN is added to the rotation of every
+    part that never moves (floor, walls and ramps)."""
     level = [
-        blk("StaticRectangle", 0, 2000, 4000, 2600),
-        blk("StaticRectangle", -1500, 0, 1000, 4000, -0.0349),
-        blk("StaticRectangle", 1500, 0, 1000, 4000, 0.0349),
+        blk("StaticRectangle", 0, 2000, 4000, 2600, turn),
+        blk("StaticRectangle", -1500, 0, 1000, 4000, turn - 0.0349),
+        blk("StaticRectangle", 1500, 0, 1000, 4000, turn + 0.0349),
     ]
     for y in (-800, -600, -400, -200, 0, 200):
         # ramps: zero-height dynamic rects, which Box2D makes static
         level += [
-            blk("DynamicRectangle", -2000, y, 3400, 0, 0.0524 + u(-0.003, 0.003)),
-            blk("DynamicRectangle", 2000, y, 3400, 0, -0.0524 + u(-0.003, 0.003)),
+            blk(
+                "DynamicRectangle", -2000, y, 3400, 0, turn + 0.0524 + u(-0.003, 0.003)
+            ),
+            blk("DynamicRectangle", 2000, y, 3400, 0, turn - 0.0524 + u(-0.003, 0.003)),
         ]
         if y == -800:
             continue
@@ -204,20 +211,66 @@ def seesaws(a):
     return design(level, balls, (0, 0, 2000, 1400), (0, 1000, 2000, 1000))
 
 
-TEMPLATES = [("hill", hill), ("pinball", pinball), ("seesaws", seesaws)] + [
-    (f"heap{n}", heap(n)) for n in (20, 50, 110)
-]
+def seesaws_fixed(a):
+    """The seesaws layout with every ball at angle 0. Instead, the parts that
+    never move are stored at their usual tilt plus k whole turns, with 2*pi*k
+    close to A. Box2D computes a body's rotation once, when it creates the
+    body, so these angles never change: each design tests the switch point
+    within about 0.11 rad."""
+    return seesaws(0.0, 2 * math.pi * round(a / (2 * math.pi)))
+
+
+_designs = {}
+
+
+def fc_design(design_id):
+    """A design from FC with its goal piece at angle A. Saved under its own
+    level, so it can be saved back to FC from fcsim with Open file."""
+
+    def make(a):
+        if design_id not in _designs:
+            req = urllib.request.Request(
+                "http://www.fantasticcontraption.com/retrieveLevel.php",
+                data=urllib.parse.urlencode(
+                    {"id": design_id, "loadDesign": 1}
+                ).encode(),
+            )
+            with urllib.request.urlopen(req, timeout=30) as r:
+                _designs[design_id] = r.read().decode()
+        xml = _designs[design_id]
+        i, j = xml.index("<playerBlocks>"), xml.index("</playerBlocks>")
+        player, n = re.subn(
+            r'(<(\w+) id="\d+">\s*<rotation>)[^<]*(</rotation>(?:(?!</\2>).)*?<goalBlock>true)',
+            lambda m: m[1] + repr(a) + m[3],
+            xml[i:j],
+            flags=re.S,
+        )
+        assert n == 1, f"design {design_id} has {n} goal pieces"
+        return xml[:i] + player + xml[j:]
+
+    return make
+
+
+# (name, template, min ticks per run)
+TEMPLATES = [
+    ("hill", hill, 0),
+    ("pinball", pinball, 0),
+    ("snail", fc_design(12728932), 0),
+    ("seesaws_fixed", seesaws_fixed, 0),
+    ("layercake", fc_design(12728960), 20000),
+    ("seesaws", seesaws, 0),
+    ("tugofwar", fc_design(12728937), 20000),
+] + [(f"heap{n}", heap(n), 0) for n in (20, 50, 110)]
 
 
 # ---- simulation ----
 
 
-def run(xml, threshold, ticks, trace=None):
-    """(solve tick or -1, if trace = A: every angle reached by the player
-    blocks that start at angle A)"""
+def run(xml, threshold, ticks, trace=False):
+    """(solve tick or -1, if trace: every angle reached by any player block)"""
     env = dict(os.environ, FSIN_THRESHOLD=repr(threshold))
     env.pop("FCSIM_TRACE", None)
-    if trace is not None:
+    if trace:
         env["FCSIM_TRACE"] = "1"
     p = subprocess.run(
         [str(BINARY), str(ticks)], input=xml, capture_output=True, text=True, env=env
@@ -225,36 +278,33 @@ def run(xml, threshold, ticks, trace=None):
     if p.returncode != 0:
         raise RuntimeError(f"{BINARY} exited {p.returncode}")
     solve = int(p.stdout.split()[0])
-    angles = []
-    if trace is not None:
-        ticks_angles = []
-        for line in p.stderr.splitlines():
-            if line.startswith("Tick"):
-                ticks_angles.append([])
-            else:
-                ticks_angles[-1].append(float(re.search(r"Ang = ([^,]+),", line)[1]))
-        # fcsim's strtod may round the XML angle differently by an ulp or so
-        tracked = [
-            i
-            for i, ang in enumerate(ticks_angles[0])
-            if abs(ang - trace) <= 1e-12 * abs(trace)
-        ]
-        angles = [t[i] for t in ticks_angles for i in tracked]
+    angles = [float(a) for a in re.findall(r"Ang = ([^,]+),", p.stderr)]
     return solve, angles
+
+
+def level_angles(xml):
+    """the level blocks' angles; these templates only give large angles to
+    level blocks that never move, so these are all the angles they reach"""
+    level = xml[xml.index("<levelBlocks>") : xml.index("</levelBlocks>")]
+    return [float(r) for r in re.findall(r"<rotation>([^<]*)</rotation>", level)]
 
 
 def attempt(make, low, high, ticks, min_diff):
     a = u(low, high)
     xml = make(a)
-    below, ang_lo = run(xml, low, ticks, trace=a)
-    above, ang_hi = run(xml, high, ticks, trace=a)
+    below, ang_lo = run(xml, low, ticks, trace=True)
+    above, ang_hi = run(xml, high, ticks, trace=True)
     if below < 0 or above < 0 or abs(below - above) < min_diff:
         return None
-    # the range of the angle bodies over both runs; it must stay inside (low, high]
-    a_min = min(ang_lo + ang_hi, key=abs)
-    a_max = max(ang_lo + ang_hi, key=abs)
-    a_min, a_max = abs(a_min), abs(a_max)
-    if a_min <= low or a_max >= high:
+    # angles outside (low, high) take the same path for every T in (low, high]
+    inside = [
+        abs(x) for x in ang_lo + ang_hi + level_angles(xml) if low < abs(x) < high
+    ]
+    if not inside:
+        return None
+    a_min, a_max = min(inside), max(inside)
+    # a design whose angles cover most of (low, high) would hardly narrow it
+    if a_max - a_min > (high - low) / 2:
         return None
     # the other end of each half: T just at a_min, T just above a_max
     if run(xml, a_min, ticks)[0] != below:
@@ -275,7 +325,12 @@ def main():
         "--min-diff", type=int, default=1, help="min |below - above| ticks (1)"
     )
     ap.add_argument("--attempts", type=int, default=40, help="tries per template (40)")
-    ap.add_argument("--ticks", type=int, default=6000, help="max ticks per run (6000)")
+    ap.add_argument(
+        "--ticks",
+        type=int,
+        default=6000,
+        help="max ticks per run (6000; more for some templates)",
+    )
     ap.add_argument("--out", default="fsin_designs", help="output directory")
     args = ap.parse_args()
     if not 0 <= args.low < args.high:
@@ -286,12 +341,14 @@ def main():
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     found = 0
-    for name, make in TEMPLATES:
+    for name, make, min_ticks in TEMPLATES:
         hits = 0
         for _ in range(args.attempts):
             if found == args.count:
                 break
-            r = attempt(make, args.low, args.high, args.ticks, args.min_diff)
+            r = attempt(
+                make, args.low, args.high, max(args.ticks, min_ticks), args.min_diff
+            )
             if not r:
                 continue
             a, a_min, a_max, below, above, xml = r
