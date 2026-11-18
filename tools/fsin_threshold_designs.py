@@ -21,11 +21,15 @@ Running one in FC halves the interval: matching "below" gives HIGH = A_min,
 matching "above" gives LOW = A_max.
 
 Templates are tried simplest first, --attempts times each, before moving on.
+With --rotate, the script moves on to the next template after each design it
+keeps, and cycles through the templates until it has --count designs or a
+whole cycle keeps none.
 Angles and layouts come from the OS random source, so separate runs with the
 same arguments don't repeat each other's work.
 """
 
 import argparse
+import itertools
 import math
 import os
 import random
@@ -331,6 +335,11 @@ def main():
         default=6000,
         help="max ticks per run (6000; more for some templates)",
     )
+    ap.add_argument(
+        "--rotate",
+        action="store_true",
+        help="move on to the next template after each design kept, and cycle",
+    )
     ap.add_argument("--out", default="fsin_designs", help="output directory")
     args = ap.parse_args()
     if not 0 <= args.low < args.high:
@@ -341,11 +350,15 @@ def main():
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     found = 0
-    for name, make, min_ticks in TEMPLATES:
-        hits = 0
+    misses = 0  # templates in a row that kept nothing
+    for name, make, min_ticks in (
+        itertools.cycle(TEMPLATES) if args.rotate else TEMPLATES
+    ):
+        hits = tries = 0
         for _ in range(args.attempts):
             if found == args.count:
                 break
+            tries += 1
             r = attempt(
                 make, args.low, args.high, max(args.ticks, min_ticks), args.min_diff
             )
@@ -366,8 +379,11 @@ def main():
             )
             found += 1
             hits += 1
-        print(f"[{name}: {hits} of {args.attempts} attempts kept]", file=sys.stderr)
-        if found == args.count:
+            if args.rotate:
+                break
+        print(f"[{name}: {hits} of {tries} attempts kept]", file=sys.stderr)
+        misses = 0 if hits else misses + 1
+        if found == args.count or misses == len(TEMPLATES):
             break
     print(f"{found} designs in {out}/ (index: designs.tsv)", file=sys.stderr)
 
