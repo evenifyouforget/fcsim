@@ -36,12 +36,15 @@ size_t strlen(const char *s) {
   return res;
 }
 
+// strcmp and memcmp compare bytes as unsigned char, as the C standard
+// requires. Plain char is signed on wasm32, so bytes 0x80-0xFF would
+// otherwise order before 0x00-0x7F.
 int strcmp(const char *s1, const char *s2) {
   while (*s1 && *s2 && *s1 == *s2) {
     s1++;
     s2++;
   }
-  return *s1 - *s2;
+  return (unsigned char)*s1 - (unsigned char)*s2;
 }
 
 void *memset(void *s, int c, size_t n) {
@@ -63,8 +66,8 @@ void *memmove(void *dest, const void *src, size_t n) {
 }
 
 int memcmp(const void *s1, const void *s2, size_t n) {
-  const char *s1c = (const char *)s1;
-  const char *s2c = (const char *)s2;
+  const unsigned char *s1c = (const unsigned char *)s1;
+  const unsigned char *s2c = (const unsigned char *)s2;
   while (n--) {
     int res = *s1c - *s2c;
     if (res)
