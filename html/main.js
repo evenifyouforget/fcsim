@@ -654,8 +654,29 @@ if (import_checksum_str) {
   }
 }
 
-function on_text(text) {
+let save_status = document.getElementById("save_status");
+
+function on_text(text, xml_str, orphaned) {
   console.log(text);
+  text = text.trim();
+  if (!/^\d+$/.test(text)) {
+    design_link.style.display = "none";
+    if (!orphaned) {
+      // FC's server refuses to save designs for some levels, such as most
+      // purged and official paid levels (#29). Retry without the level ID.
+      post_save(
+        xml_str.replace(/<levelId>[^<]*<\/levelId>/, "<levelId></levelId>"),
+        true,
+      );
+      return;
+    }
+    save_status.textContent =
+      "Save failed: the server did not return a design ID.";
+    return;
+  }
+  save_status.textContent = orphaned
+    ? "The server refused to save this design under its level, so it was saved without a level."
+    : "";
   let export_checksum_str = last_exported_checksum
     .toString(36)
     .split("")
@@ -666,10 +687,16 @@ function on_text(text) {
   design_link.style.display = "block";
 }
 
-function on_result(response) {
-  let text_promise = response.text();
-
-  text_promise.then(on_text);
+function post_save(xml_str, orphaned) {
+  fetch(FC_URL + "/saveDesign.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({ xml: xml_str }),
+  })
+    .then((response) => response.text())
+    .then((text) => on_text(text, xml_str, orphaned));
 }
 
 function save_design(event) {
@@ -687,15 +714,7 @@ function save_design(event) {
 
   let xml_str = make_cstring(xml);
 
-  let request_promise = fetch(FC_URL + "/saveDesign.php", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({ xml: xml_str }),
-  });
-
-  request_promise.then(on_result);
+  post_save(xml_str, false);
 }
 
 // Local design files (#179), format in README §Design File. Downloads are
