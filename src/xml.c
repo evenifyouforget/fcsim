@@ -719,7 +719,7 @@ int read_retrieve_level(struct slice *buf, struct xml_level *level) {
   return read_elem_end(buf, &this_name);
 }
 
-int xml_parse(char *xml, int len, struct xml_level *level) {
+static int parse(char *xml, int len, struct xml_level *level) {
   struct slice buf;
   int res;
 
@@ -744,6 +744,22 @@ int xml_parse(char *xml, int len, struct xml_level *level) {
     return -1;
 
   return 0;
+}
+
+/* Elements missing from the XML are left empty, and on failure the whole
+ * level is empty, so callers can always use `level` (#183). */
+int xml_parse(char *xml, int len, struct xml_level *level) {
+  int res;
+
+  memset(level, 0, sizeof(*level));
+  level->level_id = -1;
+  res = parse(xml, len, level);
+  if (res) {
+    xml_free(level);
+    memset(level, 0, sizeof(*level));
+    level->level_id = -1;
+  }
+  return res;
 }
 
 static void free_joints(struct xml_joint *joint) {
