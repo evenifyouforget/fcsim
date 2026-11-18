@@ -115,6 +115,7 @@ common_sources = [
     "src/arena_graphics.cpp",
     "src/export.c",
     "src/core.cpp",
+    "src/design_file.c",
     "src/gen.c",
     "src/graph.c",
     "src/graph_algorithm.cpp",

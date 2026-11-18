@@ -217,6 +217,17 @@ function close(event) {
 }
 
 save_button.addEventListener("click", save);
+document
+  .getElementById("download-button")
+  .addEventListener("click", download_design);
+document
+  .getElementById("open-button")
+  .addEventListener("click", () =>
+    document.getElementById("open-file").click(),
+  );
+document
+  .getElementById("open-file")
+  .addEventListener("change", open_design_file);
 close_button.addEventListener("click", close);
 accountButton.addEventListener("click", showAccountMenu);
 closeAccountMenuButton.addEventListener("click", hideAccountMenu);
@@ -687,6 +698,75 @@ function save_design(event) {
   request_promise.then(on_result);
 }
 
+// Local design files (#179), format in README §Design File. Downloads are
+// gzip-compressed; opening accepts a design file (plain or gzipped) or XML.
+// An opened file is handed to the next page load through sessionStorage.
+const LOCAL_DESIGN_KEY = "fcsim_local_design";
+
+function notify(text) {
+  const notification = document.getElementById("notification");
+  if (notification) notification.appendChild(chainElement(["p"], text));
+}
+
+async function gzip_transform(bytes, stream) {
+  const piped = new Blob([bytes]).stream().pipeThrough(stream);
+  return new Uint8Array(await new Response(piped).arrayBuffer());
+}
+
+async function download_design() {
+  const ptr = inst.exports.export_design_file();
+  const len = inst.exports.export_design_file_len();
+  let bytes = new Uint8Array(inst.exports.memory.buffer, ptr, len).slice();
+  inst.exports.free(ptr);
+  bytes = await gzip_transform(bytes, new CompressionStream("gzip"));
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([bytes]));
+  a.download = "design.fcd";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 0);
+}
+
+async function open_design_file(event) {
+  const file = event.target.files[0];
+  event.target.value = "";
+  if (!file) return;
+  let bytes = new Uint8Array(await file.arrayBuffer());
+  try {
+    if (bytes[0] === 0x1f && bytes[1] === 0x8b)
+      bytes = await gzip_transform(bytes, new DecompressionStream("gzip"));
+  } catch (err) {
+    notify("Could not decompress " + file.name);
+    return;
+  }
+  const head = new TextDecoder().decode(bytes.slice(0, 4));
+  if (head !== "FCDS" && !head.trimStart().startsWith("<")) {
+    notify(file.name + " is not a design file or design XML");
+    return;
+  }
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 0x8000)
+    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  try {
+    sessionStorage.setItem(LOCAL_DESIGN_KEY, btoa(binary));
+  } catch (err) {
+    notify("Could not open " + file.name + ": " + String(err));
+    return;
+  }
+  location.search = "?localDesign=1";
+}
+
+function take_local_design() {
+  let stored = null;
+  try {
+    stored = sessionStorage.getItem(LOCAL_DESIGN_KEY);
+  } catch (err) {}
+  if (!stored) {
+    notify("The opened design file is no longer available; open it again.");
+    return null;
+  }
+  return Uint8Array.from(atob(stored), (c) => c.charCodeAt(0));
+}
+
 function init_module(results) {
   let module = results[0];
 
@@ -721,11 +801,12 @@ let module_promise = WebAssembly.instantiateStreaming(
 
 let design_id = params.get("designId");
 let level_id = params.get("levelId");
+let local_design = params.get("localDesign") ? take_local_design() : null;
 // for merging purposes
 let additional_design_ids = [];
 
 // homepage behaviour: default brown
-if (!design_id && !level_id) {
+if (!design_id && !level_id && !local_design) {
   design_id = "12706185";
 
   // show usage
@@ -783,7 +864,8 @@ function append_design(i_level_id, i_design_id) {
   let buffer_promise = response_promise.then((resp) => resp.arrayBuffer());
   module_buffer_promise_list.push(buffer_promise);
 }
-append_design(level_id, design_id);
+if (local_design) module_buffer_promise_list.push(local_design.buffer);
+else append_design(level_id, design_id);
 additional_design_ids.forEach((i_design_id) => {
   append_design(undefined, i_design_id);
 });

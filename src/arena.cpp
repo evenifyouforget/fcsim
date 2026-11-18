@@ -8,6 +8,7 @@
 #define ARENA_C
 extern "C" {
 #include "arena.h"
+#include "design_file.h"
 #include "gen.h"
 #include "gl.h"
 #include "graph.h"
@@ -207,7 +208,10 @@ void arena_init(struct arena *arena, float w, float h, char *xml, int len) {
 
   /* parse incoming xml into a temporary design */
   memset(&tmp, 0, sizeof(tmp));
-  xml_parse(xml, len, &level);
+  if (design_file_is_binary(xml, len))
+    design_file_decode((const uint8_t *)xml, len, &level);
+  else
+    xml_parse(xml, len, &level);
   convert_xml(&level, &tmp);
   xml_free(&level); /* avoid leak */
 
