@@ -120,54 +120,6 @@ def pinball(a):
     )
 
 
-def heap(n):
-    """A wheel drops onto a heap of n dynamic circles on a shelf; the heap
-    spills down three ramps, carrying a goal ball to the goal area. The
-    static layout follows FC test level 687738 (design 12707232)."""
-
-    def make(a):
-        statics = [
-            blk("StaticRectangle", -220, 20, 440, 40),
-            blk("StaticRectangle", -420, 150, 40, 900),
-            blk("StaticRectangle", 0, 70, 400, 40, 0.0175),
-            blk("StaticRectangle", 100, 300, 800, 40, -0.1745),
-            blk("StaticRectangle", -40, 590, 800, 40, 0.0175),
-        ]
-        wheel = (-371 + u(-5, 5), -348, 20)
-        ball = (-20 + u(-15, 15), -10, u(8, 12))
-        placed = [wheel, ball]
-        circles = []
-        for _ in range(n * 50):
-            if len(circles) == n:
-                break
-            r = u(8, 30)
-            c = (u(-395 + r, 40 - r), u(-300 + r, -r), r)
-            if all(math.dist(c[:2], p[:2]) > c[2] + p[2] + 1 for p in placed):
-                placed.append(c)
-                circles.append(blk("DynamicCircle", c[0], c[1], r, r))
-        return design(
-            statics + circles,
-            [
-                blk("NoSpinWheel", wheel[0], wheel[1], 40, 40, a, False, 0),
-                blk(
-                    "NoSpinWheel",
-                    ball[0],
-                    ball[1],
-                    2 * ball[2],
-                    2 * ball[2],
-                    0.0,
-                    True,
-                    1,
-                ),
-            ],
-            (-205, -145, 405, 305),
-            (300, 430, 105, 325),
-        )
-
-    make.__doc__ = heap.__doc__
-    return make
-
-
 def seesaws(a, turn=0.0):
     """Many tiny goal balls, all at the large angle, fall through layers of
     seesaws (thin dynamic planks on three static circles) between ramps; the
@@ -261,10 +213,9 @@ TEMPLATES = [
     ("pinball", pinball, 0),
     ("snail", fc_design(12728932), 0),
     ("seesaws_fixed", seesaws_fixed, 0),
-    ("layercake", fc_design(12728960), 20000),
     ("seesaws", seesaws, 0),
     ("tugofwar", fc_design(12728937), 20000),
-] + [(f"heap{n}", heap(n), 0) for n in (20, 50, 110)]
+]
 
 
 # ---- simulation ----
