@@ -204,7 +204,7 @@ fsin_defines = [
 ]
 run_single_defines = [
     "CLI",
-]
+] + fsin_defines
 msan_defines = [
     "SANITIZER_MSAN",
 ]
