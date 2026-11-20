@@ -346,6 +346,54 @@ In practice, outgoing joint preference is only relevant for rods, since only rod
 
 In practice, incoming joint preference is irrelevant - any proper editor (including the original FC client) will automatically snap blocks so that all joints within a joint stack remain at "the same" position (again, subject to floating-point math), meaning that, by distance, there should never be a tie. Ties are only possible with certain external editors that do not enforce joint snapping.
 
+### Design File
+
+A binary file format for saving and loading designs locally, without FC's servers (#179). The web build's **Download** button saves one, and **Open file** loads one (or design XML). `run_single_design_xml` reads either format from stdin, and with a second argument (`run_single_design_xml MAX_TICKS out.fcd`) saves the design it loaded as a design file.
+
+It holds the same data as the XML, with two improvements:
+
+* Numbers are stored as raw doubles, and rods by their endpoints, so a save then load gives back exactly the same design. XML loses precision to decimal rounding, and stores rods as centre, length and angle.
+* Each joint reference says which joint of the other block it connects to, so loading never has to guess by distance (see "Joint Assignment: XML to Design").
+
+Downloaded files are gzip-compressed. Readers should accept the file either gzipped (starts with `1f 8b`) or plain.
+
+All integers are unsigned and all values little-endian unless stated otherwise. `f64` is an IEEE 754 double.
+
+Header (78 bytes):
+
+| Offset | Type | Field |
+| --- | --- | --- |
+| 0 | 4 bytes | Magic: ASCII `FCDS` |
+| 4 | u16 | Version: 1 |
+| 6 | i32 | Level ID the design is based on, or -1 for none |
+| 10 | 4 × f64 | Build area: x, y, width, height |
+| 42 | 4 × f64 | Goal area: x, y, width, height |
+| 74 | u32 | Block count, at most 65535 |
+
+Then each block (46 bytes), level blocks first, in design order:
+
+| Offset | Type | Field |
+| --- | --- | --- |
+| 0 | u8 | Type ID, 0 to 12, below |
+| 1 | 5 × f64 | Geometry, see below |
+| 41 | u16 | Joint reference 0: index of a block in this file, or `0xFFFF` for none |
+| 43 | u16 | Joint reference 1: likewise |
+| 45 | u8 | Joint index for reference 0 (low 4 bits) and reference 1 (high 4 bits) |
+
+Type IDs (the `FCSIM_*` constants in `src/graph.h`): 0 static rectangle, 1 static circle, 2 dynamic rectangle, 3 dynamic circle (these four are level blocks), 4 goal rectangle, 5 goal circle, 6 clockwise goal circle, 7 counterclockwise goal circle, 8 wheel, 9 clockwise wheel, 10 counterclockwise wheel, 11 water rod, 12 wood rod.
+
+Geometry is x, y, width, height, angle, with the same meaning as in the XML: centre position, `<width>` and `<height>` (so static and dynamic circles store their radius, wheels and goal circles their diameter), and `<rotation>` in radians. Rods instead store their left endpoint x, y, right endpoint x, y, and 0 (ignored when reading).
+
+Joint references say what a block's own joints are connected to:
+
+* Rods: reference 0 for the left end, 1 for the right end
+* Wheels and goal circles: reference 0 for the centre; reference 1 is unused
+* All other blocks: both unused
+
+A reference names an earlier design block in the file and a joint of that block, numbered as in "Joints": rods 0 = left, 1 = right; goal rectangles 0 = centre, 1-4 = corners; wheels and goal circles 0 = centre, 1-4 = circumference, 5-8 = inner joints (only when the diameter is over 40). An unused or unconnected reference is `0xFFFF` with joint index 0.
+
+A reader must reject a file whose magic or version it doesn't know, whose length isn't exactly 78 + 46 × block count, or which has an unknown type ID, a non-finite number, a level ID below -1, or a reference that is used by a block that has no such joint, names a level block or a later block (or the block itself), or names a joint the block doesn't have. fcsim loads a rejected file as an empty design.
+
 ### Win condition
 
 A design solves on the first tick after which all goal blocks are inside the goal area. The check follows the original game's `Player.hasWon()`, which works on Flash display-list values rather than physics values:

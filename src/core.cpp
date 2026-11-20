@@ -1,4 +1,5 @@
 #include "arena.hpp"
+#include "design_file.h"
 #include "gl.h"
 #include "text.h"
 
@@ -48,6 +49,16 @@ int get_main_design_checksum() { return the_arena.design.actual_checksum; }
 char *do_export(char *user, char *name, char *desc) {
   return export_design(&the_arena.design, user, name, desc);
 }
+
+static int design_file_len;
+
+/* binary design file (#179); free the result. Length: export_design_file_len
+ */
+uint8_t *export_design_file() {
+  return design_file_encode(&the_arena.design, &design_file_len);
+}
+
+int export_design_file_len() { return design_file_len; }
 
 void draw(void) { arena_draw(&the_arena); }
 
