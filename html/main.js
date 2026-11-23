@@ -643,8 +643,44 @@ if (import_checksum_str) {
   }
 }
 
-function on_text(text) {
+let save_status = document.getElementById("save_status");
+
+// Level IDs to try, in order (#29): the design's own, then none, then a blank
+// level kept for designs that can't be saved otherwise. FC's server refuses
+// some levels, such as most purged and official paid levels, and has been
+// seen to refuse designs with no level.
+const FALLBACK_LEVEL_ID = "690687";
+
+function save_attempts(xml_str) {
+  const m = xml_str.match(/<levelId>([^<]*)<\/levelId>/);
+  const own = m ? m[1] : "";
+  return [...new Set([own, "", FALLBACK_LEVEL_ID])];
+}
+
+function on_text(text, xml_str, level_ids, attempt) {
   console.log(text);
+  text = text.trim();
+  if (!/^\d+$/.test(text)) {
+    design_link.style.display = "none";
+    if (attempt + 1 < level_ids.length) {
+      post_save(xml_str, level_ids, attempt + 1);
+      return;
+    }
+    save_status.textContent =
+      "Save failed: the server did not return a design ID.";
+    return;
+  }
+  const level_id = level_ids[attempt];
+  save_status.textContent =
+    attempt === 0
+      ? ""
+      : level_id === ""
+        ? "The server refused to save this design under its level, so it was saved without a level."
+        : "The server refused to save this design " +
+          (level_ids[0] === "" ? "without a level" : "under its level") +
+          ", so it was saved under level " +
+          level_id +
+          ", a blank level for designs without one.";
   let export_checksum_str = last_exported_checksum
     .toString(36)
     .split("")
@@ -655,10 +691,20 @@ function on_text(text) {
   design_link.style.display = "block";
 }
 
-function on_result(response) {
-  let text_promise = response.text();
-
-  text_promise.then(on_text);
+function post_save(xml_str, level_ids, attempt) {
+  const xml = xml_str.replace(
+    /<levelId>[^<]*<\/levelId>/,
+    "<levelId>" + level_ids[attempt] + "</levelId>",
+  );
+  fetch(FC_URL + "/saveDesign.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({ xml: xml }),
+  })
+    .then((response) => response.text())
+    .then((text) => on_text(text, xml_str, level_ids, attempt));
 }
 
 function save_design(event) {
@@ -676,15 +722,7 @@ function save_design(event) {
 
   let xml_str = make_cstring(xml);
 
-  let request_promise = fetch(FC_URL + "/saveDesign.php", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({ xml: xml_str }),
-  });
-
-  request_promise.then(on_result);
+  post_save(xml_str, save_attempts(xml_str), 0);
 }
 
 function init_module(results) {
