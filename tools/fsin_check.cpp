@@ -19,6 +19,18 @@
  *   fsin_check survey [SAMPLES]
  *       Per binade [2^e, 2^(e+1)), e = 0..62: how often the fast path
  *       (fp_sincos) and the emulation each differ from the hardware.
+ *   fsin_check dump sin|cos FILE COUNT [SEED]
+ *       Writes COUNT records of the hardware FSIN (or FCOS) to FILE, to send
+ *       to someone else. Each record is 16 bytes: the bits of x, then the bits
+ *       of the hardware result, both as little-endian 64-bit integers. The x
+ *       values are |x| in [1, 2^63), log-uniform, both signs, and depend only
+ *       on SEED (default 1), so files from different computers line up.
+ *   fsin_check compare sin|cos FILE [FILE2]
+ *       Needs no x87 hardware. With one FILE, counts how often the emulation
+ *       and the fast path (the software sin/cos, s794-stable) differ from the
+ *       recorded results. With two files, compares them record by record
+ *       (their x values must match). Prints the first mismatches. Exit status
+ *       1 if the emulation (one file) or the two files (two files) differ.
  *   fsin_check candidates
  *       No hardware needed. For each candidate switch point between 6.1
  *       and 90500, how often s794-fsin and s794-stable differ just above
@@ -261,6 +273,152 @@ static int mode_survey(uint64_t samples) {
   return 0;
 }
 
+/* 0 for sin, 1 for cos, -1 for anything else */
+static int parse_fn(const char *s) {
+  if (!std::strcmp(s, "sin"))
+    return 0;
+  if (!std::strcmp(s, "cos"))
+    return 1;
+  return -1;
+}
+
+/* Record files: 16 bytes per entry, little-endian x bits then result bits. */
+static const int RECORD_BYTES = 16;
+
+static void put_le64(unsigned char *p, uint64_t v) {
+  for (int i = 0; i < 8; i++)
+    p[i] = static_cast<unsigned char>(v >> (8 * i));
+}
+
+static uint64_t get_le64(const unsigned char *p) {
+  uint64_t v = 0;
+  for (int i = 0; i < 8; i++)
+    v |= static_cast<uint64_t>(p[i]) << (8 * i);
+  return v;
+}
+
+/* The i-th x of the sequence for a seed. Integer-only, so it is the same on
+ * every computer. */
+static double next_record_x() {
+  double x = rng_binades(0, 62);
+  if (rng_next() & 1)
+    x = -x;
+  return x;
+}
+
+static int mode_dump(int want_cos, const char *path, uint64_t count,
+                     uint64_t seed) {
+  if (need_x87())
+    return 2;
+  std::FILE *f = std::fopen(path, "wb");
+  if (!f) {
+    std::fprintf(stderr, "cannot write %s\n", path);
+    return 2;
+  }
+  rng_state = seed ? seed : 0x9E3779B97F4A7C15ull;
+  print_cpu();
+  for (uint64_t i = 0; i < count; i++) {
+    unsigned char rec[16];
+    double x = next_record_x();
+    put_le64(rec, bits_of(x));
+    put_le64(rec + 8, bits_of(hw_sincos(x, want_cos)));
+    if (std::fwrite(rec, 1, sizeof rec, f) != sizeof rec) {
+      std::fprintf(stderr, "write error on %s\n", path);
+      std::fclose(f);
+      return 2;
+    }
+  }
+  if (std::fclose(f) != 0) {
+    std::fprintf(stderr, "write error on %s\n", path);
+    return 2;
+  }
+  std::printf("RESULT dump: %s, %" PRIu64 " records of %s (%" PRIu64
+              " bytes), seed %" PRIu64 "\n",
+              path, count, want_cos ? "cos" : "sin", count * RECORD_BYTES,
+              seed);
+  return 0;
+}
+
+/* reads the next record; returns 1, 0 at a clean end of file, -1 on a short
+ * or failed read */
+static int read_record(std::FILE *f, uint64_t *x_bits, uint64_t *res_bits) {
+  unsigned char rec[16];
+  size_t n = std::fread(rec, 1, sizeof rec, f);
+  if (n == 0 && !std::ferror(f))
+    return 0;
+  if (n != sizeof rec)
+    return -1;
+  *x_bits = get_le64(rec);
+  *res_bits = get_le64(rec + 8);
+  return 1;
+}
+
+static const int MAX_SHOWN = 10;
+
+static int mode_compare(int want_cos, const char *path_a, const char *path_b) {
+  const char *fn = want_cos ? "cos" : "sin";
+  std::FILE *fa = std::fopen(path_a, "rb");
+  std::FILE *fb = path_b ? std::fopen(path_b, "rb") : nullptr;
+  if (!fa || (path_b && !fb)) {
+    std::fprintf(stderr, "cannot read %s\n", fa ? path_b : path_a);
+    return 2;
+  }
+  uint64_t n = 0, emu_bad = 0, fast_bad = 0, differ = 0;
+  uint64_t xa, ra, xb, rb;
+  for (;;) {
+    int ga = read_record(fa, &xa, &ra);
+    int gb = fb ? read_record(fb, &xb, &rb) : 0;
+    if (ga < 0 || gb < 0 || (fb && ga != gb)) {
+      std::fprintf(stderr,
+                   "bad or mismatched file length after %" PRIu64
+                   " records (each record is %d bytes)\n",
+                   n, RECORD_BYTES);
+      return 2;
+    }
+    if (ga == 0)
+      break;
+    double x = double_of(xa);
+    if (fb) {
+      if (xa != xb) {
+        std::fprintf(stderr,
+                     "record %" PRIu64 ": the files have different x (%a vs "
+                     "%a); use the same SEED\n",
+                     n, x, double_of(xb));
+        return 2;
+      }
+      if (ra != rb) {
+        if (differ++ < MAX_SHOWN)
+          std::printf("DIFFER %s x=%.17g (%a) a=%a b=%a\n", fn, x, x,
+                      double_of(ra), double_of(rb));
+      }
+    } else {
+      uint64_t emu = bits_of(emu_sincos(x, want_cos));
+      uint64_t fast = bits_of(fast_sincos(x, want_cos));
+      if (emu != ra) {
+        if (emu_bad++ < MAX_SHOWN)
+          std::printf("MISMATCH emu %s x=%.17g (%a) file=%a emu=%a\n", fn, x, x,
+                      double_of(ra), double_of(emu));
+      }
+      fast_bad += fast != ra;
+    }
+    n++;
+  }
+  std::fclose(fa);
+  if (fb)
+    std::fclose(fb);
+  if (fb) {
+    std::printf("RESULT compare: %" PRIu64 " records of %s, %" PRIu64
+                " differ between the files\n",
+                n, fn, differ);
+    return differ ? 1 : 0;
+  }
+  std::printf("RESULT compare: %" PRIu64 " records of %s: emulation differs "
+              "from the file in %" PRIu64
+              ", fast path (s794-stable) in %" PRIu64 "\n",
+              n, fn, emu_bad, fast_bad);
+  return emu_bad ? 1 : 0;
+}
+
 /* The fast path's range check compares the top 16 bits of |x| (sign
  * cleared), so the possible switch points are the doubles whose low 48
  * bits are zero. */
@@ -299,11 +457,18 @@ int main(int argc, char **argv) {
     return mode_scan(std::strtod(argv[2], 0), std::strtoull(argv[3], 0, 0));
   if (!std::strcmp(mode, "survey"))
     return mode_survey(argc > 2 ? std::strtoull(argv[2], 0, 0) : 100000);
+  if (!std::strcmp(mode, "dump") && argc > 4 && parse_fn(argv[2]) >= 0)
+    return mode_dump(parse_fn(argv[2]), argv[3], std::strtoull(argv[4], 0, 0),
+                     argc > 5 ? std::strtoull(argv[5], 0, 0) : 1);
+  if (!std::strcmp(mode, "compare") && argc > 3 && parse_fn(argv[2]) >= 0)
+    return mode_compare(parse_fn(argv[2]), argv[3],
+                        argc > 4 ? argv[4] : nullptr);
   if (!std::strcmp(mode, "candidates"))
     return mode_candidates();
   std::fprintf(stderr,
                "usage: %s info | verify [SECONDS] [SEED] | scan START "
-               "COUNT | survey [SAMPLES] | candidates\n",
+               "COUNT | survey [SAMPLES] | dump sin|cos FILE COUNT [SEED] | "
+               "compare sin|cos FILE [FILE2] | candidates\n",
                argv[0]);
   return 2;
 }
