@@ -207,13 +207,50 @@ extern "C" int recalculate_design_checksum(struct design *design) {
   return result;
 }
 
+// How many ticks normal playback should run in this callback (#31). Timer
+// callbacks come at whole-millisecond periods and are delayed by the browser
+// (e.g. lined up with display frames), so a fixed number of ticks per
+// callback never averages to the target rate. Instead count the ticks due
+// at the target rate since the clock started.
+static int64_t ticks_due(arena *the_arena, double now) {
+  // at most this much backlog is caught up; beyond it (the simulation can't
+  // keep up, e.g. hyperspeed) the clock restarts instead of bursting
+  const double MAX_BACKLOG_MS = 250;
+  if (!the_arena->clock_synced ||
+      the_arena->clock_target_tps != _fcsim_target_tps) {
+    the_arena->clock_synced = true;
+    the_arena->clock_origin_ms = now;
+    the_arena->clock_target_tps = _fcsim_target_tps;
+    // the first tick is due immediately
+    the_arena->clock_ticks = -1;
+  }
+  double due_total =
+      (now - the_arena->clock_origin_ms) * the_arena->clock_target_tps / 1000.0;
+  double due = due_total - the_arena->clock_ticks;
+  if (due * 1000.0 / the_arena->clock_target_tps > MAX_BACKLOG_MS) {
+    // run this callback's usual batch (all the time budget allows, at
+    // hyperspeed) and count from here
+    the_arena->clock_origin_ms = now;
+    the_arena->clock_ticks = 0;
+    return the_arena->tick_multiply;
+  }
+  return due < 1 ? 0 : (int64_t)due;
+}
+
 extern "C" void tick_func(void *arg) {
   arena *the_arena = (arena *)arg;
 
   double time_start = time_precise_ms();
-  for (int i = 0;
-       is_running(the_arena) && the_arena->single_ticks_remaining != 0 &&
-       i < the_arena->tick_multiply;
+  // normal playback follows the real-time clock; stepping (and the CLI,
+  // which steps one tick per call) runs tick_multiply ticks as before
+  bool clocked = the_arena->single_ticks_remaining < 0;
+  int64_t max_ticks = the_arena->tick_multiply;
+  if (clocked && is_running(the_arena))
+    max_ticks = ticks_due(the_arena, time_start);
+  else
+    the_arena->clock_synced = false;
+  for (int64_t i = 0; is_running(the_arena) &&
+                      the_arena->single_ticks_remaining != 0 && i < max_ticks;
        ++i) {
     if (the_arena->single_ticks_remaining > 0)
       the_arena->single_ticks_remaining--;
@@ -239,6 +276,8 @@ extern "C" void tick_func(void *arg) {
 #endif
     step(the_arena->world);
     the_arena->tick++;
+    if (clocked)
+      the_arena->clock_ticks++;
     if (!the_arena->has_won &&
         goal_blocks_inside_goal_area(&the_arena->design)) {
       the_arena->has_won = true;
