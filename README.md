@@ -97,12 +97,16 @@ In light of this, we are making a distinction between `794-stable` and `794-targ
 The build `fcsim-fpatan` has `fpatan` but is still missing `fsin` and possibly others, so it does not implement `794-target`.
 Feel free to call it `794-fpatan` instead.
 
-`794-fsin` (s794-fsin) is `794-stable` plus a software emulation of the x87 `fsin`/`fcos` instructions (`USE_FSIN`, `src/fpmath/sincos.c`).
+`794-fsin-emu` (s794-fsin-emu) is `794-stable` plus a software emulation of the x87 `fsin`/`fcos` instructions (`USE_FSIN_EMU`, `src/fpmath/sincos.c`).
 For large angles the `794-target` runtime switches from its fast software `sin`/`cos` to `fsin`/`fcos`, which reduce the angle with a 66-bit approximation of pi, so their results differ by a few ulps (#13).
-The emulation reproduces that bit for bit and is 100% portable.
-It is the web build's default, and the native build `fcsim-fsin` provides it too.
-The angle where the switch happens (currently 90112) is not yet confirmed against FC; FC test designs only pin it between 6.1 and 90500.
-`tools/fsin_check.cpp` (x86 only) checks the emulation against real `fsin` hardware and suggests test angles for narrowing the switch point down.
+The emulation is 100% portable, and agrees with real hardware on all but a few inputs in a million (#13):
+on 16,000,000 random angles, it differs from AMD Ryzen (Zen 2 and Zen 3) in 0.00051% of them, and from Intel Core (Coffee Lake and Alder Lake) in 0.0015%.
+Every difference is exactly 1 ulp. AMD and Intel differ from each other in 0.0015%, so no emulation can match both: FC's recorded results depend on the CPU, in rare cases.
+The emulation models the exact result and never the hardware's own rounding errors; ftlib's recordings come from AMD, the closer of the two.
+Matching one vendor exactly (`s794-fsin-amd`, `s794-fsin-intel`) would need a model of that chip's internal rounding. Those spectres don't exist, and we have no data for them yet.
+It is the web build's default, and the native build `fcsim-fsin-emu` provides it too.
+The angle where the switch happens (default 90112) is not exactly known; FC test designs pin it to between 90057.83 and 90143.62 (#13).
+`tools/fsin_check.cpp` (x86 only) checks the emulation against real `fsin` hardware, compares `fsin` results dumped on different computers, and suggests test angles for narrowing the switch point down.
 
 Hopefully at some point we can fully reverse engineer these specialized instructions and implement them in software, such that we can implement `794-target` in a fully portable way.
 

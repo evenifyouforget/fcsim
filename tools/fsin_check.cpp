@@ -1,6 +1,6 @@
 /*
  * Checks fcsim's sin/cos (src/fpmath/sincos.c) against the x87 FSIN/FCOS
- * instructions, for spectre s794-fsin (#13). Not part of the build or CI.
+ * instructions, for spectre s794-fsin-emu (#13). Not part of the build or CI.
  *
  * Build (x86 or x86-64; gcc or clang):
  *   c++ -O2 -ffp-contract=off -Iinclude tools/fsin_check.cpp -o fsin_check
@@ -33,12 +33,12 @@
  *       1 if the emulation (one file) or the two files (two files) differ.
  *   fsin_check candidates
  *       No hardware needed. For each candidate switch point between 6.1
- *       and 90500, how often s794-fsin and s794-stable differ just above
+ *       and 90500, how often s794-fsin-emu and s794-stable differ just above
  *       it, and the first angle where they do. For building FC test designs
  *       to pin down the real switch point.
  */
 
-#define USE_FSIN
+#define USE_FSIN_EMU
 #include "../src/fpmath/sincos.c"
 
 #include <cinttypes>
