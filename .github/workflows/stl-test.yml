@@ -21,11 +21,11 @@ jobs:
     - name: Add venv to PATH
       run: echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
-    - name: Build stl_test_asan and stl_test_msan
-      run: scons stl_test_asan stl_test_msan
+    - name: Build stl_test_asan, stl_test_msan and arena_test_asan
+      run: scons stl_test_asan stl_test_msan arena_test_asan
 
-    - name: Run stl_test via pytest
-      run: pytest test/test_stl.py -n auto --junitxml=results.xml -v
+    - name: Run stl_test and arena_test via pytest
+      run: pytest test/test_stl.py test/test_arena.py -n auto --junitxml=results.xml -v
 
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action@v2
