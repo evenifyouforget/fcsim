@@ -138,6 +138,7 @@ AI-written work is welcome under the same rules as everyone's, plus these. AI ag
 - Apply the `written-and-posted-by-ai` label to every Issue and PR it opens.
 - AI must not merge a PR, close a human-authored Issue or PR, manually trigger a workflow or CI run (the automatic runs on a PR are fine), or make a release.
 - A PR an AI opens as Draft is not yet asking for human review. The AI marks it ready when it is blocked on a human decision, including when it thinks the PR is safe to merge. If a human wants further edits they say so in a review or comment, and if they posted from the same account they mark the PR Draft again.
+- At the start of each session and before each push, the AI reads new GitHub comments (Issue comments, PR comments, review comments and reviews) on everything it owns or works on, and rechecks which PRs have merged or closed, including any it depends on or mentions. It never relies on a PR list from earlier in the session. **Why:** Prevents building on a PR that already merged, and missing a human's comment.
 - If CI fails for reasons unrelated to the PR, the AI comments why on the PR and on the relevant Issue (creating one if needed), says the PR is blocked, and stops working on it.
 - The AI instructions are kept in a local, untracked `AGENTS.md` (listed in `.gitignore`); this section is what contributors can rely on. See #193 for whether to commit one.
 
