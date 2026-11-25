@@ -26,6 +26,9 @@ tags
 pr_draft*.md
 experiment_log.md
 claude_*/
+TMP_*
+# local agent instructions, see CONTRIBUTING.md (AI-assisted contributions)
+AGENTS.md
 
 # SCons files
 .sconsign*
