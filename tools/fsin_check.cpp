@@ -3,7 +3,7 @@
  * instructions, for spectre s794-fsin (#13). Not part of the build or CI.
  *
  * Build (x86 or x86-64; gcc or clang):
- *   cc -O2 -ffp-contract=off -Iinclude tools/fsin_check.c -lm -o fsin_check
+ *   c++ -O2 -ffp-contract=off -Iinclude tools/fsin_check.cpp -o fsin_check
  *
  * Modes:
  *   fsin_check info
@@ -29,12 +29,12 @@
 #define USE_FSIN
 #include "../src/fpmath/sincos.c"
 
-#include <inttypes.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <cinttypes>
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 
 #if defined(__i386__) || defined(__x86_64__)
 #define HAVE_X87 1
@@ -90,7 +90,7 @@ static double now_s(void) {
   return (double)ts.tv_sec + (double)ts.tv_nsec * 1e-9;
 }
 
-static volatile sig_atomic_t interrupted = 0;
+static volatile std::sig_atomic_t interrupted = 0;
 
 static void on_sigint(int sig) {
   (void)sig;
@@ -99,7 +99,7 @@ static void on_sigint(int sig) {
 
 static int need_x87(void) {
   if (!HAVE_X87) {
-    fprintf(stderr, "this mode needs an x86 CPU (x87 FSIN/FCOS)\n");
+    std::fprintf(stderr, "this mode needs an x86 CPU (x87 FSIN/FCOS)\n");
     return 1;
   }
   return 0;
@@ -111,27 +111,27 @@ static void print_cpu(void) {
   char vendor[13] = {0};
   char brand[49] = {0};
   if (__get_cpuid(0, &a, &b, &c, &d)) {
-    memcpy(vendor, &b, 4);
-    memcpy(vendor + 4, &d, 4);
-    memcpy(vendor + 8, &c, 4);
+    std::memcpy(vendor, &b, 4);
+    std::memcpy(vendor + 4, &d, 4);
+    std::memcpy(vendor + 8, &c, 4);
   }
   for (unsigned i = 0; i < 3; i++)
     if (__get_cpuid(0x80000002 + i, &a, &b, &c, &d)) {
-      memcpy(brand + 16 * i, &a, 4);
-      memcpy(brand + 16 * i + 4, &b, 4);
-      memcpy(brand + 16 * i + 8, &c, 4);
-      memcpy(brand + 16 * i + 12, &d, 4);
+      std::memcpy(brand + 16 * i, &a, 4);
+      std::memcpy(brand + 16 * i + 4, &b, 4);
+      std::memcpy(brand + 16 * i + 8, &c, 4);
+      std::memcpy(brand + 16 * i + 12, &d, 4);
     }
-  printf("cpu: %s / %s\n", vendor, brand);
+  std::printf("cpu: %s / %s\n", vendor, brand);
 #else
-  printf("cpu: not x86\n");
+  std::printf("cpu: not x86\n");
 #endif
 }
 
 static void print_mismatch(const char *what, double x, int want_cos, double hw,
                            double other) {
-  printf("MISMATCH %s %s x=%.17g (%a) hw=%a %s=%a\n", what,
-         want_cos ? "cos" : "sin", x, x, hw, what, other);
+  std::printf("MISMATCH %s %s x=%.17g (%a) hw=%a %s=%a\n", what,
+              want_cos ? "cos" : "sin", x, x, hw, what, other);
 }
 
 static int mode_info(void) {
@@ -141,12 +141,13 @@ static int mode_info(void) {
   print_cpu();
   if (!HAVE_X87)
     return 0;
-  printf("%-22s %-4s %-24s %-24s %-24s\n", "x", "fn", "hardware", "emulation",
-         "fast path");
+  std::printf("%-22s %-4s %-24s %-24s %-24s\n", "x", "fn", "hardware",
+              "emulation", "fast path");
   for (size_t i = 0; i < sizeof xs / sizeof xs[0]; i++)
     for (int c = 0; c < 2; c++)
-      printf("%-22.17g %-4s %-24a %-24a %-24a\n", xs[i], c ? "cos" : "sin",
-             hw_sincos(xs[i], c), emu_sincos(xs[i], c), fast_sincos(xs[i], c));
+      std::printf("%-22.17g %-4s %-24a %-24a %-24a\n", xs[i], c ? "cos" : "sin",
+                  hw_sincos(xs[i], c), emu_sincos(xs[i], c),
+                  fast_sincos(xs[i], c));
   return 0;
 }
 
@@ -157,11 +158,11 @@ static int mode_verify(double seconds, uint64_t seed) {
     return 2;
   rng_state = seed ? seed : 0x9E3779B97F4A7C15ull;
   print_cpu();
-  printf("verify: emulation vs hardware, |x| in [1, 2^63), seed %" PRIu64
-         ", %s\n",
-         seed, seconds > 0 ? "timed" : "until Ctrl-C");
-  fflush(stdout);
-  signal(SIGINT, on_sigint);
+  std::printf("verify: emulation vs hardware, |x| in [1, 2^63), seed %" PRIu64
+              ", %s\n",
+              seed, seconds > 0 ? "timed" : "until Ctrl-C");
+  std::fflush(stdout);
+  std::signal(SIGINT, on_sigint);
   while (!interrupted) {
     double x = rng_binades(0, 62);
     if (rng_next() & 1)
@@ -171,26 +172,26 @@ static int mode_verify(double seconds, uint64_t seed) {
       if (bits_of(hw) != bits_of(emu)) {
         bad++;
         print_mismatch("emu", x, c, hw, emu);
-        fflush(stdout);
+        std::fflush(stdout);
       }
     }
     n++;
     if ((n & 0xFFFFF) == 0) {
       double t = now_s();
       if (t - last >= 60 || (seconds > 0 && t - start >= seconds)) {
-        printf("progress: %" PRIu64 " inputs (x2 functions), %" PRIu64
-               " mismatches, %.0f s\n",
-               n, bad, t - start);
-        fflush(stdout);
+        std::printf("progress: %" PRIu64 " inputs (x2 functions), %" PRIu64
+                    " mismatches, %.0f s\n",
+                    n, bad, t - start);
+        std::fflush(stdout);
         last = t;
       }
       if (seconds > 0 && t - start >= seconds)
         break;
     }
   }
-  printf("RESULT verify: %" PRIu64 " inputs (sin and cos each), %" PRIu64
-         " mismatches, seed %" PRIu64 "\n",
-         n, bad, seed);
+  std::printf("RESULT verify: %" PRIu64 " inputs (sin and cos each), %" PRIu64
+              " mismatches, seed %" PRIu64 "\n",
+              n, bad, seed);
   return bad ? 1 : 0;
 }
 
@@ -200,11 +201,11 @@ static int mode_scan(double start, uint64_t count) {
   if (need_x87())
     return 2;
   if (!(start >= 1.0 && start < X87_LIMIT)) {
-    fprintf(stderr, "START must be in [1, 2^63)\n");
+    std::fprintf(stderr, "START must be in [1, 2^63)\n");
     return 2;
   }
   print_cpu();
-  signal(SIGINT, on_sigint);
+  std::signal(SIGINT, on_sigint);
   bits = bits_of(start);
   for (i = 0; i < count && !interrupted; i++, bits++) {
     double x = double_of(bits);
@@ -214,25 +215,25 @@ static int mode_scan(double start, uint64_t count) {
       double hw = hw_sincos(x, c), emu = emu_sincos(x, c);
       if (bits_of(hw) != bits_of(emu)) {
         print_mismatch("emu", x, c, hw, emu);
-        printf("RESULT scan: (X, Y) = (%.17g, %.17g): every x in [X, Y) "
-               "matches, Y does not\n",
-               start, x);
+        std::printf("RESULT scan: (X, Y) = (%.17g, %.17g): every x in [X, Y) "
+                    "matches, Y does not\n",
+                    start, x);
         return 1;
       }
     }
     if ((i & 0xFFFFFF) == 0xFFFFFF) {
       double t = now_s();
       if (t - last >= 60) {
-        printf("progress: %" PRIu64 " checked, next %.17g (%a), %.0f s\n",
-               i + 1, double_of(bits + 1), double_of(bits + 1), t - t0);
-        fflush(stdout);
+        std::printf("progress: %" PRIu64 " checked, next %.17g (%a), %.0f s\n",
+                    i + 1, double_of(bits + 1), double_of(bits + 1), t - t0);
+        std::fflush(stdout);
         last = t;
       }
     }
   }
-  printf("RESULT scan: no mismatch in [%.17g, %.17g) (%" PRIu64
-         " doubles); resume from %a\n",
-         start, double_of(bits), i, double_of(bits));
+  std::printf("RESULT scan: no mismatch in [%.17g, %.17g) (%" PRIu64
+              " doubles); resume from %a\n",
+              start, double_of(bits), i, double_of(bits));
   return 0;
 }
 
@@ -240,8 +241,8 @@ static int mode_survey(uint64_t samples) {
   if (need_x87())
     return 2;
   print_cpu();
-  printf("%-6s %-24s %-14s %-14s\n", "e", "binade start", "fast != hw",
-         "emu != hw");
+  std::printf("%-6s %-24s %-14s %-14s\n", "e", "binade start", "fast != hw",
+              "emu != hw");
   for (int e = 0; e <= 62; e++) {
     uint64_t fast_bad = 0, emu_bad = 0;
     for (uint64_t i = 0; i < samples; i++) {
@@ -252,10 +253,10 @@ static int mode_survey(uint64_t samples) {
         emu_bad += bits_of(emu_sincos(x, c)) != hw;
       }
     }
-    printf("%-6d %-24.17g %-14.6f %-14.6f\n", e, ldexp(1.0, e),
-           (double)fast_bad / (2.0 * (double)samples),
-           (double)emu_bad / (2.0 * (double)samples));
-    fflush(stdout);
+    std::printf("%-6d %-24.17g %-14.6f %-14.6f\n", e, std::ldexp(1.0, e),
+                (double)fast_bad / (2.0 * (double)samples),
+                (double)emu_bad / (2.0 * (double)samples));
+    std::fflush(stdout);
   }
   return 0;
 }
@@ -266,8 +267,8 @@ static int mode_survey(uint64_t samples) {
 static int mode_candidates(void) {
   const uint64_t samples = 20000;
   uint64_t lo = bits_of(6.1) >> 48, hi = bits_of(90500.0) >> 48;
-  printf("%-8s %-24s %-12s %-24s\n", "top16", "switch point T", "differ",
-         "first differing angle >= T");
+  std::printf("%-8s %-24s %-12s %-24s\n", "top16", "switch point T", "differ",
+              "first differing angle >= T");
   for (uint64_t h = lo; h <= hi; h++) {
     double t = double_of(h << 48), next = double_of((h + 1) << 48);
     uint64_t differ = 0;
@@ -281,28 +282,28 @@ static int mode_candidates(void) {
         first = x;
       differ += d;
     }
-    printf("0x%04" PRIx64 "   %-24.17g %-12.4f %-24.17g\n", h, t,
-           (double)differ / (double)samples, first);
+    std::printf("0x%04" PRIx64 "   %-24.17g %-12.4f %-24.17g\n", h, t,
+                (double)differ / (double)samples, first);
   }
   return 0;
 }
 
 int main(int argc, char **argv) {
   const char *mode = argc > 1 ? argv[1] : "";
-  if (!strcmp(mode, "info"))
+  if (!std::strcmp(mode, "info"))
     return mode_info();
-  if (!strcmp(mode, "verify"))
-    return mode_verify(argc > 2 ? strtod(argv[2], 0) : 0.0,
-                       argc > 3 ? strtoull(argv[3], 0, 0) : 1);
-  if (!strcmp(mode, "scan") && argc > 3)
-    return mode_scan(strtod(argv[2], 0), strtoull(argv[3], 0, 0));
-  if (!strcmp(mode, "survey"))
-    return mode_survey(argc > 2 ? strtoull(argv[2], 0, 0) : 100000);
-  if (!strcmp(mode, "candidates"))
+  if (!std::strcmp(mode, "verify"))
+    return mode_verify(argc > 2 ? std::strtod(argv[2], 0) : 0.0,
+                       argc > 3 ? std::strtoull(argv[3], 0, 0) : 1);
+  if (!std::strcmp(mode, "scan") && argc > 3)
+    return mode_scan(std::strtod(argv[2], 0), std::strtoull(argv[3], 0, 0));
+  if (!std::strcmp(mode, "survey"))
+    return mode_survey(argc > 2 ? std::strtoull(argv[2], 0, 0) : 100000);
+  if (!std::strcmp(mode, "candidates"))
     return mode_candidates();
-  fprintf(stderr,
-          "usage: %s info | verify [SECONDS] [SEED] | scan START "
-          "COUNT | survey [SAMPLES] | candidates\n",
-          argv[0]);
+  std::fprintf(stderr,
+               "usage: %s info | verify [SECONDS] [SEED] | scan START "
+               "COUNT | survey [SAMPLES] | candidates\n",
+               argv[0]);
   return 2;
 }
