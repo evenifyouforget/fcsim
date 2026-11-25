@@ -2,11 +2,11 @@
 
 For |x| >= 90112 the 794-target runtime computes sin/cos with the x87
 FSIN/FCOS instructions, which reduce the argument with a 66-bit pi. With
-USE_FSIN (spectre s794-fsin), fcsim emulates them in src/fpmath/sincos.c.
+USE_FSIN_EMU (spectre s794-fsin-emu), fcsim emulates them in src/fpmath/sincos.c.
 This compiles that file natively and checks it bit for bit against an exact
 model of the instructions: sin/cos(x * pi / pi66), rounded to the x87's
 64-bit significand and then to double, both to nearest with ties to even.
-Without USE_FSIN (s794-stable) nothing may change.
+Without USE_FSIN_EMU (s794-stable) nothing may change.
 """
 
 import random
@@ -116,7 +116,7 @@ def tmp(tmp_path_factory):
 
 @pytest.fixture(scope="module")
 def driver(tmp):
-    return _build(tmp, "driver_fsin", ["-DUSE_FSIN"])
+    return _build(tmp, "driver_fsin", ["-DUSE_FSIN_EMU"])
 
 
 @pytest.fixture(scope="module")
@@ -152,7 +152,7 @@ def test_stable_and_fsin_agree_below_threshold(driver, stable_driver):
 
 
 def test_stable_keeps_the_fast_path(driver, stable_driver):
-    # without USE_FSIN, large arguments must not take the x87 emulation
+    # without USE_FSIN_EMU, large arguments must not take the x87 emulation
     xs = [90500.0, 1e6, 123456789.123]
     stable, fsin = _run(stable_driver, xs), _run(driver, xs)
     assert all(s != f for s, f in zip(stable, fsin)), (stable, fsin)

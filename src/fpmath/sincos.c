@@ -133,16 +133,18 @@ static double fp_sincos(double x, int off) {
  * Above 2^63, FSIN does nothing and sets C2. What the runtime does then is
  * not known, so those arguments keep the fast path, as before.
  *
- * This is spectre s794-fsin, built only with USE_FSIN (the web build and
- * fcsim-fsin). Without it fp_sin/fp_cos are the fast path alone: s794-stable.
+ * This is spectre s794-fsin-emu, built only with USE_FSIN_EMU (the web build
+ * and fcsim-fsin-emu). Without it fp_sin/fp_cos are the fast path alone:
+ * s794-stable.
  */
 
-#ifdef USE_FSIN
+#ifdef USE_FSIN_EMU
 
 /* Where the fast path ends. 90112 (top 16 bits of |x| at most 0x40F5) is
  * the range check of Intel's SSE2 sin/cos that fp_sincos follows, from
  * memory, not checked against the 794-target binary. The designs in #13
- * only show that it lies between 6.1 and 90500. */
+ * show that the real switch point lies in (90057.83, 90143.62], which
+ * contains it. */
 #ifndef X87_THRESHOLD /* overridable, to test other switch points */
 #define X87_THRESHOLD 90112.0
 #endif
@@ -354,7 +356,7 @@ double fp_sin(double x) { return fp_sincos(x, 0); }
 
 double fp_cos(double x) { return fp_sincos(x, 0x10); }
 
-#endif /* USE_FSIN */
+#endif /* USE_FSIN_EMU */
 
 static union tab_t tab = {
     .x = {
