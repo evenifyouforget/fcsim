@@ -1,5 +1,12 @@
 #include <stddef.h>
 
+// These are the memcpy/memset/memmove the rest of the wasm build calls, so
+// the compiler must not turn their loops back into calls to those functions
+// (loop idiom recognition), or they would call themselves until the stack
+// overflows. no_builtin on every function here does what -fno-builtin would,
+// without affecting builtin optimizations in other translation units.
+#pragma clang attribute push(__attribute__((no_builtin)), apply_to = function)
+
 // Internal helpers: not part of the C ABI.
 
 static void *memcpy_right(void *dest, const void *src, size_t n) {
@@ -29,12 +36,15 @@ size_t strlen(const char *s) {
   return res;
 }
 
+// strcmp and memcmp compare bytes as unsigned char, as the C standard
+// requires. Plain char is signed on wasm32, so bytes 0x80-0xFF would
+// otherwise order before 0x00-0x7F.
 int strcmp(const char *s1, const char *s2) {
   while (*s1 && *s2 && *s1 == *s2) {
     s1++;
     s2++;
   }
-  return *s1 - *s2;
+  return (unsigned char)*s1 - (unsigned char)*s2;
 }
 
 void *memset(void *s, int c, size_t n) {
@@ -56,8 +66,8 @@ void *memmove(void *dest, const void *src, size_t n) {
 }
 
 int memcmp(const void *s1, const void *s2, size_t n) {
-  const char *s1c = (const char *)s1;
-  const char *s2c = (const char *)s2;
+  const unsigned char *s1c = (const unsigned char *)s1;
+  const unsigned char *s2c = (const unsigned char *)s2;
   while (n--) {
     int res = *s1c - *s2c;
     if (res)
@@ -69,3 +79,5 @@ int memcmp(const void *s1, const void *s2, size_t n) {
 }
 
 } // extern "C"
+
+#pragma clang attribute pop

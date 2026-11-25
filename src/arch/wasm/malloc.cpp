@@ -3,7 +3,11 @@
 
 extern unsigned char __heap_base;
 
-static BuddyAllocator g_alloc(&__heap_base, 0);
+// The wasm build never runs global constructors (we link with --no-entry and
+// html/main.js does not call __wasm_call_ctors), so g_alloc must be constant
+// initialized. This attribute turns any regression into a compile error.
+[[clang::require_constant_initialization]] static BuddyAllocator
+    g_alloc(&__heap_base, 0);
 
 extern "C" {
 
