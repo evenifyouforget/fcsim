@@ -7,7 +7,7 @@ union tab_t {
   double d[256];
 };
 
-static union tab_t tab;
+static double *tab_d(void); /* the table is defined at the end of the file */
 
 static double c0 = -0.16666666666666666;
 static double c1 = -0.5;
@@ -47,7 +47,7 @@ static double fp_sincos(double x, int off) {
   idx &= 0x3f;
   x5 = c6;
   x5h = c7;
-  ptr = &tab.d[idx << 2];
+  ptr = &tab_d()[idx << 2];
   x2 *= x1;
   x2h *= x1h;
   x0 -= x3;
@@ -447,3 +447,5 @@ static union tab_t tab = {
         0xBF73B92E176D6D31, 0xBFB917A6BC29B42C, 0x3C3E2718E0000000,
         0x3FF0000000000000,
     }};
+
+static double *tab_d(void) { return tab.d; }

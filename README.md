@@ -106,6 +106,7 @@ The emulation models the exact result and never the hardware's own rounding erro
 Matching one vendor exactly (`s794-fsin-amd`, `s794-fsin-intel`) would need a model of that chip's internal rounding. Those spectres don't exist, and we have no data for them yet.
 It is the web build's default, and the native build `fcsim-fsin-emu` provides it too.
 The angle where the switch happens (default 90112) is not exactly known; FC test designs pin it to between 90057.83 and 90143.62 (#13).
+`tools/fsin_check.cpp` (x86 only) checks the emulation against real `fsin` hardware, compares `fsin` results dumped on different computers, and suggests test angles for narrowing the switch point down.
 
 Hopefully at some point we can fully reverse engineer these specialized instructions and implement them in software, such that we can implement `794-target` in a fully portable way.
 
