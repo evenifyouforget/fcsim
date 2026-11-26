@@ -31,6 +31,18 @@
  *       recorded results. With two files, compares them record by record
  *       (their x values must match). Prints the first mismatches. Exit status
  *       1 if the emulation (one file) or the two files (two files) differ.
+ *   fsin_check dump80 sin|cos random|small FILE COUNT [SEED]
+ *       Like dump, but stores the full 80-bit extended result (the 64-bit
+ *       significand FSIN produces, before it is rounded to double). Each
+ *       record is 24 bytes, little-endian: the bits of x (8 bytes), the
+ *       significand with its explicit integer bit (8 bytes), sign and
+ *       biased exponent (2 bytes), 6 zero bytes. "random" is the same
+ *       inputs as dump; "small" is x uniform in [0, pi/4), which FSIN
+ *       evaluates without argument reduction. Needs an x87 CPU.
+ *   fsin_check compare80 FILE FILE2
+ *       Needs no x87 hardware. Compares two dump80 files record by record
+ *       (x must match) and reports the first differences, with the distance
+ *       in last places when the exponents match. Exit status 1 if any differ.
  *   fsin_check candidates
  *       No hardware needed. For each candidate switch point between 6.1
  *       and 90500, how often s794-fsin-emu and s794-stable differ just above
@@ -62,12 +74,44 @@ static double hw_sincos(double x, int want_cos) {
    * significand; this store rounds it to double */
   return (double)r;
 }
+
+/* the full 80-bit result: 64-bit significand with its integer bit, then sign
+ * and biased exponent */
+struct ext80 {
+  uint64_t mant;
+  uint16_t se;
+};
+
+static ext80 hw_sincos80(double x, int want_cos) {
+  long double r;
+  ext80 e;
+  if (want_cos)
+    __asm__("fcos" : "=t"(r) : "0"((long double)x));
+  else
+    __asm__("fsin" : "=t"(r) : "0"((long double)x));
+  /* x86 is little-endian and long double is the 80-bit format */
+  std::memcpy(&e.mant, &r, 8);
+  std::memcpy(&e.se, reinterpret_cast<const char *>(&r) + 8, 2);
+  return e;
+}
 #else
 #define HAVE_X87 0
 static double hw_sincos(double x, int want_cos) {
   (void)x;
   (void)want_cos;
   return 0.0;
+}
+
+struct ext80 {
+  uint64_t mant;
+  uint16_t se;
+};
+
+static ext80 hw_sincos80(double x, int want_cos) {
+  (void)x;
+  (void)want_cos;
+  ext80 e = {0, 0};
+  return e;
 }
 #endif
 
@@ -419,6 +463,131 @@ static int mode_compare(int want_cos, const char *path_a, const char *path_b) {
   return emu_bad ? 1 : 0;
 }
 
+/* dump80 record files: 24 bytes per entry, little-endian: x bits, 64-bit
+ * significand (with its integer bit), sign and biased exponent, 6 zero bytes */
+static const int RECORD80_BYTES = 24;
+
+/* 0 for random, 1 for small, -1 for anything else */
+static int parse_inputs(const char *s) {
+  if (!std::strcmp(s, "random"))
+    return 0;
+  if (!std::strcmp(s, "small"))
+    return 1;
+  return -1;
+}
+
+/* x uniform in [0, pi/4): the top 53 bits of the RNG scaled exactly, then one
+ * rounded multiplication, so every computer gets the same double */
+static double next_small_x() {
+  const double quarter_pi = 0.78539816339744828;
+  return static_cast<double>(rng_next() >> 11) * (1.0 / 9007199254740992.0) *
+         quarter_pi;
+}
+
+static int mode_dump80(int want_cos, int inputs, const char *path,
+                       uint64_t count, uint64_t seed) {
+  if (need_x87())
+    return 2;
+  std::FILE *f = std::fopen(path, "wb");
+  if (!f) {
+    std::fprintf(stderr, "cannot write %s\n", path);
+    return 2;
+  }
+  rng_state = seed ? seed : 0x9E3779B97F4A7C15ull;
+  print_cpu();
+  for (uint64_t i = 0; i < count; i++) {
+    unsigned char rec[24] = {0};
+    double x = inputs ? next_small_x() : next_record_x();
+    ext80 e = hw_sincos80(x, want_cos);
+    put_le64(rec, bits_of(x));
+    put_le64(rec + 8, e.mant);
+    rec[16] = static_cast<unsigned char>(e.se & 0xFF);
+    rec[17] = static_cast<unsigned char>(e.se >> 8);
+    if (std::fwrite(rec, 1, sizeof rec, f) != sizeof rec) {
+      std::fprintf(stderr, "write error on %s\n", path);
+      std::fclose(f);
+      return 2;
+    }
+  }
+  if (std::fclose(f) != 0) {
+    std::fprintf(stderr, "write error on %s\n", path);
+    return 2;
+  }
+  std::printf("RESULT dump80: %s, %" PRIu64
+              " records of %s, %s inputs (%" PRIu64 " bytes), seed %" PRIu64
+              "\n",
+              path, count, want_cos ? "cos" : "sin",
+              inputs ? "small" : "random", count * RECORD80_BYTES, seed);
+  return 0;
+}
+
+/* 1 for a record, 0 at a clean end of file, -1 on a short or failed read */
+static int read_record80(std::FILE *f, uint64_t *x_bits, ext80 *e) {
+  unsigned char rec[24];
+  size_t n = std::fread(rec, 1, sizeof rec, f);
+  if (n == 0 && !std::ferror(f))
+    return 0;
+  if (n != sizeof rec)
+    return -1;
+  *x_bits = get_le64(rec);
+  e->mant = get_le64(rec + 8);
+  e->se = static_cast<uint16_t>(rec[16] | (rec[17] << 8));
+  return 1;
+}
+
+static int mode_compare80(const char *path_a, const char *path_b) {
+  std::FILE *fa = std::fopen(path_a, "rb");
+  std::FILE *fb = std::fopen(path_b, "rb");
+  if (!fa || !fb) {
+    std::fprintf(stderr, "cannot read %s\n", fa ? path_b : path_a);
+    return 2;
+  }
+  uint64_t n = 0, differ = 0;
+  uint64_t xa, xb;
+  ext80 ea, eb;
+  for (;;) {
+    int ga = read_record80(fa, &xa, &ea);
+    int gb = read_record80(fb, &xb, &eb);
+    if (ga < 0 || gb < 0 || ga != gb) {
+      std::fprintf(stderr,
+                   "bad or mismatched file length after %" PRIu64
+                   " records (each record is %d bytes)\n",
+                   n, RECORD80_BYTES);
+      return 2;
+    }
+    if (ga == 0)
+      break;
+    if (xa != xb) {
+      std::fprintf(stderr,
+                   "record %" PRIu64 ": the files have different x (%a vs %a); "
+                   "use the same mode and SEED\n",
+                   n, double_of(xa), double_of(xb));
+      return 2;
+    }
+    if (ea.mant != eb.mant || ea.se != eb.se) {
+      if (differ++ < MAX_SHOWN) {
+        double x = double_of(xa);
+        std::printf("DIFFER x=%.17g (%a) a=0x%04x:%016" PRIx64
+                    " b=0x%04x:%016" PRIx64,
+                    x, x, static_cast<unsigned>(ea.se), ea.mant,
+                    static_cast<unsigned>(eb.se), eb.mant);
+        if (ea.se == eb.se)
+          std::printf(" (%+" PRId64 " last places)\n",
+                      static_cast<int64_t>(ea.mant - eb.mant));
+        else
+          std::printf(" (exponents differ)\n");
+      }
+    }
+    n++;
+  }
+  std::fclose(fa);
+  std::fclose(fb);
+  std::printf("RESULT compare80: %" PRIu64 " records, %" PRIu64
+              " differ between the files\n",
+              n, differ);
+  return differ ? 1 : 0;
+}
+
 /* The fast path's range check compares the top 16 bits of |x| (sign
  * cleared), so the possible switch points are the doubles whose low 48
  * bits are zero. */
@@ -463,6 +632,13 @@ int main(int argc, char **argv) {
   if (!std::strcmp(mode, "compare") && argc > 3 && parse_fn(argv[2]) >= 0)
     return mode_compare(parse_fn(argv[2]), argv[3],
                         argc > 4 ? argv[4] : nullptr);
+  if (!std::strcmp(mode, "dump80") && argc > 5 && parse_fn(argv[2]) >= 0 &&
+      parse_inputs(argv[3]) >= 0)
+    return mode_dump80(parse_fn(argv[2]), parse_inputs(argv[3]), argv[4],
+                       std::strtoull(argv[5], 0, 0),
+                       argc > 6 ? std::strtoull(argv[6], 0, 0) : 1);
+  if (!std::strcmp(mode, "compare80") && argc > 3)
+    return mode_compare80(argv[2], argv[3]);
   if (!std::strcmp(mode, "candidates"))
     return mode_candidates();
   std::fprintf(stderr,
