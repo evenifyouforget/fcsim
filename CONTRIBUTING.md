@@ -93,9 +93,16 @@ The build uses `-Werror` for a selected set of warnings (see `SConstruct`). New 
 
 - Target `main`. Pushes to `main` deploy the web build to GitHub Pages (`static.yml`).
 - Fill in `pull_request_template.md`: the issues closed (`Closes #N`), the test checklist, and AI-usage transparency.
-- Label the PR appropriately.
+- Label the PR appropriately, and apply every label that fits.
+- Put the PR in the milestone of the release it is meant for, if you can. If the work can't be finished in that milestone, cancel it or move it to a later one. **Why:** Keeps GitHub's tracker accurate and lets reviewers navigate.
 - One PR per issue is preferred, unless the changes are intrinsically linked.
 - Stacked PRs should be used when there is a dependency.
+- Keep the diff minimal. PRs with superfluous edits (reformatting, unrelated cleanups) will not be accepted. **Why:** Superfluous edits strain reviewers.
+- A PR that is not meant to be merged is marked Draft and has "DO NOT MERGE" in the title. **Why:** Prevents wasting reviewer time.
+- A human reads every PR, including the diff, and approves it by a review, a comment, or by enabling auto-merge before it merges. **Why:** Maintains quality standards.
+- A PR that is no longer relevant should be closed. **Why:** Reduces clutter.
+- Do not have more than 5 PRs open at once. This applies to PRs opened from now on; PRs already open when the rule was introduced are not counted against you. **Why:** More PRs than that will be bottlenecked on human review anyway, and it creates clutter.
+- A PR for fcsim and a PR for ftlib that depend on each other must not be open at the same time.
 
 CI must pass before merge, and this is enforced. These are the checks on a PR:
 
@@ -105,3 +112,42 @@ CI must pass before merge, and this is enforced. These are the checks on a PR:
 | `scons-sanity.yml`               | Full `scons` build succeeds, and `test/test_run_single_design.py` passes                 |
 | `stl-test.yml`                   | `test/test_stl.py` under ASan/MSan, plus a coverage report posted as a PR comment       |
 | `reverse-integration-sanity.yml` | ftlib pass rate ≥ `min_pass_rate` (see [Reverse integration](#reverse-integration-ftlib)) |
+
+## Issues and communication
+
+1. When you identify new work, open an Issue first. **Why:** Informs collaborators that there is work to be done, and invites them to take it.
+2. When you start work, comment on the Issue with what you plan to deliver (a PR, or something else) and an internal deadline. **Why:** Prevents duplicated effort, and tells collaborators who to offer help to.
+3. A PR that closes an Issue says so with `Closes #N`.
+4. If the Issue is still open after the PR merges, close it manually with a comment.
+
+We are stricter about this for AI than for humans.
+
+- Use Discord for long or urgent conversations, since it's a chat platform. Use GitHub for everything else. **Why:** Comments there last and are easy to search and reference.
+- If your work would conflict with someone else's, work with them to pick one. Offer to drop yours before asking them to drop theirs. **Why:** Two people supporting one line of work beats two PRs where the first merge invalidates or conflicts with the second.
+- Measurable claims must actually be measured before you make them publicly. **Why:** Reduces misinformation.
+- Do not check off a template box you did not do. **Why:** Honesty matters more than checkmarks.
+- To call a bug debunked, state clearly that the same conditions fail to reproduce it, or that it is already fixed, and include the evidence in the comment that closes the Issue.
+- Never push sensitive data such as account login tokens. If you do by accident, delete it as soon as possible.
+- Issues are triaged by the maintainer. Do not triage old Issues or assign them milestones unless asked. **Why:** Scoping decisions usually leave the next 2 or 3 releases full of work already.
+
+## AI-assisted contributions
+
+AI-written work is welcome under the same rules as everyone's, plus these. AI agents often post from a human's account, so they have to be easy to tell apart.
+
+- Sign every Issue, PR and comment at the bottom: `Posted by AI (model) (nickname)`. If no nickname was given, pick one and keep using it for that user (in the agent's memory or a gitignored file), or per session if that isn't possible. **Why:** Shows what is AI-authored even on a shared account, and tells collaborators when someone runs several agents that don't share context.
+- Apply the `written-and-posted-by-ai` label to every Issue and PR it opens.
+- AI must not merge a PR, close a human-authored Issue or PR, manually trigger a workflow or CI run (the automatic runs on a PR are fine), or make a release.
+- A PR an AI opens as Draft is not yet asking for human review. The AI marks it ready when it is blocked on a human decision, including when it thinks the PR is safe to merge. If a human wants further edits they say so in a review or comment, and if they posted from the same account they mark the PR Draft again.
+- At the start of each session and before each push, the AI reads new GitHub comments (Issue comments, PR comments, review comments and reviews) on everything it owns or works on, and rechecks which PRs have merged or closed, including any it depends on or mentions. It never relies on a PR list from earlier in the session. **Why:** Prevents building on a PR that already merged, and missing a human's comment.
+- If CI fails for reasons unrelated to the PR, the AI comments why on the PR and on the relevant Issue (creating one if needed), says the PR is blocked, and stops working on it.
+- The AI instructions are kept in a local, untracked `AGENTS.md` (listed in `.gitignore`); this section is what contributors can rely on. See #193 for whether to commit one.
+
+## Branches
+
+Branches created by AI that have not been touched for 2 weeks are still needed only if a variant build, an open Issue or an open PR uses them. Any others are listed and offered to the maintainer to delete, and nothing is deleted without their approval. If a branch's artifacts are still useful, keep a copy locally or move them onto a current branch, so the remote branch can be deleted. The same standard is not applied to humans' branches. **Why:** Those are sometimes historically relevant, hold artifacts that don't belong on `main`, or are referenced in Discord.
+
+Before deleting a local branch, check whether it holds anything useful. **Why:** A PR sometimes merges first and a later commit never reaches `main`.
+
+## Releases
+
+Official releases on GitHub are made by evenifyouforget.
