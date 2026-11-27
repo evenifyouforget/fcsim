@@ -5,11 +5,17 @@
 // test/test_arena.py runs each in turn.
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <vector>
 
 #include "../src/arena.hpp"
 #include "../src/interval.h"
+
+extern "C" {
+#include "../src/graph.h"
+#include "../src/xml.h"
+}
 
 // The front ends provide these (src/timing.cpp natively, JS on the web); the
 // tests have no event loop, as in src/run_single_design.cpp.
@@ -130,6 +136,182 @@ static int move_after_delete(arena *a) {
   return 0;
 }
 
+static bool is_joint_in_list(design *d, joint *j) {
+  for (joint *c = d->joints.head; c != nullptr; c = c->next) {
+    if (c == j)
+      return true;
+  }
+  return false;
+}
+
+// Pointers are compared by value only, so checking them before the original is
+// freed never reads the stale memory a bad copy would hold. NULL is allowed:
+// wheel inner joints are NULL when the radius is 20 or less.
+static int check_joint(design *d, joint *j, const char *what) {
+  if (j == nullptr || is_joint_in_list(d, j))
+    return 0;
+  printf("%s is not one of the copy's joints\n", what);
+  return 1;
+}
+
+// An attach node must be in the attach list of its joint and point back at
+// its block. Only checked once the joint itself has been accepted.
+static int check_attach(design *d, block *owner, joint *j, attach_node *n,
+                        const char *what) {
+  if (j == nullptr || !is_joint_in_list(d, j))
+    return 0;
+  for (attach_node *c = j->att.head; c != nullptr; c = c->next) {
+    if (c == n && n->block == owner)
+      return 0;
+  }
+  printf("%s is not in its joint's attach list\n", what);
+  return 1;
+}
+
+// number of joint and attach pointers in the design's shapes that are not
+// the design's own
+static int check_copy_shapes(design *d) {
+  int bad = 0;
+  for (block *b = d->design_blocks.head; b != nullptr; b = b->next) {
+    switch (b->shape.type) {
+    case SHAPE_BOX:
+      bad += check_joint(d, b->shape.box.center, "box centre");
+      for (int i = 0; i < 4; i++)
+        bad += check_joint(d, b->shape.box.corners[i], "box corner");
+      break;
+    case SHAPE_ROD:
+      bad += check_joint(d, b->shape.rod.from, "rod endpoint");
+      bad += check_joint(d, b->shape.rod.to, "rod endpoint");
+      bad += check_attach(d, b, b->shape.rod.from, b->shape.rod.from_att,
+                          "rod start attach node");
+      bad += check_attach(d, b, b->shape.rod.to, b->shape.rod.to_att,
+                          "rod end attach node");
+      break;
+    case SHAPE_WHEEL:
+      bad += check_joint(d, b->shape.wheel.center, "wheel centre");
+      bad += check_attach(d, b, b->shape.wheel.center,
+                          b->shape.wheel.center_att, "wheel attach node");
+      for (int i = 0; i < 4; i++) {
+        bad += check_joint(d, b->shape.wheel.spokes[i], "wheel spoke");
+        bad += check_joint(d, b->shape.wheel.inner[i], "wheel inner joint");
+      }
+      break;
+    default:
+      break;
+    }
+  }
+  return bad;
+}
+
+static bool has_shape(design *d, enum shape_type t) {
+  for (block *b = d->design_blocks.head; b != nullptr; b = b->next) {
+    if (b->shape.type == t)
+      return true;
+  }
+  return false;
+}
+
+// a wheel of radius 30 (so it has inner joints), a free rod and a goal box
+static const char SHAPES_XML[] =
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><retrieveLevel><level>"
+    "<levelBlocks></levelBlocks><playerBlocks>"
+    "<ClockwiseWheel><rotation>0</rotation>"
+    "<position><x>0</x><y>0</y></position>"
+    "<width>60</width><height>60</height></ClockwiseWheel>"
+    "<SolidRod><rotation>0</rotation>"
+    "<position><x>200</x><y>0</y></position>"
+    "<width>100</width><height>8</height></SolidRod>"
+    "<JointedDynamicRectangle><rotation>0</rotation>"
+    "<position><x>-200</x><y>0</y></position>"
+    "<width>60</width><height>60</height>"
+    "<goalBlock>true</goalBlock></JointedDynamicRectangle>"
+    "</playerBlocks>"
+    "<start><position><x>0</x><y>0</y></position>"
+    "<width>2000</width><height>2000</height></start>"
+    "<end><position><x>5000</x><y>5000</y></position>"
+    "<width>10</width><height>10</height></end>"
+    "</level><levelId>1</levelId></retrieveLevel>";
+
+// heap-allocated, so it can be freed separately from any arena
+static design *load_shapes_design() {
+  std::vector<char> xml(SHAPES_XML, SHAPES_XML + sizeof(SHAPES_XML) - 1);
+  struct xml_level level;
+  design *d = (design *)calloc(1, sizeof(design));
+  xml_parse(xml.data(), (int)xml.size(), &level);
+  convert_xml(&level, d);
+  xml_free(&level);
+  return d;
+}
+
+struct body_state {
+  bool present;
+  double x, y, rot;
+};
+
+static const int SIM_TICKS = 300;
+
+// steps a world built from the design and returns each design block's body
+// state, read before the world is freed
+static std::vector<body_state> simulate(design *d) {
+  b2World *world = gen_world(d);
+  for (int i = 0; i < SIM_TICKS; i++)
+    step(world);
+  std::vector<body_state> states;
+  for (block *b = d->design_blocks.head; b != nullptr; b = b->next) {
+    body_state s = {b->body != nullptr, 0, 0, 0};
+    if (b->body) {
+      s.x = b->body->m_position.x;
+      s.y = b->body->m_position.y;
+      s.rot = b->body->m_rotation;
+    }
+    states.push_back(s);
+  }
+  free_world(world, d);
+  return states;
+}
+
+static bool same_states(const std::vector<body_state> &a,
+                        const std::vector<body_state> &b) {
+  if (a.size() != b.size())
+    return false;
+  for (size_t i = 0; i < a.size(); i++) {
+    if (!a[i].present || !b[i].present || a[i].x != b[i].x ||
+        a[i].y != b[i].y || a[i].rot != b[i].rot)
+      return false;
+  }
+  return true;
+}
+
+// #199: clean_copy_design is a deep copy. Every joint and attach pointer in a
+// copied shape must belong to the copy, so the copy must keep simulating the
+// same way after the original is freed. Rods, wheels and goal boxes are the
+// shape types that hold such pointers.
+static int clean_copy_rod_joints(arena *) {
+  design *orig = load_shapes_design();
+  design *copy = clean_copy_design(orig);
+  int res = 0;
+  if (!has_shape(copy, SHAPE_ROD) || !has_shape(copy, SHAPE_WHEEL) ||
+      !has_shape(copy, SHAPE_BOX)) {
+    printf("expected the copy to contain a rod, a wheel and a goal box\n");
+    res = 1;
+  } else if (check_copy_shapes(copy) != 0) {
+    res = 1;
+  } else {
+    std::vector<body_state> before = simulate(orig);
+    free_design(orig);
+    orig = nullptr;
+    std::vector<body_state> after = simulate(copy);
+    if (!same_states(before, after)) {
+      printf("copy does not simulate the same as the original\n");
+      res = 1;
+    }
+  }
+  if (orig)
+    free_design(orig);
+  free_design(copy);
+  return res;
+}
+
 struct scenario {
   const char *name;
   int (*fn)(arena *);
@@ -139,6 +321,7 @@ static const scenario SCENARIOS[] = {
     {"rod_after_delete", rod_after_delete},
     {"wheel_after_delete", wheel_after_delete},
     {"move_after_delete", move_after_delete},
+    {"clean_copy_rod_joints", clean_copy_rod_joints},
 };
 
 int main(int argc, char **argv) {
