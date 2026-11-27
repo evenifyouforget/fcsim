@@ -79,8 +79,8 @@ static void b2PolyContact_ctor(b2PolyContact *poly_contact, b2Shape *s1,
 
 b2Contact *b2PolyContact_Create(b2Shape *shape1, b2Shape *shape2,
                                 b2BlockAllocator *allocator) {
-  b2PolyContact *poly_contact =
-      b2BlockAllocator_Allocate(allocator, sizeof(b2PolyContact));
+  b2PolyContact *poly_contact = (b2PolyContact *)b2BlockAllocator_Allocate(
+      allocator, sizeof(b2PolyContact));
   b2PolyContact_ctor(poly_contact, shape1, shape2);
   return &poly_contact->contact;
 }
