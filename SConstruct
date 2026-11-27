@@ -113,7 +113,7 @@ common_sources = [
     "src/arena.cpp",
     "src/arena_algorithm.cpp",
     "src/arena_graphics.cpp",
-    "src/export.c",
+    "src/export.cpp",
     "src/core.cpp",
     "src/gen.c",
     "src/graph.c",
@@ -143,7 +143,7 @@ common_sources = [
     "src/box2d/b2World.cpp",
     "src/fpmath/atan2.c",
     "src/fpmath/sincos.c",
-    "src/fpmath/strtod.c",
+    "src/fpmath/strtod.cpp",
 ]
 stl_mock_sources = [
     "src/stl_mock.cpp",
