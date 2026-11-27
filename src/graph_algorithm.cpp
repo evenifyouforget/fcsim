@@ -43,6 +43,33 @@ block *_clean_copy(std::unordered_map<void *, void *> &pointer_map,
   CLEAN_COPY(*new_obj, *old_obj, prev);
   CLEAN_COPY(*new_obj, *old_obj, next);
   new_obj->shape = old_obj->shape;
+  // the shape holds joint and attach pointers, remap the ones its type uses
+  switch (old_obj->shape.type) {
+  case SHAPE_BOX:
+    CLEAN_COPY(*new_obj, *old_obj, shape.box.center);
+    for (int i = 0; i < 4; i++)
+      new_obj->shape.box.corners[i] =
+          _clean_copy(pointer_map, old_obj->shape.box.corners[i]);
+    break;
+  case SHAPE_ROD:
+    CLEAN_COPY(*new_obj, *old_obj, shape.rod.from);
+    CLEAN_COPY(*new_obj, *old_obj, shape.rod.from_att);
+    CLEAN_COPY(*new_obj, *old_obj, shape.rod.to);
+    CLEAN_COPY(*new_obj, *old_obj, shape.rod.to_att);
+    break;
+  case SHAPE_WHEEL:
+    CLEAN_COPY(*new_obj, *old_obj, shape.wheel.center);
+    CLEAN_COPY(*new_obj, *old_obj, shape.wheel.center_att);
+    for (int i = 0; i < 4; i++) {
+      new_obj->shape.wheel.spokes[i] =
+          _clean_copy(pointer_map, old_obj->shape.wheel.spokes[i]);
+      new_obj->shape.wheel.inner[i] =
+          _clean_copy(pointer_map, old_obj->shape.wheel.inner[i]);
+    }
+    break;
+  default:
+    break;
+  }
   new_obj->material = old_obj->material; // intentionally not deep copying
   new_obj->goal = old_obj->goal;
   new_obj->overlap = old_obj->overlap;

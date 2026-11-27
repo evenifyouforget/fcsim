@@ -3,7 +3,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+extern "C" {
 #include "graph.h"
+}
 #include "str.h"
 
 void u64tostr(char *buf, uint64_t val) {
@@ -285,7 +287,8 @@ void append_area(struct str *str, struct area *area, char *name) {
   append_str(str, ">");
 }
 
-char *export_design(struct design *design, char *user, char *name, char *desc) {
+extern "C" char *export_design(struct design *design, char *user, char *name,
+                               char *desc) {
   struct str str;
 
   update_block_ids(design);
