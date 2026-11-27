@@ -31,14 +31,17 @@
  *       recorded results. With two files, compares them record by record
  *       (their x values must match). Prints the first mismatches. Exit status
  *       1 if the emulation (one file) or the two files (two files) differ.
- *   fsin_check dump80 sin|cos random|small FILE COUNT [SEED]
+ *   fsin_check dump80 sin|cos random|small|range=LO,HI FILE COUNT [SEED]
  *       Like dump, but stores the full 80-bit extended result (the 64-bit
  *       significand FSIN produces, before it is rounded to double). Each
  *       record is 24 bytes, little-endian: the bits of x (8 bytes), the
  *       significand with its explicit integer bit (8 bytes), sign and
  *       biased exponent (2 bytes), 6 zero bytes. "random" is the same
  *       inputs as dump; "small" is x uniform in [0, pi/4), which FSIN
- *       evaluates without argument reduction. Needs an x87 CPU.
+ *       evaluates without argument reduction. "range=LO,HI" (for example
+ *       range=0.5,0.55) is x uniform in [LO, HI) up to rounding, to scan a
+ *       narrow interval densely; LO and HI are decimal numbers, LO < HI,
+ *       both below 2^62 in magnitude. Needs an x87 CPU.
  *   fsin_check compare80 FILE FILE2
  *       Needs no x87 hardware. Compares two dump80 files record by record
  *       (x must match) and reports the first differences, with the distance
@@ -467,13 +470,40 @@ static int mode_compare(int want_cos, const char *path_a, const char *path_b) {
  * significand (with its integer bit), sign and biased exponent, 6 zero bytes */
 static const int RECORD80_BYTES = 24;
 
-/* 0 for random, 1 for small, -1 for anything else */
+static double range_lo, range_hi;
+
+/* 0 for random, 1 for small, 2 for range=LO,HI (sets range_lo and range_hi),
+ * -1 for anything else */
 static int parse_inputs(const char *s) {
   if (!std::strcmp(s, "random"))
     return 0;
   if (!std::strcmp(s, "small"))
     return 1;
+  if (!std::strncmp(s, "range=", 6)) {
+    char *end = nullptr;
+    double lo = std::strtod(s + 6, &end);
+    if (end == s + 6 || *end != ',')
+      return -1;
+    char *end2 = nullptr;
+    double hi = std::strtod(end + 1, &end2);
+    if (end2 == end + 1 || *end2 != '\0')
+      return -1;
+    const double limit = 4611686018427387904.0; /* 2^62 */
+    if (!(lo < hi) || !(lo > -limit) || !(hi < limit))
+      return -1;
+    range_lo = lo;
+    range_hi = hi;
+    return 2;
+  }
   return -1;
+}
+
+/* x uniform in [range_lo, range_hi): the top 53 bits of the RNG scaled
+ * exactly, then one rounded multiplication and one rounded addition, so every
+ * computer gets the same double */
+static double next_range_x() {
+  double u = static_cast<double>(rng_next() >> 11) * (1.0 / 9007199254740992.0);
+  return range_lo + u * (range_hi - range_lo);
 }
 
 /* x uniform in [0, pi/4): the top 53 bits of the RNG scaled exactly, then one
@@ -497,7 +527,9 @@ static int mode_dump80(int want_cos, int inputs, const char *path,
   print_cpu();
   for (uint64_t i = 0; i < count; i++) {
     unsigned char rec[24] = {0};
-    double x = inputs ? next_small_x() : next_record_x();
+    double x = inputs == 2   ? next_range_x()
+               : inputs == 1 ? next_small_x()
+                             : next_record_x();
     ext80 e = hw_sincos80(x, want_cos);
     put_le64(rec, bits_of(x));
     put_le64(rec + 8, e.mant);
@@ -517,7 +549,12 @@ static int mode_dump80(int want_cos, int inputs, const char *path,
               " records of %s, %s inputs (%" PRIu64 " bytes), seed %" PRIu64
               "\n",
               path, count, want_cos ? "cos" : "sin",
-              inputs ? "small" : "random", count * RECORD80_BYTES, seed);
+              inputs == 2   ? "range"
+              : inputs == 1 ? "small"
+                            : "random",
+              count * RECORD80_BYTES, seed);
+  if (inputs == 2)
+    std::printf("RANGE: [%.17g, %.17g)\n", range_lo, range_hi);
   return 0;
 }
 
@@ -644,7 +681,9 @@ int main(int argc, char **argv) {
   std::fprintf(stderr,
                "usage: %s info | verify [SECONDS] [SEED] | scan START "
                "COUNT | survey [SAMPLES] | dump sin|cos FILE COUNT [SEED] | "
-               "compare sin|cos FILE [FILE2] | candidates\n",
+               "compare sin|cos FILE [FILE2] | dump80 sin|cos "
+               "random|small|range=LO,HI FILE COUNT [SEED] | compare80 FILE "
+               "FILE2 | candidates\n",
                argv[0]);
   return 2;
 }
