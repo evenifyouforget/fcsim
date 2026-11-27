@@ -50,7 +50,8 @@ static void b2PolyAndCircleContact_ctor(b2PolyAndCircleContact *pc_contact,
 b2Contact *b2PolyAndCircleContact_Create(b2Shape *shape1, b2Shape *shape2,
                                          b2BlockAllocator *allocator) {
   b2PolyAndCircleContact *pc_contact =
-      b2BlockAllocator_Allocate(allocator, sizeof(b2PolyAndCircleContact));
+      (b2PolyAndCircleContact *)b2BlockAllocator_Allocate(
+          allocator, sizeof(b2PolyAndCircleContact));
   b2PolyAndCircleContact_ctor(pc_contact, shape1, shape2);
   return &pc_contact->contact;
 }
