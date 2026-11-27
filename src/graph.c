@@ -424,6 +424,25 @@ static struct joint *find_closest_joint(struct attach_list *list, double x,
   return best_joint;
 }
 
+/* the joint that slot `slot` of a binary design file block refers to, or NULL
+ */
+static struct joint *find_ref_joint(struct design *design,
+                                    struct xml_block *xml_block, int slot) {
+  struct joint *joints[MAX_BLOCK_JOINTS];
+  struct block *block;
+  int n;
+
+  if (xml_block->joint_ref_block[slot] < 0)
+    return NULL;
+  block = find_block(&design->design_blocks, xml_block->joint_ref_block[slot]);
+  if (!block)
+    return NULL;
+  n = get_block_joints(block, joints);
+  if (xml_block->joint_ref_joint[slot] >= n)
+    return NULL;
+  return joints[xml_block->joint_ref_joint[slot]];
+}
+
 static bool block_has_joint(struct block *block, struct joint *joint) {
   struct joint *j[MAX_BLOCK_JOINTS];
   int n;
@@ -459,12 +478,20 @@ static void add_rod(struct design *design, struct block *block,
   double x0, y0;
   double x1, y1;
 
-  get_rod_endpoints(xml_block, &x0, &y0, &x1, &y1);
-
-  make_joints_list(&att_list, &design->design_blocks, xml_block->joints);
-  j0 = find_closest_joint(&att_list, x0, y0);
-  j1 = find_closest_joint(&att_list, x1, y1);
-  destroy_joints_list(&att_list);
+  if (xml_block->has_joint_refs) {
+    x0 = xml_block->rod_ends[0];
+    y0 = xml_block->rod_ends[1];
+    x1 = xml_block->rod_ends[2];
+    y1 = xml_block->rod_ends[3];
+    j0 = find_ref_joint(design, xml_block, 0);
+    j1 = find_ref_joint(design, xml_block, 1);
+  } else {
+    get_rod_endpoints(xml_block, &x0, &y0, &x1, &y1);
+    make_joints_list(&att_list, &design->design_blocks, xml_block->joints);
+    j0 = find_closest_joint(&att_list, x0, y0);
+    j1 = find_closest_joint(&att_list, x1, y1);
+    destroy_joints_list(&att_list);
+  }
 
   if (j0 && j1) {
     if (j0 == j1 || share_block(design, j0, j1))
@@ -527,9 +554,13 @@ static void add_wheel(struct design *design, struct block *block,
   x0 = xml_block->position.x;
   y0 = xml_block->position.y;
 
-  make_joints_list(&att_list, &design->design_blocks, xml_block->joints);
-  j0 = find_closest_joint(&att_list, x0, y0);
-  destroy_joints_list(&att_list);
+  if (xml_block->has_joint_refs) {
+    j0 = find_ref_joint(design, xml_block, 0);
+  } else {
+    make_joints_list(&att_list, &design->design_blocks, xml_block->joints);
+    j0 = find_closest_joint(&att_list, x0, y0);
+    destroy_joints_list(&att_list);
+  }
 
   if (j0) {
     x0 = j0->x;
