@@ -33,6 +33,14 @@ struct xml_block {
   double height;
   int goal_block;
   struct xml_joint *joints;
+  /* Set only by the binary design file (src/design_file.c), which says
+   * exactly which joint each rod end (slot 0 = left, 1 = right) or wheel
+   * centre (slot 0) is connected to: a block id and a joint index within
+   * that block (get_block_joints order), or -1. XML only has `joints`. */
+  int has_joint_refs;
+  int joint_ref_block[2];
+  int joint_ref_joint[2];
+  double rod_ends[4]; /* binary file rods: x0, y0, x1, y1 (left, right) */
 
   struct xml_block *next;
 };

@@ -13,6 +13,8 @@
 #include "../src/interval.h"
 
 extern "C" {
+#include "../src/arena.h"
+#include "../src/design_file.h"
 #include "../src/graph.h"
 #include "../src/xml.h"
 }
@@ -312,6 +314,335 @@ static int clean_copy_rod_joints(arena *) {
   return res;
 }
 
+// ---- #179: local save/load round trip ----------------------------------
+
+// A wheel (id 1, radius 30), a goal box (id 3), a rod (id 2) from the wheel
+// centre to the box (a block can only be connected to earlier ones), a second
+// rod (id 4) from the first rod's far end to a point that is not a joint, and a
+// static level block. The rods are not axis-aligned, so the XML
+// centre/length/angle form is lossy for them.
+static const char JOINTED_XML[] =
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?><retrieveLevel><level>"
+    "<levelBlocks><StaticRectangle><rotation>0.3</rotation>"
+    "<position><x>-500</x><y>100</y></position>"
+    "<width>200</width><height>40</height></StaticRectangle></levelBlocks>"
+    "<playerBlocks>"
+    "<ClockwiseWheel id=\"1\"><rotation>0.1</rotation>"
+    "<position><x>0</x><y>0</y></position>"
+    "<width>60</width><height>60</height></ClockwiseWheel>"
+    "<JointedDynamicRectangle id=\"3\"><rotation>0.2</rotation>"
+    "<position><x>75.7</x><y>63.9</y></position>"
+    "<width>60</width><height>60</height>"
+    "<goalBlock>true</goalBlock></JointedDynamicRectangle>"
+    "<SolidRod id=\"2\"><rotation>0.7</rotation>"
+    "<position><x>38.3</x><y>32.1</y></position>"
+    "<width>100.1</width><height>8</height>"
+    "<joints><jointedTo>1</jointedTo><jointedTo>3</jointedTo></joints>"
+    "</SolidRod>"
+    "<HollowRod id=\"4\"><rotation>-1.1</rotation>"
+    "<position><x>120.3</x><y>40.2</y></position>"
+    "<width>88.8</width><height>4</height>"
+    "<joints><jointedTo>3</jointedTo></joints></HollowRod>"
+    "</playerBlocks>"
+    "<start><position><x>0</x><y>0</y></position>"
+    "<width>2000</width><height>2000</height></start>"
+    "<end><position><x>5000</x><y>5000</y></position>"
+    "<width>10</width><height>10</height></end>"
+    "</level><levelId>7</levelId></retrieveLevel>";
+
+static design *load_xml_design(const char *xml_text, size_t n) {
+  std::vector<char> xml(xml_text, xml_text + n);
+  struct xml_level level;
+  design *d = (design *)calloc(1, sizeof(design));
+  xml_parse(xml.data(), (int)xml.size(), &level);
+  convert_xml(&level, d);
+  xml_free(&level);
+  return d;
+}
+
+static std::vector<uint8_t> encode(design *d) {
+  int len = 0;
+  uint8_t *buf = design_file_encode(d, &len);
+  std::vector<uint8_t> bytes(buf, buf + len);
+  free(buf);
+  return bytes;
+}
+
+// nullptr if the file is rejected
+static design *decode(const std::vector<uint8_t> &bytes) {
+  struct xml_level level;
+  if (design_file_decode(bytes.data(), (int)bytes.size(), &level) != 0) {
+    xml_free(&level);
+    return nullptr;
+  }
+  design *d = (design *)calloc(1, sizeof(design));
+  convert_xml(&level, d);
+  xml_free(&level);
+  return d;
+}
+
+// Structural comparison, in list order. Doubles are compared as bit patterns
+// so -0.0 and NaN payloads count. Joints are compared by their index in the
+// design's joint list, so sharing between blocks has to match too. Returns
+// the number of differences; each one is printed.
+static bool quiet_diffs = false;
+
+struct design_diff {
+  int count = 0;
+  void report(const char *what, int block) {
+    if (count < 10 && !quiet_diffs)
+      printf("differs: %s (block %d)\n", what, block);
+    count++;
+  }
+  void dbl(double a, double b, const char *what, int block) {
+    if (memcmp(&a, &b, sizeof a) != 0)
+      report(what, block);
+  }
+};
+
+static int joint_index(design *d, joint *j) {
+  if (j == nullptr)
+    return -1;
+  int i = 0;
+  for (joint *c = d->joints.head; c != nullptr; c = c->next, i++) {
+    if (c == j)
+      return i;
+  }
+  return -2; // not one of the design's joints
+}
+
+static void diff_joint_ref(design_diff &df, design *a, joint *ja, design *b,
+                           joint *jb, const char *what, int block) {
+  if (joint_index(a, ja) != joint_index(b, jb))
+    df.report(what, block);
+}
+
+static void diff_areas(design_diff &df, const area &a, const area &b,
+                       const char *what) {
+  df.dbl(a.x, b.x, what, -1);
+  df.dbl(a.y, b.y, what, -1);
+  df.dbl(a.w, b.w, what, -1);
+  df.dbl(a.h, b.h, what, -1);
+  df.dbl(a.expand, b.expand, what, -1);
+}
+
+static void diff_block_list(design_diff &df, design *da, block *a, design *db,
+                            block *b) {
+  int i = 0;
+  for (; a != nullptr && b != nullptr; a = a->next, b = b->next, i++) {
+    if (a->shape.type != b->shape.type || a->type_id != b->type_id ||
+        a->goal != b->goal || a->material != b->material) {
+      df.report("block kind", i);
+      continue;
+    }
+    const shape &sa = a->shape, &sb = b->shape;
+    switch (sa.type) {
+    case SHAPE_RECT:
+      df.dbl(sa.rect.x, sb.rect.x, "rect x", i);
+      df.dbl(sa.rect.y, sb.rect.y, "rect y", i);
+      df.dbl(sa.rect.w, sb.rect.w, "rect w", i);
+      df.dbl(sa.rect.h, sb.rect.h, "rect h", i);
+      df.dbl(sa.rect.angle, sb.rect.angle, "rect angle", i);
+      break;
+    case SHAPE_CIRC:
+      df.dbl(sa.circ.x, sb.circ.x, "circ x", i);
+      df.dbl(sa.circ.y, sb.circ.y, "circ y", i);
+      df.dbl(sa.circ.radius, sb.circ.radius, "circ radius", i);
+      break;
+    case SHAPE_BOX:
+      df.dbl(sa.box.x, sb.box.x, "box x", i);
+      df.dbl(sa.box.y, sb.box.y, "box y", i);
+      df.dbl(sa.box.w, sb.box.w, "box w", i);
+      df.dbl(sa.box.h, sb.box.h, "box h", i);
+      df.dbl(sa.box.angle, sb.box.angle, "box angle", i);
+      diff_joint_ref(df, da, sa.box.center, db, sb.box.center, "box centre", i);
+      for (int k = 0; k < 4; k++)
+        diff_joint_ref(df, da, sa.box.corners[k], db, sb.box.corners[k],
+                       "box corner", i);
+      break;
+    case SHAPE_ROD:
+      df.dbl(sa.rod.width, sb.rod.width, "rod width", i);
+      diff_joint_ref(df, da, sa.rod.from, db, sb.rod.from, "rod from", i);
+      diff_joint_ref(df, da, sa.rod.to, db, sb.rod.to, "rod to", i);
+      break;
+    case SHAPE_WHEEL:
+      df.dbl(sa.wheel.radius, sb.wheel.radius, "wheel radius", i);
+      df.dbl(sa.wheel.angle, sb.wheel.angle, "wheel angle", i);
+      if (sa.wheel.spin != sb.wheel.spin)
+        df.report("wheel spin", i);
+      diff_joint_ref(df, da, sa.wheel.center, db, sb.wheel.center,
+                     "wheel centre", i);
+      for (int k = 0; k < 4; k++) {
+        diff_joint_ref(df, da, sa.wheel.spokes[k], db, sb.wheel.spokes[k],
+                       "wheel spoke", i);
+        diff_joint_ref(df, da, sa.wheel.inner[k], db, sb.wheel.inner[k],
+                       "wheel inner joint", i);
+      }
+      break;
+    }
+  }
+  if (a != nullptr || b != nullptr)
+    df.report("block count", i);
+}
+
+static int diff_designs(design *a, design *b) {
+  design_diff df;
+  diff_block_list(df, a, a->level_blocks.head, b, b->level_blocks.head);
+  diff_block_list(df, a, a->design_blocks.head, b, b->design_blocks.head);
+  diff_areas(df, a->build_area, b->build_area, "build area");
+  diff_areas(df, a->goal_area, b->goal_area, "goal area");
+  if (a->level_id != b->level_id)
+    df.report("level id", -1);
+  joint *ja = a->joints.head, *jb = b->joints.head;
+  int i = 0;
+  for (; ja != nullptr && jb != nullptr; ja = ja->next, jb = jb->next, i++) {
+    df.dbl(ja->x, jb->x, "joint x", i);
+    df.dbl(ja->y, jb->y, "joint y", i);
+    if ((ja->gen == nullptr) != (jb->gen == nullptr))
+      df.report("joint owner", i);
+    int na = 0, nb = 0;
+    for (attach_node *n = ja->att.head; n != nullptr; n = n->next)
+      na++;
+    for (attach_node *n = jb->att.head; n != nullptr; n = n->next)
+      nb++;
+    if (na != nb)
+      df.report("joint attachments", i);
+  }
+  if (ja != nullptr || jb != nullptr)
+    df.report("joint count", i);
+  int ca = recalculate_design_checksum(a);
+  int cb = recalculate_design_checksum(b);
+  if (ca != cb) {
+    if (!quiet_diffs)
+      printf("checksums: %d vs %d\n", ca, cb);
+    df.report("checksum", -1);
+  }
+  return df.count;
+}
+
+// loadXML (1) -> design (2) -> file (3) -> design (4); (2) must equal (4)
+// exactly, and saving (4) must give the same bytes as saving (2).
+static int check_round_trip(design *d2) {
+  int before = recalculate_design_checksum(d2);
+  std::vector<uint8_t> file3 = encode(d2);
+  if (recalculate_design_checksum(d2) != before) {
+    printf("saving a design changed its checksum\n");
+    return 1;
+  }
+  design *d4 = decode(file3);
+  if (d4 == nullptr) {
+    printf("the file the encoder wrote was rejected by the decoder\n");
+    return 1;
+  }
+  int res = 0;
+  if (diff_designs(d2, d4) != 0)
+    res = 1;
+  if (encode(d4) != file3) {
+    printf("saving the loaded design gave different bytes\n");
+    res = 1;
+  }
+  design *copy = clean_copy_design(d2);
+  if (encode(copy) != file3) {
+    printf("saving a clean copy gave different bytes\n");
+    res = 1;
+  }
+  free_design(copy);
+  free_design(d4);
+  return res;
+}
+
+static int file_round_trip_shapes(arena *) {
+  design *d = load_shapes_design();
+  int res = check_round_trip(d);
+  free_design(d);
+  return res;
+}
+
+static int file_round_trip_jointed(arena *) {
+  design *d = load_xml_design(JOINTED_XML, sizeof(JOINTED_XML) - 1);
+  int res = 0;
+  if (!has_shape(d, SHAPE_ROD) || !has_shape(d, SHAPE_WHEEL) ||
+      !has_shape(d, SHAPE_BOX)) {
+    printf("expected a rod, a wheel and a goal box\n");
+    res = 1;
+  }
+  res |= check_round_trip(d);
+  free_design(d);
+  return res;
+}
+
+// Designs built with the editor never had block uids assigned, so the file
+// must not depend on them.
+static int file_round_trip_editor(arena *a) {
+  init(a);
+  press(a, KEY_R);
+  move(a, 400, 400);
+  mouse_down(a);
+  move(a, 500, 430);
+  mouse_up(a);
+  press(a, KEY_R);
+  move(a, 500, 430);
+  frame(a);
+  mouse_down(a);
+  move(a, 600, 380);
+  mouse_up(a);
+  press(a, KEY_U);
+  move(a, 600, 380);
+  frame(a);
+  mouse_down(a);
+  mouse_up(a);
+  if (a->design.design_blocks.head == nullptr) {
+    printf("expected the editor to have drawn blocks\n");
+    return 1;
+  }
+  return check_round_trip(&a->design);
+}
+
+// The comparator has to be able to fail, or the tests above prove nothing.
+static int comparator_detects_differences(arena *) {
+  design *a = load_xml_design(JOINTED_XML, sizeof(JOINTED_XML) - 1);
+  design *b = clean_copy_design(a);
+  int res = 0;
+  quiet_diffs = true; // the differences below are expected
+  if (diff_designs(a, b) != 0) {
+    printf("a clean copy should compare equal\n");
+    res = 1;
+  }
+  // flip the lowest bit of a joint coordinate
+  uint64_t bits;
+  memcpy(&bits, &b->joints.head->x, sizeof bits);
+  bits ^= 1;
+  memcpy(&b->joints.head->x, &bits, sizeof bits);
+  if (diff_designs(a, b) == 0) {
+    printf("a one-bit change in a joint went unnoticed\n");
+    res = 1;
+  }
+  free_design(b);
+  b = clean_copy_design(a);
+  b->goal_area.expand += 1;
+  if (diff_designs(a, b) == 0) {
+    printf("a change in the goal area's expand went unnoticed\n");
+    res = 1;
+  }
+  free_design(b);
+  b = clean_copy_design(a);
+  for (block *k = b->design_blocks.head; k != nullptr; k = k->next) {
+    if (k->shape.type != SHAPE_ROD)
+      continue;
+    joint *saved = k->shape.rod.to;
+    k->shape.rod.to = k->shape.rod.from; // repoint one rod end
+    if (diff_designs(a, b) == 0) {
+      printf("a repointed rod end went unnoticed\n");
+      res = 1;
+    }
+    k->shape.rod.to = saved; // so free_design sees a consistent design
+    break;
+  }
+  free_design(b);
+  free_design(a);
+  return res;
+}
+
 struct scenario {
   const char *name;
   int (*fn)(arena *);
@@ -322,6 +653,10 @@ static const scenario SCENARIOS[] = {
     {"wheel_after_delete", wheel_after_delete},
     {"move_after_delete", move_after_delete},
     {"clean_copy_rod_joints", clean_copy_rod_joints},
+    {"file_round_trip_shapes", file_round_trip_shapes},
+    {"file_round_trip_jointed", file_round_trip_jointed},
+    {"file_round_trip_editor", file_round_trip_editor},
+    {"comparator_detects_differences", comparator_detects_differences},
 };
 
 int main(int argc, char **argv) {
