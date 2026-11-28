@@ -510,15 +510,25 @@ static int diff_designs(design *a, design *b) {
   }
   if (ja != nullptr || jb != nullptr)
     df.report("joint count", i);
-  if (recalculate_design_checksum(a) != recalculate_design_checksum(b))
+  int ca = recalculate_design_checksum(a);
+  int cb = recalculate_design_checksum(b);
+  if (ca != cb) {
+    if (!quiet_diffs)
+      printf("checksums: %d vs %d\n", ca, cb);
     df.report("checksum", -1);
+  }
   return df.count;
 }
 
 // loadXML (1) -> design (2) -> file (3) -> design (4); (2) must equal (4)
 // exactly, and saving (4) must give the same bytes as saving (2).
 static int check_round_trip(design *d2) {
+  int before = recalculate_design_checksum(d2);
   std::vector<uint8_t> file3 = encode(d2);
+  if (recalculate_design_checksum(d2) != before) {
+    printf("saving a design changed its checksum\n");
+    return 1;
+  }
   design *d4 = decode(file3);
   if (d4 == nullptr) {
     printf("the file the encoder wrote was rejected by the decoder\n");
